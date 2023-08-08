@@ -7,7 +7,9 @@
 	"jsc": {
 		"parser": {
 			"syntax": "typescript",
-		}
+			"dynamicImport": true
+		},
+		"baseUrl": "."
 	},
 	"module": {
 		"type": "commonjs"
