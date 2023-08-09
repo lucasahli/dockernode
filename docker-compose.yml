@@ -6,5 +6,3 @@ services:
     ports: # port_on_host_machine:port_on_container
       - 8080:8080 
       - 9229:9229 # for debugging
-
-    #command: pnpm run dev # overrides the RUN command of the targetStage in the Dockerfile
