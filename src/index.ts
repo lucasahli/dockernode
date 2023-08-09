@@ -3,7 +3,7 @@ import express from 'express'
 const app = express()
 
 app.get('/', (req, res) => {
-    res.json({ hello: "World of express!!!"})
+    res.json({ hello: "World of express works"})
 })
 
 const port = Number(process.env.PORT || 8080) 

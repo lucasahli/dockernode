@@ -1,4 +1,4 @@
-FROM node:18 as buildStage
+FROM node:18 as buildstage
 
 RUN npm i -g pnpm
 
@@ -12,9 +12,9 @@ ENV WATCHPACK_POLLING=true
 
 COPY . .
 
-CMD ["pnpm", "run", "build"]  
+RUN pnpm run build  
 
-FROM node:18 as productionStage
+FROM node:18 as productionstage
 
 RUN npm i -g pnpm
 
@@ -24,8 +24,8 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod
 
-COPY --from=buildStage /usr/src/app/dist ./dist
+COPY --from=buildstage /usr/src/app/dist ./dist
 
 CMD ["node", "dist/index.js"]

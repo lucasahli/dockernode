@@ -2,13 +2,9 @@ services:
   express-server:
     build:
       context: . # path to Dockerfile to build
-      target: buildStage # targetStage in the Dockerfile
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/.pnpm-store # is only here to prevent syncing with the host machine
-      - /usr/src/app/node_modules # is only here to prevent syncing with the host machine (this hack works because this path is more specific than /usr/src/app)
+      target: productionstage # targetStage in the Dockerfile
     ports: # port_on_host_machine:port_on_container
       - 8080:8080 
       - 9229:9229 # for debugging
 
-    command: pnpm run dev # overrides the RUN command of the targetStage in the Dockerfile
+    #command: pnpm run dev # overrides the RUN command of the targetStage in the Dockerfile
