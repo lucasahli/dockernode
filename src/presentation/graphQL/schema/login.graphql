@@ -1,0 +1,16 @@
+type Token {
+  token: String!
+}
+
+type Login {
+  id: ID!
+  email: String!
+  users: [User]
+}
+
+extend type Mutation {
+  signUp(email: String!, password: String!): Token
+  signIn(email: String!, password: String!): Token
+#  TODO: deleteLogin(id: ID!): Boolean!
+}
+

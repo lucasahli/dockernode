@@ -1,0 +1,16 @@
+scalar Date
+
+type Query {
+  _empty: String
+  # define any root queries here
+}
+
+type Mutation {
+  _empty: String
+  # define any root mutations here
+}
+
+type Subscription {
+  _empty: Boolean
+  # define any root subscriptions here
+}

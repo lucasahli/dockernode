@@ -1,0 +1,49 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+type Mutation {
+    _empty: String
+    createReminder(date: Date!, title: String!): Reminder
+    deleteReminder(id: ID!): Boolean!
+    deleteUser(id: ID!): Boolean!
+    signIn(email: String!, password: String!): Token
+    signUp(email: String!, password: String!): Token
+}
+
+type Query {
+    _empty: String
+    me: User
+    reminder(id: ID!): Reminder
+    reminders: [Reminder]
+    user(id: ID!): User
+    users: [User]
+}
+
+type Reminder {
+    date: Date
+    id: ID!
+    title: String
+}
+
+type Subscription {
+    _empty: Boolean
+}
+
+type Token {
+    token: String!
+}
+
+# TODO: rename to Login
+type User {
+    email: String!
+    id: ID!
+    role: String
+    username: String
+}
+
+scalar Date

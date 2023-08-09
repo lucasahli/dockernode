@@ -1,0 +1,18 @@
+type User {
+  id: ID!
+  firstname: String
+  lastname: String
+  role: String!
+  reminders: [Reminder]
+  login: Login!
+}
+
+extend type Query {
+  users: [User]
+  user(id: ID!): User
+}
+
+extend type Mutation {
+  deleteUser(id: ID!): Boolean!
+}
+

@@ -1,0 +1,16 @@
+type Reminder {
+    id: ID!
+    title: String
+    date: Date
+    owner: User
+}
+
+extend type Query {
+    reminders: [Reminder]
+    reminder(id: ID!): Reminder
+}
+
+extend type Mutation {
+    createReminder(title: String!, date: Date!): Reminder
+    deleteReminder(id: ID!): Boolean!
+}

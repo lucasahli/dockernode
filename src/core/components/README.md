@@ -1,0 +1,1 @@
+Bounded Contexts (Components) separate areas of potentially different meanings
