@@ -43,9 +43,13 @@ app.use(loggingMiddleware);
 
 const createViewerMiddleware = async (req: any, res: any, next: any) => {
     const myViewer = new Viewer(req.headers, process.env.SECRET as string);
-    await myViewer.prepareViewer().then(() => console.log("Prepared Viewer..."));
-    res.locals.myViewer = myViewer;
-    next();
+    await myViewer.prepareViewer().then(() => {
+        res.locals.myViewer = myViewer;
+        console.log("Prepared Viewer...");
+        next();
+        
+    });
+    
 }
 app.use(createViewerMiddleware);
 
@@ -54,8 +58,8 @@ app.use(createViewerMiddleware);
 // **************************************
 const resolverFiles = await loadFiles("dist/presentation/graphQL/resolvers/*.js", {
     ignoreIndex: true,
-    requireMethod: async path => {
-      return await import(url.pathToFileURL(path));
+    requireMethod: async (path: string) => {
+      return await import(url.pathToFileURL(path).toString());
     },
 });
 const resolvers = mergeResolvers(resolverFiles);
@@ -75,12 +79,22 @@ const graphqlContext = {
     }
 };
 
-app.use('/graphql', graphqlHTTP((req: Request, res: Response) => ({
-        schema: executableSchema,
-        context: res.locals.myViewer, //new Viewer(req.headers, process.env.SECRET as string).prepareViewer().then(() => console.log("Prepared Viewer...")),        // { req , secret: process.env.SECRET },
-        graphiql: true,
-    })),
-);
+
+app.use('/graphql', createHandler({
+    schema: executableSchema, 
+    context: async (req, args) => { 
+        console.log("req.context.res.locals.myViewer:\n", req.context.res.locals.myViewer);
+        console.log("args:\n", args);
+        return {args}; 
+    },
+}
+),);
+// app.use('/graphql', graphqlHTTP((req: Request, res: Response) => ({
+//         schema: executableSchema,
+//         context: res.locals.myViewer, //new Viewer(req.headers, process.env.SECRET as string).prepareViewer().then(() => console.log("Prepared Viewer...")),        // { req , secret: process.env.SECRET },
+//         graphiql: true,
+//     })),
+// );
 app.listen(process.env.API_SERVER_PORT,
     () => console.log(`Running a GraphQL API server at http://127.0.0.1:${process.env.API_SERVER_PORT}/graphql`)
 );

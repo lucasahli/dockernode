@@ -28,7 +28,7 @@ export class RedisRepository implements LoginRepository, UserRepository, Reminde
         this.redis = createClient({url: redisUrl});
         this.redis.on('error', (err) => console.log('Redis Client Error', err));
         this.redis.connect()
-            .then(() => console.log("connected"));
+            .then(() => console.log("Redis connected"));
 
         // @ts-ignore
         // const redisLoader = new DataLoader<string, User>(

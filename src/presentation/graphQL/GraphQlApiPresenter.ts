@@ -72,6 +72,7 @@ class GraphQlApiPresenter {
     // User
     public handleUserQuery(parent: any, args: any, viewer: Viewer): Promise<User | null> {
         let {id} = args;
+        console.log("ARGS:", args);
         let result = this.userUseCase.getUserById(viewer, id);
         result.then(function (user) {
             return user;
@@ -128,6 +129,6 @@ const userUseCase: UserUseCase = new UserUseCaseHandler(userService);
 const loginUseCase: LoginUseCase = new LoginUseCaseHandler(loginService);
 const reminderService = new ReminderService(redisRepository);
 const reminderUseCase: ReminderUseCaseHandler = new ReminderUseCaseHandler(reminderService);
-const accountService: AccountService = new AccountService(loginService, userService, new PasswordManager(new BcryptHasher()), jwt);
+const accountService: AccountService = new AccountService(loginService, userService, new PasswordManager(new BcryptHasher()));
 const accountUseCaseHandler: AccountUseCaseHandler = new AccountUseCaseHandler(accountService);
 export const graphQlApiPresenter = new GraphQlApiPresenter(userUseCase, reminderUseCase, loginUseCase, accountUseCaseHandler);

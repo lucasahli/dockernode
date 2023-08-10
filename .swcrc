@@ -15,4 +15,5 @@
 		"type": "es6",
 		"importInterop": "node"
 	},
+	"sourceMaps": "inline"
 }

@@ -1,0 +1,17 @@
+{
+    "configurations": [
+    {
+        "address": "localhost",
+        "name": "Attach to Remote Docker Node",
+        "port": 9229,
+        "remoteRoot": "/usr/src/app",
+        "request": "attach",
+        "skipFiles": [
+            "/usr/src/app/node_modules/**/*.js",
+            "<node_internals>/**"
+        ],
+        "type": "node",
+        "sourceMaps": true
+    }
+    ]
+}

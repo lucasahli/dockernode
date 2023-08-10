@@ -22,7 +22,7 @@ services:
     env_file:
       - .env
     ports: # port_on_host_machine:port_on_container
-      - "8080:8080"
+      - "4000:4000"
       - "9229:9229" # for debugging
     networks:
       - backend
