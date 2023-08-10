@@ -1,0 +1,30 @@
+{
+  "name": "NewReminderApp GraphQL Schema",
+  "projects": {
+    "shared": {
+      "includes": ["shared/**"]
+    },
+    "alpha": {
+      "includes": ["alpha/**", "shared/**"]
+    },
+    "beta": {
+      "includes": ["beta/**", "shared/**"]
+    },
+    "reminderProject": {
+      "schemaPath": "./combinedSchemas/introspectedSchema.graphql",
+      "includes": ["./*.graphql"],
+      "excludes": ["./combinedSchemas/**"]
+    }
+  },
+  "extensions": {
+    "endpoints": {
+      "Default GraphQL Endpoint": {
+        "url": "http://localhost:4000/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL"
+        },
+        "introspect": true
+      }
+    }
+  }
+}

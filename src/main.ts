@@ -45,11 +45,9 @@ const createViewerMiddleware = async (req: any, res: any, next: any) => {
     const myViewer = new Viewer(req.headers, process.env.SECRET as string);
     await myViewer.prepareViewer().then(() => {
         res.locals.myViewer = myViewer;
-        console.log("Prepared Viewer...");
-        next();
-        
     });
-    
+    console.log("Prepared Viewer...");
+    next();
 }
 app.use(createViewerMiddleware);
 
