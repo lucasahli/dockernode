@@ -7,7 +7,7 @@ import {Reminder} from "../../../core/components/reminderContext/domain/entities
 import {User} from "../../../core/components/reminderContext/domain/entities/User.js";
 import {rejects} from "assert";
 import {UserRole} from "../../../core/sharedKernel/UserRole.js";
-import DataLoader from 'dataloader';
+// import DataLoader from 'dataloader';
 
 function generateRandomStringWithLength(length: number) {
     let result = '';
@@ -24,7 +24,8 @@ export class RedisRepository implements LoginRepository, UserRepository, Reminde
     redis: RedisClientType;
 
     constructor() {
-        this.redis = createClient();
+        const redisUrl = `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}` || 'redis://localhost:6379';
+        this.redis = createClient({url: redisUrl});
         this.redis.on('error', (err) => console.log('Redis Client Error', err));
         this.redis.connect()
             .then(() => console.log("connected"));
