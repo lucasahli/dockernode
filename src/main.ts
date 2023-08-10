@@ -83,9 +83,9 @@ const graphqlContext = {
 app.use('/graphql', createHandler({
     schema: executableSchema, 
     context: async (req, args) => { 
-        console.log("req.context.res.locals.myViewer:\n", req.context.res.locals.myViewer);
-        console.log("args:\n", args);
-        return {args}; 
+        // console.log("req.context.res.locals.myViewer:\n", req.context.res.locals.myViewer);
+        // console.log("args:\n", args);
+        return req.context.res.locals.myViewer; 
     },
 }
 ),);

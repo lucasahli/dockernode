@@ -51,6 +51,7 @@ class GraphQlApiPresenter {
     }
 
     public handleSignInMutation(parent: any, args: any, viewer: Viewer): Promise<any | null> {
+        console.log("handleSignInMutation");
         return new Promise<any | null>( (resolve, reject) => {
             let {email, password} = args;
             let result = this.accountUseCase.signIn(viewer, email, password);
@@ -66,11 +67,13 @@ class GraphQlApiPresenter {
     }
 
     public handleLoginUsersFieldQuery(parent: any, args: any, viewer: Viewer): Promise<User[] | null> {
+        console.log("handleLoginUsersFieldQuery");
         return Promise.resolve(null);
     }
 
     // User
     public handleUserQuery(parent: any, args: any, viewer: Viewer): Promise<User | null> {
+        console.log("handleUserQuery");
         let {id} = args;
         console.log("ARGS:", args);
         let result = this.userUseCase.getUserById(viewer, id);
@@ -84,6 +87,7 @@ class GraphQlApiPresenter {
     }
 
     public handleUsersQuery(parent: any, args: any, viewer: Viewer): Promise<User[] | null> {
+        console.log("handleUsersQuery");
         return this.userUseCase.getAllUsers(viewer);
     }
 

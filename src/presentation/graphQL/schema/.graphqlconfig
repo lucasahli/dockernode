@@ -1,5 +1,5 @@
 {
-  "name": "ReminderApp GraphQL Schema",
+  "name": "NewReminderApp GraphQL Schema",
   "projects": {
     "shared": {
       "includes": ["shared/**"]
