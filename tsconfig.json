@@ -14,7 +14,9 @@
 	  "skipLibCheck": true,
 	  "forceConsistentCasingInFileNames": true,
 	  "moduleResolution": "node16",
-	  "sourceMap": true
+	  "inlineSourceMap": true,
+	  "isolatedModules": true,
+	  "verbatimModuleSyntax": true
 	},
 	"include": ["src"],
 	"exclude": ["node_modules", "**/*.test.ts"]
