@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  redis:
+    image: redis/redis-stack:latest
+    container_name: rediscontainer
+    ports:
+      - "6379"
+    networks:
+      - backend
+    volumes:
+      - ./redis_data/:/data
+    expose:
+      - 6379
+  express-server:
+    build:
+      context: . # path to Dockerfile to build
+      target: buildstage # targetStage in the Dockerfile
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/.pnpm-store # is only here to prevent syncing with the host machine
+      - /usr/src/app/node_modules # is only here to prevent syncing with the host machine (this hack works because this path is more specific than /usr/src/app)
+    env_file:
+      - .env.test
+    ports: # port_on_host_machine:port_on_container
+      - "4000:4000"
+      - "9229:9229" # for debugging
+    networks:
+      - backend
+    depends_on:
+      - redis
+    command: pnpm run testing # overrides the RUN command of the targetStage in the Dockerfile
+networks:
+  backend:

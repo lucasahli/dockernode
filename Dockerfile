@@ -5,7 +5,7 @@ RUN npm i -g pnpm
 WORKDIR /usr/src/app
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 ENV CHOKIDAR_USEPOLLING=true
 ENV WATCHPACK_POLLING=true
