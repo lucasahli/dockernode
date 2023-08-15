@@ -1,8 +1,8 @@
 import {Hasher} from "../../core/portsAndInterfaces/interfaces/Hasher.js";
 
-const argon2 = require('argon2');
+import argon2 from 'argon2';
 
-export class ArgonHasher extends Hasher{
+export class ArgonHasher implements Hasher{
     compare(plainText: string, hash: string): Promise<boolean> {
         return argon2.verify(hash, plainText);
     }
