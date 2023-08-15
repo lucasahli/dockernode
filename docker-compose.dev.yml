@@ -1,5 +1,11 @@
 version: '3.8'
 services:
+  redis-single-use:
+    image: redis/redis-stack:latest
+    container_name: redissingleusecontainer
+    ports:
+      - "6380:6379"
+      - "8002:8001"
   redis:
     image: redis/redis-stack:latest
     container_name: rediscontainer

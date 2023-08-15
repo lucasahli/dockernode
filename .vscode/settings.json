@@ -1,5 +1,9 @@
 {
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "graphql-config.load.rootDir": "./src/presentation/graphQL/schema",
-    "jest.nodeEnv": { "SECRET": "MySuperDuperSecret" }
+    "jest.nodeEnv": { 
+        "SECRET": "MySuperDuperSecret",
+        "REDIS_TEST_HOST": "127.0.0.1",
+        "REDIS_TEST_PORT": 6380
+     }
 }

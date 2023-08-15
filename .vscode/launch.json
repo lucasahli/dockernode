@@ -1,18 +1,40 @@
 {
     "configurations": [
-    {
-        "address": "localhost",
-        "name": "Attach to Remote Docker Node",
-        "port": 9229,
-        "remoteRoot": "/usr/src/app",
-        "request": "attach",
-        "skipFiles": [
-            "/usr/src/app/node_modules/**/*.js",
-            "<node_internals>/**"
-        ],
-        "type": "node",
-        "sourceMaps": true,
-        "restart": true
-    }
+        {
+            "type": "node",
+            "name": "vscode-jest-tests.v2",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": [
+                "--runInBand",
+                "--watchAll=false",
+                "--detectOpenHandles",
+                "--testNamePattern",
+                "${jest.testNamePattern}",
+                "--runTestsByPath",
+                "${jest.testFile}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "disableOptimisticBPs": true,
+            "windows": {
+                "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+            }
+        },
+        {
+            "address": "localhost",
+            "name": "Attach to Remote Docker Node",
+            "port": 9229,
+            "remoteRoot": "/usr/src/app",
+            "request": "attach",
+            "skipFiles": [
+                "/usr/src/app/node_modules/**/*.js",
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "sourceMaps": true,
+            "restart": true
+        }
     ]
 }
