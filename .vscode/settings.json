@@ -1,4 +1,5 @@
 {
     "typescript.tsdk": "node_modules\\typescript\\lib",
-    "graphql-config.load.rootDir": "./src/presentation/graphQL/schema"
+    "graphql-config.load.rootDir": "./src/presentation/graphQL/schema",
+    "jest.nodeEnv": { "SECRET": "MySuperDuperSecret" }
 }
