@@ -1,4 +1,4 @@
-import { graphQlApiPresenter } from "../GraphQlApiPresenter.js"
+import { graphQlApiPresenter } from "../GraphQlApiPresenter.js";
 import {Viewer} from "../../../core/sharedKernel/Viewer.js";
 
 /** When setting up a field whose value is a custom type,

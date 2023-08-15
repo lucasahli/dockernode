@@ -12,7 +12,7 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
     private passwordManager = new PasswordManager(new BcryptHasher());
 
     private logins: Login[] = [
-        new Login("1", "mockup01@test.com", "$2b$08$OBj8Oq3MB2K7VhAlpgVtBeesgLM6/a7WL5.tfFj3vFgSxRoSOYxxy", ["1"]),
+        new Login("1", "mockup01@test.com", "$2b$08$OBj8Oq3MB2K7VhAlpgVtBeesgLM6/a7WL5.tfFj3vFgSxRoSOYxxy", ["1"]), //PW: superSecretPassword01
         new Login("2", "mockup02@test.com", "$2b$08$sZwh4hqfyc3LxI4NOtpY2e1iOxxxr9iTjk4QS21XWpnPrsflnm4Ni", ["2"]),
         new Login("3", "mockup03@test.com", "$2b$08$v0J1QjRiYvrmwoDTuKXK0.f06pFwmXXMM1D5cufuUROSAPzsigmH6", ["3"]),
     ];

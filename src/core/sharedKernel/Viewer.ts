@@ -11,10 +11,10 @@ export class Viewer {
     headers: IncomingHttpHeaders;
     cookies: any;
 
-    loginId!: string;
-    loginEmail!: string;
-    userId!: string;
-    userRole!: UserRole;
+    loginId: string;
+    loginEmail: string;
+    userId: string;
+    userRole: UserRole;
 
     constructor(headers: IncomingHttpHeaders, secret: string = 'SomeWrongSecret') {
         this.headers = headers;
@@ -31,7 +31,6 @@ export class Viewer {
             this.loginEmail = payloadFromToken.loginEmail;
             this.userId = payloadFromToken.userId;
             this.userRole = payloadFromToken.userRole;
-            // console.log("viewer: ", this);
         }
 
     }
@@ -45,10 +44,7 @@ export class Viewer {
         const bearerToken = this.headers.authorization
         if (bearerToken !== undefined) {
             const decoded = jwt.verify(bearerToken?.replace('Bearer ', ''), this.jwtSecret);
-            if (decoded as string) {
-                return (decoded as jwt.JwtPayload).id != null;
-            }
-            return false;
+            return decoded.id != null;
         }
         return false;
     }

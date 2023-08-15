@@ -1,10 +1,10 @@
-import {User} from "../../components/reminderContext/domain/entities/User.js"
+import {User} from "../../components/reminderContext/domain/entities/User.js";
 import {Login} from "../../components/reminderContext/domain/entities/Login.js";
 import {UserRole} from "../../sharedKernel/UserRole.js";
 
-export abstract class UserRepository {
-    abstract getUserById(id: string): Promise<User | null>
-    abstract addUser(login: Login, role: UserRole, firstname: string, lastname: string): Promise<User>
-    abstract deleteUser(id: string): Promise<boolean>
+export interface UserRepository {
+    getUserById(id: string): Promise<User | null>
+    addUser(login: Login, role: UserRole, firstname: string, lastname: string): Promise<User>
+    deleteUser(id: string): Promise<boolean>
 }
 

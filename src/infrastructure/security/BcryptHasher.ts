@@ -2,7 +2,7 @@ import {Hasher} from "../../core/portsAndInterfaces/interfaces/Hasher.js";
 import bcrypt from 'bcrypt';
 
 
-export class BcryptHasher extends Hasher {
+export class BcryptHasher implements Hasher {
     saltRounds: number = 8;
 
     hash(plainText: string): Promise<string> {

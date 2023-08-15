@@ -1,5 +1,3 @@
-import {jest} from '@jest/globals';
-
 import {AccountService} from "../src/core/components/reminderContext/domain/services/AccountService.js";
 import {LoginService} from "../src/core/components/reminderContext/domain/services/LoginService.js";
 import {UserService} from "../src/core/components/reminderContext/domain/services/UserService.js";
@@ -30,7 +28,7 @@ describe("AccountService", () => {
             expect.assertions(1);
             const viewer = new Viewer(new MockHeaders());
             const result = await accountService.signUp(viewer, "newEmail@test.com", "passwordTest");
-            return expect(result).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-\+\/=]*)/); // // Match a JWT
+            return expect(result).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
         })
 
         test("can not create a login with an email that exists", async () => {
@@ -45,7 +43,7 @@ describe("AccountService", () => {
         test("creates a new token string when given a login with id and email and a user with a role", () => {
             const login = new Login("1", "mockup01@test.com", "superSecretPassword01", ["1"]);
             const user = new User("1", login || null, UserRole.freemium, "Firstname01", "Lastname01")
-            expect(AccountService.createToken(login, user, process.env.SECRET!, '30m')).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-\+\/=]*)/) // Match a JWT
+            expect((accountService as any).createToken(login, user, process.env.SECRET!, '30m')).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/) // Match a JWT
         })
     })
 
@@ -53,13 +51,13 @@ describe("AccountService", () => {
         test("Can signUp if a token was created", () => {
             const viewer = new Viewer(new MockHeaders());
             const token = "someToken";
-            expect(AccountService.checkCanSignUp(viewer, "unused.email@test.com", "somePassword", token)).toBeTruthy();
+            expect((accountService as any).checkCanSignUp(viewer, "unused.email@test.com", "somePassword", token)).toBeTruthy();
         })
 
         test("Can not signUp without token", () => {
             const viewer = new Viewer(new MockHeaders());
             const token = null;
-            expect(AccountService.checkCanSignUp(viewer, "unused.email@test.com", "somePassword", token)).toBeFalsy();
+            expect((accountService as any).checkCanSignUp(viewer, "unused.email@test.com", "somePassword", token)).toBeFalsy();
         })
     })
 
@@ -68,7 +66,7 @@ describe("AccountService", () => {
             expect.assertions(1);
             const viewer = new Viewer(new MockHeaders());
             const result = await accountService.signIn(viewer, "mockup01@test.com", "superSecretPassword01");
-            return expect(result).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-\+\/=]*)/); // // Match a JWT
+            return expect(result).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
         })
 
         test("Can not sign in without correct password", async () => {

@@ -4,52 +4,18 @@ import {graphQlApiPresenter} from "../GraphQlApiPresenter.js";
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql';
 
-// const dateScalar = new GraphQLScalarType({
-//     name: 'Date',
-//     parseValue(value) {
-//         return new Date(value);
-//     },
-//     serialize(value) {
-//         return value.toISOString();
-//     },
-// })
-// const dateScalar = new GraphQLScalarType({
-//     name: 'Date',
-//     description: 'Date custom scalar type',
-//     serialize(value) {
-//       if (value instanceof Date) {
-//         return value.getTime(); // Convert outgoing Date to integer for JSON
-//       }
-//       throw Error('GraphQL Date Scalar serializer expected a `Date` object');
-//     },
-//     parseValue(value) {
-//       if (typeof value === 'number') {
-//         return new Date(value); // Convert incoming integer to Date
-//       }
-//       throw new Error('GraphQL Date Scalar parser expected a `number`');
-//     },
-//     parseLiteral(ast) {
-//       if (ast.kind === Kind.INT) {
-//         // Convert hard-coded AST string to integer and then to Date
-//         return new Date(parseInt(ast.value, 10));
-//       }
-//       // Invalid hard-coded value (not an integer)
-//       return null;
-//     },
-//   });
-
 
 export default {
     Date: new GraphQLScalarType({
         name: 'Date',
         description: 'Date custom scalar type',
-        serialize(value) {
+        serialize(value) { // value sent to the client
           if (value instanceof Date) {
             return value.getTime(); // Convert outgoing Date to integer for JSON
           }
           throw Error('GraphQL Date Scalar serializer expected a `Date` object');
         },
-        parseValue(value) {
+        parseValue(value) { // value from the client
           if (typeof value === 'number') {
             return new Date(value); // Convert incoming integer to Date
           }

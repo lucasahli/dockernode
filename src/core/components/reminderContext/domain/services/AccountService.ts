@@ -18,12 +18,12 @@ export class AccountService {
 
     async signUp(viewer: Viewer, email: string, password: string): Promise<string | null> {
         return this.loginService.createNewLogin(viewer, email, password)
-            .then( function (login) {
+            .then( (login) => {
                 if(login) {
-                    return UserService.createFreemiumUser(login, "Luca", "Sahli")
+                    return this.userService.createFreemiumUser(login, "Luca", "Sahli")
                         .then( (user: User) => {
-                            const token = AccountService.createToken(login, user, process.env.SECRET!, '30m');
-                            let canSignUp = AccountService.checkCanSignUp(viewer, email, password, token);
+                            const token = this.createToken(login, user, process.env.SECRET!, '30m');
+                            let canSignUp = this.checkCanSignUp(viewer, email, password, token);
                             if(!canSignUp) {
                                 console.log("Can not SignUp!!!");
                                 return null;
@@ -38,7 +38,7 @@ export class AccountService {
                 console.log("Could not create login!!!");
                 return null;
             })
-            .catch(function (error) {
+            .catch((error) => {
                 console.log("Could not create new login --> Should return error: ", error);
                 return null;
             });
@@ -46,13 +46,13 @@ export class AccountService {
 
     }
 
-    static createToken(login: Login, user: User, secret: string, expiresIn: string): string {
+    private createToken(login: Login, user: User, secret: string, expiresIn: string): string {
         const { id, email } = login;
         const { role } = user;
         return jwt.sign({loginId: id, loginEmail: email, userId: user.id, userRole: role}, secret, {expiresIn});
     }
 
-    static checkCanSignUp(viewer: Viewer, email: string, password: string, potentialToken: any): boolean {
+    private checkCanSignUp(viewer: Viewer, email: string, password: string, potentialToken: any): boolean {
         return !!potentialToken;
     }
 
@@ -60,8 +60,8 @@ export class AccountService {
         const login = await this.loginService.getLoginByEmail(email);
         if(login === null) return null;
         const canSignIn = await this.checkCanSignIn(viewer, email, password, login);
-        const possibleUser = await UserService.generate(viewer, login.associatedUserIds[0] ? login.associatedUserIds[0] : "");
-        return canSignIn ? AccountService.createToken(login, possibleUser as User, process.env.SECRET!, '30m') : null;
+        const possibleUser = await this.userService.generate(viewer, login.associatedUserIds[0] ? login.associatedUserIds[0] : "");
+        return canSignIn ? this.createToken(login, possibleUser as User, process.env.SECRET!, '30m') : null;
     }
 
     public checkCanSignIn(viewer: Viewer, email: string, password: string, login: Login): Promise<boolean> {

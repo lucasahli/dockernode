@@ -1,4 +1,4 @@
-export abstract class Hasher {
-    abstract hash(plainText: string): Promise<string>
-    abstract compare(plainText: string, hash: string): Promise<boolean>
+export interface Hasher {
+    hash(plainText: string): Promise<string>
+    compare(plainText: string, hash: string): Promise<boolean>
 }
