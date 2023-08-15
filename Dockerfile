@@ -27,5 +27,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod
 
 COPY --from=buildstage /usr/src/app/dist ./dist
+RUN mkdir -p ./src/presentation/graphQL/schema
+COPY ./src/presentation/graphQL/schema ./src/presentation/graphQL/schema
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "./dist/main.js"]
