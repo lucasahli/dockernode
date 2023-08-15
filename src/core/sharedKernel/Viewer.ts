@@ -31,7 +31,6 @@ export class Viewer {
             this.loginEmail = payloadFromToken.loginEmail;
             this.userId = payloadFromToken.userId;
             this.userRole = payloadFromToken.userRole;
-            console.log("viewer: ", this);
         }
 
     }

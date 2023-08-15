@@ -25,10 +25,10 @@ export class ReminderService {
     async createReminder(viewer: Viewer, title: string, date: Date): Promise<Reminder | null> {
         const ownerId = viewer.userId;
         const possibleReminder = await ReminderService.reminderRepository.addReminder(title, date, ownerId)
-            .then(function (reminder) {
+            .then((reminder) => {
                 return reminder;
             })
-            .catch(function (error) {
+            .catch((error) => {
                 console.log("Could not add new reminder --> Should return error: ", error);
                 return null
             })

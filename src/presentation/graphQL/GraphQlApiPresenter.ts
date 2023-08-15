@@ -39,12 +39,12 @@ class GraphQlApiPresenter {
         return new Promise<any | null>( (resolve, reject) => {
             let {email, password} = args;
             let result = this.accountUseCase.signUp(viewer, email, password);
-            result.then(function (tokenString) {
+            result.then((tokenString) => {
                 if(tokenString == null){
                     return resolve(null);
                 }
                 return resolve({token: tokenString!});
-            }).catch(function (reason) {
+            }).catch((reason) => {
                 return reject(reason);
             })
         });
@@ -54,12 +54,12 @@ class GraphQlApiPresenter {
         return new Promise<any | null>( (resolve, reject) => {
             let {email, password} = args;
             let result = this.accountUseCase.signIn(viewer, email, password);
-            result.then(function (tokenString) {
+            result.then((tokenString) => {
                 if(tokenString == null){
                     return resolve(null);
                 }
                 return resolve({token: tokenString!});
-            }).catch(function (reason) {
+            }).catch((reason) => {
                 return reject(reason);
             })
         });
@@ -72,12 +72,11 @@ class GraphQlApiPresenter {
     // User
     public handleUserQuery(parent: any, args: any, viewer: Viewer): Promise<User | null> {
         let {id} = args;
-        console.log("ARGS:", args);
         let result = this.userUseCase.getUserById(viewer, id);
-        result.then(function (user) {
+        result.then((user) => {
             return user;
         })
-            .catch(function (error) {
+            .catch((error) => {
                 return error;
             })
         return result;
@@ -96,10 +95,10 @@ class GraphQlApiPresenter {
     public handleReminderQuery(parent: any, args: any, viewer: Viewer): Promise<Reminder | null>{
         let {id} = args;
         let result = this.reminderUseCase.getReminderById(viewer, id);
-        result.then(function (reminder) {
+        result.then((reminder) => {
             return reminder;
         })
-            .catch(function (error) {
+            .catch((error) => {
                 return error;
             })
         return result;

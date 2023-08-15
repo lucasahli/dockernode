@@ -11,7 +11,8 @@
             "<node_internals>/**"
         ],
         "type": "node",
-        "sourceMaps": true
+        "sourceMaps": true,
+        "restart": true
     }
     ]
 }

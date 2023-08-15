@@ -136,12 +136,12 @@ class SequelizeAddressModel extends Model<
 
 
 export class MySqlRepository implements LoginRepository, UserRepository, ReminderRepository{
-    dbURI = process.env.SQL_DATABASE_DIALECT
-        + "://" + process.env.SQL_DATABASE_USER
-        // + ":" + process.env.SQL_DATABASE_PASSWORD
-        + "@" + process.env.SQL_DATABASE_HOST
-        + ":" + process.env.SQL_DATABASE_PORT
-        + "/" + process.env.SQL_DATABASE_SCHEMA_NAME;
+    dbURI = process.env.DATABASE_DIALECT
+        + "://" + process.env.DATABASE_USER
+        // + ":" + process.env.DATABASE_PASSWORD
+        + "@" + process.env.DATABASE_HOST
+        + ":" + process.env.DATABASE_PORT
+        + "/" + process.env.DATABASE_SCHEMA_NAME;
     public sequelize = new Sequelize(this.dbURI);
 
     constructor() {
@@ -288,10 +288,10 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
 
         (async () => {
             await this.sequelize.sync()
-                .then(function (result) {
+                .then( (result) => {
                     console.log("Could sync MySqlDatabase...");
                 })
-                .catch(function (reason) {
+                .catch( (reason) => {
                     console.log("Could not sync MySqlDatabase because: ", reason);
                 })
             await doStuffWithUser();
@@ -304,9 +304,9 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
             SequelizeLoginModel.findByPk(id, {
                 include: [SequelizeLoginModel.associations.reminders],
                 rejectOnEmpty: false // Specifying true here removes `null` from the return type!
-            }).then(function (sequelizeUserData) {
+            }).then( (sequelizeUserData) => {
                 resolve(new Login(sequelizeUserData.id, sequelizeUserData.email, sequelizeUserData.password));
-            }).catch(function (error) {
+            }).catch( (error) => {
                 reject(error);
             })
         });
@@ -316,11 +316,11 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
 
         return new Promise<Login>( (resolve, reject) => {
             SequelizeLoginModel.create({login, password})
-                .then(function (sequelizeUserData) {
+                .then((sequelizeUserData) => {
                 console.log("Created user in SQL-Database...");
                 resolve(new Login(sequelizeUserData.id, sequelizeUserData.email, sequelizeUserData.password));
             })
-                .catch(function (error) {
+                .catch((error) => {
                 console.log("Could not create user in SQL-database: ", error);
                 reject(Error(error));
             })
@@ -330,10 +330,10 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
     getAllLoginIds(): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
             SequelizeLoginModel.findAll({attributes: ['id']})
-                .then(function (userDataList) {
+                .then((userDataList) => {
                     resolve(userDataList.map(user => { return user.id.toString(); }));
                 })
-                .catch(function (reason) {
+                .catch((reason) => {
                     reject(reason);
                 })
         });
@@ -345,10 +345,10 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
                 attributes: ['id', 'email', 'password'],
                 where: { email: email },
                 rejectOnEmpty: false})
-                .then(function (sequelizeUserData) {
+                .then((sequelizeUserData) => {
                     resolve(new Login(sequelizeUserData.id, sequelizeUserData.email, sequelizeUserData.password));
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     reject(error);
             })
         });
@@ -371,9 +371,9 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
         return new Promise<Reminder | null>( (resolve, reject) => {
             SequelizeReminderModel.findByPk(id, {
                 rejectOnEmpty: false // Specifying true here removes `null` from the return type!
-            }).then(function (sequelizeReminderData) {
+            }).then((sequelizeReminderData) => {
                 resolve(new Reminder(sequelizeReminderData.id, sequelizeReminderData.title, sequelizeReminderData.date));
-            }).catch(function (error) {
+            }).catch((error) => {
                 reject(error);
             })
         });
@@ -382,11 +382,11 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
     addReminder(title: string, date: Date): Promise<Reminder> {
         return new Promise<Reminder>( (resolve, reject) => {
             SequelizeReminderModel.create({title, date})
-                .then(function (sequelizeReminderData) {
+                .then((sequelizeReminderData) => {
                     console.log("Created reminder in SQL-Database...");
                     resolve(new Reminder(sequelizeReminderData.id, sequelizeReminderData.title, sequelizeReminderData.date));
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     console.log("Could not create Reminder: ", error);
                     reject(Error(error));
                 })
@@ -408,10 +408,10 @@ export class MySqlRepository implements LoginRepository, UserRepository, Reminde
     getAllReminderIds(): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
             SequelizeReminderModel.findAll({attributes: ['id']})
-                .then(function (userDataList) {
+                .then((userDataList) => {
                     resolve(userDataList.map(user => { return user.id.toString(); }));
                 })
-                .catch(function (reason) {
+                .catch((reason) => {
                     reject(reason);
                 })
         });

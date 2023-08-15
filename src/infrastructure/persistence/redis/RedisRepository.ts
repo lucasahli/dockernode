@@ -7,7 +7,7 @@ import {Reminder} from "../../../core/components/reminderContext/domain/entities
 import {User} from "../../../core/components/reminderContext/domain/entities/User.js";
 import {rejects} from "assert";
 import {UserRole} from "../../../core/sharedKernel/UserRole.js";
-// import DataLoader from 'dataloader';
+import DataLoader from 'dataloader';
 
 function generateRandomStringWithLength(length: number) {
     let result = '';

@@ -45,11 +45,8 @@ const createViewerMiddleware = async (req: any, res: any, next: any) => {
     const myViewer = new Viewer(req.headers, process.env.SECRET as string);
     await myViewer.prepareViewer().then(() => {
         res.locals.myViewer = myViewer;
-        console.log("Prepared Viewer...");
-        next();
-        
     });
-    
+    next();
 }
 app.use(createViewerMiddleware);
 
@@ -83,9 +80,9 @@ const graphqlContext = {
 app.use('/graphql', createHandler({
     schema: executableSchema, 
     context: async (req, args) => { 
-        console.log("req.context.res.locals.myViewer:\n", req.context.res.locals.myViewer);
-        console.log("args:\n", args);
-        return {args}; 
+        // console.log("req.context.res.locals.myViewer:\n", req.context.res.locals.myViewer);
+        // console.log("args:\n", args);
+        return req.context.res.locals.myViewer; 
     },
 }
 ),);

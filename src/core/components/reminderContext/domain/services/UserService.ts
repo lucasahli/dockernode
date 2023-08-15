@@ -6,25 +6,28 @@ import {Login} from "../entities/Login.js";
 import {UserRole} from "../../../../sharedKernel/UserRole.js";
 
 export class UserService {
-    private static userRepository: UserRepository;
+    private userRepository: UserRepository;
 
     constructor(repo: UserRepository) {
-        UserService.userRepository = repo;
+        this.userRepository = repo;
     }
 
     // Single source of truth for fetching
-    static async generate(viewer: Viewer, id: string): Promise<User | null> {
+    async generate(viewer: Viewer, id: string): Promise<User | null> {
         const user = await this.userRepository.getUserById(id); // Nullable
         if(user === null) return null;
         const canSee = this.checkCanSee(viewer, user);
         return canSee ? user : null;
     }
 
-    static async createFreemiumUser(login: Login, firstname: string, lastname: string): Promise<User> {
-        return UserService.userRepository.addUser(login, UserRole.freemium, firstname, lastname);
+    async createFreemiumUser(login: Login, firstname: string, lastname: string): Promise<User> {
+        if (await this.checkCanCreateFreemiumUser(login)) {
+            return this.userRepository.addUser(login, UserRole.freemium, firstname, lastname);
+        }
+        return Promise.reject("This login is already associated with a user with that role!!!");
     }
 
-    static async deleteUser(viewer: Viewer, id: string): Promise<boolean> {
+    async deleteUser(viewer: Viewer, id: string): Promise<boolean> {
         const dataOfUserToDelete = await this.userRepository.getUserById(id)
             .then((result) => {
                 return result;
@@ -36,41 +39,40 @@ export class UserService {
             });
         if(dataOfUserToDelete === null) return false;
         const canDelete = this.checkCanDelete(viewer, dataOfUserToDelete);
-        return canDelete ? UserService.userRepository.deleteUser(id) : false;
+        return canDelete ? this.userRepository.deleteUser(id) : false;
     }
 
-    // async getAllUsers(viewer: Viewer): Promise<Login[] | null> {
-    //     return this.getAllUserIds()
-    //         .then(function (userIds) {
-    //             return userIds.filter(async (userId) => {
-    //                 const possibleUser = await UserService.generate(viewer, userId)
-    //                     .then(function (user) {
-    //                         return user;
-    //                     })
-    //                     .catch(function (reason) {
-    //                         console.log("Could not generate user: ", reason);
-    //                         return null;
-    //                     });
-    //                 if (possibleUser !== null) {
-    //                     return true;
-    //                 }
-    //             }).map(async (userId) => {
-    //                 return await UserService.generate(viewer, userId);
-    //             }) as unknown as Login[];
-    //         })
-    //         .catch(reason => {
-    //             console.log("Problem with ids!!!", reason)
-    //             return null;
-    //         })
-    // }
+    private async checkCanCreateFreemiumUser(login: Login): Promise<boolean> {
+            const promises = [];
+            for (const userId of login.associatedUserIds) {
+                promises.push(this.userRepository.getUserById(userId));
+            }
+            if (login.associatedUserIds.length >= 1) {
+                return await Promise.all(promises)
+                    .then((results) => {
+                        for (const user of results) {
+                            if (user?.role === UserRole.freemium) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .catch((e) => {
+                        return true;
+                        // Handle errors here
+                    });
+            }
+            else {
+                return true;
+            }
 
+    }
 
-    private static checkCanSee(viewer: Viewer, user: User): boolean {
+    private checkCanSee(viewer: Viewer, user: User): boolean {
         return true;
     }
 
-    private static checkCanDelete(viewer: Viewer, user: User): boolean {
-        console.log(viewer);
+    private checkCanDelete(viewer: Viewer, user: User): boolean {
         return true;
     }
 }
