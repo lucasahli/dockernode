@@ -1,49 +1,51 @@
-# This file was generated based on ".graphqlconfig". Do not edit manually.
+"""
+Date custom scalar type
+"""
+scalar Date
 
-schema {
-    query: Query
-    mutation: Mutation
-    subscription: Subscription
+type Query {
+  _empty: String
+  reminders: [Reminder]
+  reminder(id: ID!): Reminder
+  users: [User]
+  user(id: ID!): User
 }
 
 type Mutation {
-    _empty: String
-    createReminder(date: Date!, title: String!): Reminder
-    deleteReminder(id: ID!): Boolean!
-    deleteUser(id: ID!): Boolean!
-    signIn(email: String!, password: String!): Token
-    signUp(email: String!, password: String!): Token
-}
-
-type Query {
-    _empty: String
-    me: User
-    reminder(id: ID!): Reminder
-    reminders: [Reminder]
-    user(id: ID!): User
-    users: [User]
-}
-
-type Reminder {
-    date: Date
-    id: ID!
-    title: String
+  _empty: String
+  signUp(email: String!, password: String!): Token
+  signIn(email: String!, password: String!): Token
+  createReminder(title: String!, date: Date!): Reminder
+  deleteReminder(id: ID!): Boolean!
+  deleteUser(id: ID!): Boolean!
 }
 
 type Subscription {
-    _empty: Boolean
+  _empty: Boolean
 }
 
 type Token {
-    token: String!
+  token: String!
 }
 
-# TODO: rename to Login
+type Login {
+  id: ID!
+  email: String!
+  users: [User]
+}
+
+type Reminder {
+  id: ID!
+  title: String
+  date: Date
+  owner: User
+}
+
 type User {
-    email: String!
-    id: ID!
-    role: String
-    username: String
+  id: ID!
+  firstname: String
+  lastname: String
+  role: String!
+  reminders: [Reminder]
+  login: Login!
 }
-
-scalar Date
