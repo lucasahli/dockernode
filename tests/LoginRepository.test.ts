@@ -41,7 +41,7 @@ describe("RedisRepository as LoginRepository", () => {
   describe(".getLoginById", () => {
     test("Returns Login if it exists", async () => {
       expect.assertions(1);
-      const result = await redisRepository.getLoginById("0");
+      const result = await redisRepository.getLoginById("1");
       expect(result).toBeInstanceOf(Login);
     });
 

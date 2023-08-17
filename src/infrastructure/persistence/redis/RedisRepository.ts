@@ -266,9 +266,13 @@ export class RedisRepository
       ])
         .then((results) => {
           console.log("results: ", results);
-          return resolve(
-            new Login(id, results[0].email, results[0].password, results[1])
-          );
+          if(id === undefined || results[0].email === undefined || results[0].password === undefined){
+            console.log(results);
+            return resolve(null);
+          }
+          else {
+            return resolve(new Login(id, results[0].email, results[0].password, results[1]));
+          }
         })
         .catch((reason) => {
           console.log("Reason: ", reason);
