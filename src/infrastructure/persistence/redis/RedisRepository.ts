@@ -29,7 +29,6 @@ export class RedisRepository
   constructor(redisHost: string | null, redisPort: string | null) {
     const redisUrl =
       `redis://${redisHost}:${redisPort}` || "redis://localhost:6379";
-    console.log("Redis URL: ", redisUrl);
     this.redis = createClient({ url: redisUrl });
     this.redis.on("error", (err) => console.log("Redis Client Error", err));
     this.redis.connect().then(() => console.log("Redis connected"));
@@ -104,7 +103,6 @@ export class RedisRepository
     ownerId: string
   ): Promise<Reminder> {
     const reminderId = await this.redis.incr("next_reminder_id");
-    console.log("DATE: ", date);
     await this.redis.hSet("reminder:" + reminderId.toString(), [
       ...Object.entries({
         title: title,
@@ -265,9 +263,7 @@ export class RedisRepository
         this.redis.sMembers("login:" + id + "associated_user_ids"),
       ])
         .then((results) => {
-          console.log("results: ", results);
           if(id === undefined || results[0].email === undefined || results[0].password === undefined){
-            console.log(results);
             return resolve(null);
           }
           else {
