@@ -4,7 +4,7 @@ import {UserRole} from "../../sharedKernel/UserRole.js";
 
 export interface UserRepository {
     getUserById(id: string): Promise<User | null>
-    addUser(login: Login, role: UserRole, firstname: string, lastname: string): Promise<User>
+    addUser(associatedLoginId: string, role: UserRole, firstname: string, lastname: string): Promise<User>
     deleteUser(id: string): Promise<boolean>
 }
 

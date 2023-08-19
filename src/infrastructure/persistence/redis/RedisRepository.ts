@@ -120,39 +120,55 @@ export class RedisRepository
   }
 
   async addUser(
-    login: Login,
+      associatedLoginId: string,
     role: UserRole,
     firstname: string,
     lastname: string
   ): Promise<User> {
     // Get users already associated with this login:
-    for (const userId of login.associatedUserIds) {
-      const user = await this.getUserById(userId);
-      if (user !== null) {
-        if (user.role === role) {
-          return Promise.reject(
-            "This login is already associated with a user with that role!!!"
-          );
-        }
+    // TODO get Login and associatedUserIds from there
+    // for (const userId of login.associatedUserIds) {
+    //   const user = await this.getUserById(userId);
+    //   if (user !== null) {
+    //     if (user.role === role) {
+    //       return Promise.reject(
+    //         "This login is already associated with a user with that role!!!"
+    //       );
+    //     }
+    //   }
+    // }
+
+    const userIdsAssociatedWithSameLogin = await this.redis.sMembers("login:" + associatedLoginId + "associated_user_ids")
+    for(const existingUserId of userIdsAssociatedWithSameLogin){
+      const userData = await this.redis.hGetAll("user:" + existingUserId);
+      const userRole = userData.role;
+      if (userRole == role.toString()){
+        return Promise.reject("This Login is already associated with a user of role " + role.toString());
       }
     }
     // Add new user
     const userId = await this.redis.incr("next_user_id");
-    await this.redis.hSet("user:" + userId.toString(), [
+
+    const numberOfNewAddedFields = await this.redis.hSet("user:" + userId.toString(), [
       ...Object.entries({
-        login: login.id,
+        associatedLoginId: associatedLoginId,
         role: role,
         firstname: firstname,
         lastname: lastname,
       }).flat(),
     ]);
-    await this.redis.sAdd(
-      "login:" + login.id + "associated_user_ids",
+    const numberOfElementsAddedToSet = await this.redis.sAdd(
+      "login:" + associatedLoginId + "associated_user_ids",
       userId.toString()
     );
-    return Promise.resolve(
-      new User(userId.toString(), login, role, firstname, lastname)
-    );
+    if(numberOfNewAddedFields > 0 && numberOfElementsAddedToSet > 0){
+      return Promise.resolve(
+          new User(userId.toString(), associatedLoginId, role, firstname, lastname)
+      );
+    }
+    else {
+      return Promise.reject("User was not added or existed already!");
+    }
   }
 
   async deleteLogin(id: string): Promise<boolean> {
@@ -299,12 +315,12 @@ export class RedisRepository
   getUserById(id: string): Promise<User | null> {
     return new Promise<User | null>(async (resolve, reject) => {
       const userData = await this.redis.hGetAll("user:" + id);
-      const login = await this.getLoginById(userData.login);
-      if (userData && login) {
+      // const login = await this.getLoginById(userData.login);
+      if (id !== undefined && userData.firstname !== undefined && userData.lastname !== undefined && userData.role !== undefined) {
         return resolve(
           new User(
             id,
-            login,
+            userData.associatedLoginId,
             userData.role as UserRole,
             userData.firstname,
             userData.lastname
