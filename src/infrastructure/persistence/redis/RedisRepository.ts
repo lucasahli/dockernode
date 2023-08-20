@@ -211,7 +211,7 @@ export class RedisRepository
 
   async deleteUser(id: string): Promise<boolean> {
     const userData = await this.redis.hGetAll("user:" + id);
-    if (!userData) {
+    if (!Object.keys(userData).length) {
       return Promise.reject("No user found with id: " + id);
     }
     await this.redis.sRem(

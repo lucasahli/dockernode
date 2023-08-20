@@ -6,6 +6,7 @@ import { UserRepository } from "../src/core/portsAndInterfaces/interfaces/UserRe
 import { User } from "../src/core/components/reminderContext/domain/entities/User.js";
 import {Login} from "../src/core/components/reminderContext/domain/entities/Login.js";
 import {UserRole} from "../src/core/sharedKernel/UserRole.js";
+import {expect} from "@jest/globals";
 
 describe("RedisRepository as UserRepository", () => {
   // RUN DOCKER REDIS to connect to Redis single use database!
@@ -60,5 +61,14 @@ describe("RedisRepository as UserRepository", () => {
     });
   });
 
-  // TODO Delete userById test
+  describe(".deleteUser", () => {
+    test("Resolves true if successful", async () => {
+      return expect(redisRepository.deleteUser("1")).resolves.toBeTruthy();
+    });
+
+    test("Returns null if it does not exist", async () => {
+      return expect(redisRepository.deleteUser("5")).rejects.toMatch("No user found with id: " + "5");
+    });
+  });
+
 });
