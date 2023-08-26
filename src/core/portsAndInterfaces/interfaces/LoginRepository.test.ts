@@ -1,10 +1,10 @@
 /*
 Redis LoginRepository
 */
-import { RedisRepository } from "../src/infrastructure/persistence/redis/RedisRepository.js";
-import { LoginRepository } from "../src/core/portsAndInterfaces/interfaces/LoginRepository.js";
-import { Login } from "../src/core/components/reminderContext/domain/entities/Login.js";
-import { throws } from "assert";
+
+
+import {RedisRepository} from "../../../infrastructure/persistence/redis/RedisRepository.js";
+import {Login} from "../../components/reminderContext/domain/entities/index.js";
 
 describe("RedisRepository as LoginRepository", () => {
   // RUN DOCKER COMPOSE DEV to connect to Redis single use database!

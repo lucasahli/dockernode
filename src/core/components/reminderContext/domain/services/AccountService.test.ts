@@ -1,16 +1,15 @@
 import {describe, expect, test} from '@jest/globals';
-import {AccountService} from "../src/core/components/reminderContext/domain/services/AccountService.js";
-import {LoginService} from "../src/core/components/reminderContext/domain/services/LoginService.js";
-import {UserService} from "../src/core/components/reminderContext/domain/services/UserService.js";
-import {MockupRepository} from "../src/infrastructure/persistence/mockup/MockupRepository.js";
-import {PasswordManager} from "../src/core/components/reminderContext/domain/services/PasswordManager.js";
-import {BcryptHasher} from "../src/infrastructure/security/BcryptHasher.js";
-import {Viewer} from "../src/core/sharedKernel/Viewer.js";
-import {MockHeaders} from "../src/core/sharedKernel/MockHeaders.js";
-import {Login} from "../src/core/components/reminderContext/domain/entities/Login.js";
-import {User} from "../src/core/components/reminderContext/domain/entities/User.js";
-import {UserRole} from "../src/core/sharedKernel/UserRole.js";
+
+import {AccountService, LoginService, PasswordManager, UserService} from "./index.js";
+import {MockHeaders, UserRole, Viewer} from "../../../../sharedKernel/index.js";
+import {Login, User} from "../entities/index.js";
+
+import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
+import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
+
 import jwt from 'jsonwebtoken';
+
+
 
 
 describe("AccountService", () => {
@@ -43,7 +42,7 @@ describe("AccountService", () => {
     describe(".createToken", () => {
         test("creates a new token string when given a login with id and email and a user with a role", () => {
             const login = new Login("1", "mockup01@test.com", "superSecretPassword01", ["1"]);
-            const user = new User("1", login || null, UserRole.freemium, "Firstname01", "Lastname01")
+            const user = new User("1", login.id, UserRole.freemium, "Firstname01", "Lastname01")
             expect((accountService as any).createToken(login, user, process.env.SECRET!, '30m')).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/) // Match a JWT
         })
     })

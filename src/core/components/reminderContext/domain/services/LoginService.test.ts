@@ -1,10 +1,9 @@
-import {LoginService} from "../src/core/components/reminderContext/domain/services/LoginService.js";
-import {PasswordManager} from "../src/core/components/reminderContext/domain/services/PasswordManager.js";
-import {BcryptHasher} from "../src/infrastructure/security/BcryptHasher.js";
-import {MockupRepository} from "../src/infrastructure/persistence/mockup/MockupRepository.js";
-import {Viewer} from "../src/core/sharedKernel/Viewer.js";
-import {MockHeaders} from "../src/core/sharedKernel/MockHeaders.js";
-import {Login} from "../src/core/components/reminderContext/domain/entities/Login.js";
+import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
+import {LoginService, PasswordManager} from "./index.js";
+import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
+import {MockHeaders, Viewer} from "../../../../sharedKernel/index.js";
+import {Login} from "../entities/index.js";
+
 
 describe("LoginService", () => {
     const mockRepo = new MockupRepository();

@@ -1,12 +1,11 @@
 /*
 Redis UserRepository
 */
-import { RedisRepository } from "../src/infrastructure/persistence/redis/RedisRepository.js";
-import { UserRepository } from "../src/core/portsAndInterfaces/interfaces/UserRepository.js";
-import { User } from "../src/core/components/reminderContext/domain/entities/User.js";
-import {Login} from "../src/core/components/reminderContext/domain/entities/Login.js";
-import {UserRole} from "../src/core/sharedKernel/UserRole.js";
+
 import {expect} from "@jest/globals";
+import {RedisRepository} from "../../../infrastructure/persistence/redis/RedisRepository.js";
+import {UserRole} from "../../sharedKernel/index.js";
+import {User} from "../../components/reminderContext/domain/entities/index.js";
 
 describe("RedisRepository as UserRepository", () => {
   // RUN DOCKER REDIS to connect to Redis single use database!

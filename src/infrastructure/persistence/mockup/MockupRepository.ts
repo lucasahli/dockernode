@@ -29,9 +29,9 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
     ];
 
     private users: User[] = [
-        new User("1", this.logins.at(0) || null, UserRole.freemium, "Firstname01", "Lastname01"),
-        new User("2", this.logins.at(1) || null, UserRole.freemium, "Firstname02", "Lastname02"),
-        new User("3", this.logins.at(2) || null, UserRole.freemium, "Firstname03", "Lastname03"),
+        new User("1", "1", UserRole.freemium, "Firstname01", "Lastname01"),
+        new User("2", "2", UserRole.freemium, "Firstname02", "Lastname02"),
+        new User("3", "3", UserRole.freemium, "Firstname03", "Lastname03"),
     ];
 
     async printPWS() {
@@ -48,8 +48,8 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         return Promise.resolve(new Reminder((this.reminders.length + 1).toString(), title, date, ownerId));
     }
 
-    addUser(login: Login, role: UserRole, firstname: string, lastname: string): Promise<User> {
-        return Promise.resolve(new User((this.users.length + 1).toString(), login, role, firstname, lastname));
+    addUser(loginId: string, role: UserRole, firstname: string, lastname: string): Promise<User> {
+        return Promise.resolve(new User((this.users.length + 1).toString(), loginId, role, firstname, lastname));
     }
 
     deleteLogin(id: string): Promise<boolean> {

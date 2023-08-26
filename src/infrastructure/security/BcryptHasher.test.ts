@@ -1,4 +1,4 @@
-import {BcryptHasher} from "../src/infrastructure/security/BcryptHasher.js";
+import {BcryptHasher} from "./BcryptHasher.js";
 
 describe("BcryptHasher", () => {
     const bcryptHasher = new BcryptHasher();

@@ -1,5 +1,6 @@
-import {PasswordManager} from "../src/core/components/reminderContext/domain/services/PasswordManager.js";
-import {BcryptHasher} from "../src/infrastructure/security/BcryptHasher.js";
+import {PasswordManager} from "./index.js";
+import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
+
 
 describe("PasswordManager", () => {
     const passwordManager = new PasswordManager(new BcryptHasher());
