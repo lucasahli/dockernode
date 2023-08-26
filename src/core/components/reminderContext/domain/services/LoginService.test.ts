@@ -1,3 +1,4 @@
+import {jest} from "@jest/globals";
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
 import {LoginService, PasswordManager} from "./index.js";
 import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
@@ -9,7 +10,7 @@ describe("LoginService", () => {
     const mockRepo = new MockupRepository();
     const loginService = new LoginService(mockRepo, new PasswordManager(new BcryptHasher()));
 
-    test("Can be instanciated", () => {
+    test("Can be instanced", () => {
         expect(loginService).toBeInstanceOf(LoginService);
     })
 
@@ -31,7 +32,7 @@ describe("LoginService", () => {
         })
 
         test("Can't create a new login with a used email", async () => {
-            return await expect(loginService.createNewLogin(viewer, "mockup01@test.com", "passwordTest")).rejects.toEqual("Login with that email already exists!!!");
+            return expect(loginService.createNewLogin(viewer, "mockup01@test.com", "passwordTest")).rejects.toEqual("Login with that email already exists!!!");
         })
     })
 

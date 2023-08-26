@@ -1,3 +1,4 @@
+import {jest} from "@jest/globals";
 import {describe, expect, test} from '@jest/globals';
 
 import {AccountService, LoginService, PasswordManager, UserService} from "./index.js";

@@ -1,7 +1,7 @@
 /*
 Redis UserRepository
 */
-
+import {jest} from "@jest/globals";
 import {expect} from "@jest/globals";
 import {RedisRepository} from "../../../infrastructure/persistence/redis/RedisRepository.js";
 import {UserRole} from "../../sharedKernel/index.js";

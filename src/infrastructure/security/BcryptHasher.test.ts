@@ -1,3 +1,4 @@
+import {jest} from "@jest/globals";
 import {BcryptHasher} from "./BcryptHasher.js";
 
 describe("BcryptHasher", () => {

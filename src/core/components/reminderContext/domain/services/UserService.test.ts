@@ -1,3 +1,4 @@
+import {jest} from "@jest/globals";
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
 import {UserService} from "./index.js";
 import {MockHeaders, Viewer, UserRole} from "../../../../sharedKernel/index.js";
