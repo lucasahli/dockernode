@@ -28,6 +28,6 @@ export class ReminderUseCaseHandler extends ReminderUseCase {
     }
 
     getRemindersByUser(viewer: Viewer, id: string): Promise<Reminder[] | null> {
-        return this.reminderService.getRemindersByUser(viewer, id);
+        return this.reminderService.getRemindersByUserId(viewer, id);
     }
 }

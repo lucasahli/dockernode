@@ -2,6 +2,29 @@ import { Viewer } from "../../../../sharedKernel/Viewer.js";
 import { ReminderRepository } from "../../../../portsAndInterfaces/interfaces/ReminderRepository.js";
 import { Reminder } from "../entities/Reminder.js";
 
+
+//
+// Static properties and methods are shared by all instances of a class.
+//
+/*
+class Employee {
+  static headcount: number = 0;
+
+  constructor(
+      private firstName: string,
+      private lastName: string,
+      private jobTitle: string) {
+
+    Employee.headcount++;
+  }
+}
+
+let john = new Employee('John', 'Doe', 'Front-end Developer');
+let jane = new Employee('Jane', 'Doe', 'Back-end Developer');
+console.log(Employee.headcount); // 2
+
+ */
+
 export class ReminderService {
   private static reminderRepository: ReminderRepository;
 
@@ -17,8 +40,8 @@ export class ReminderService {
     return canSee ? reminder : null;
   }
 
-  private static checkCanSee(viewer: Viewer, reminder: Reminder): boolean {
-    return viewer.hasValidToken() || true;
+  static checkCanSee(viewer: Viewer, reminder: Reminder): boolean {
+    return viewer.hasValidToken();
   }
 
   async createReminder(
@@ -49,14 +72,14 @@ export class ReminderService {
     return possibleReminder;
   }
 
-  private static checkCanCreate(
+  static checkCanCreate(
     viewer: Viewer,
     title: string,
-    date: Date,
+    dateTimeToRemind: Date,
     potentialReminder: any
   ): boolean {
     console.log("CheckCanCreate: ", potentialReminder);
-    return true;
+    return viewer.isLoggedIn();
   }
 
   static async deleteReminder(viewer: Viewer, id: string): Promise<boolean> {
@@ -78,11 +101,14 @@ export class ReminderService {
       : false;
   }
 
-  private static checkCanDelete(viewer: Viewer, reminder: Reminder): boolean {
-    return true;
+  static checkCanDelete(viewer: Viewer, reminder: Reminder): boolean {
+    if(viewer.isLoggedIn()){
+      return viewer.userId == reminder.ownerId;
+    }
+    return false;
   }
 
-  getRemindersByUser(viewer: Viewer, id: string): Promise<Reminder[] | null> {
-    return ReminderService.reminderRepository.getRemindersByUser(id);
+  getRemindersByUserId(viewer: Viewer, userId: string): Promise<Reminder[] | null> {
+    return ReminderService.reminderRepository.getRemindersByUserId(userId);
   }
 }

@@ -4,6 +4,7 @@ import {User} from "../components/reminderContext/domain/entities/User.js";
 import {UserRole} from "./UserRole.js";
 
 import jwt from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 
 export class Viewer {
     user: User | null;
@@ -44,7 +45,9 @@ export class Viewer {
         const bearerToken = this.headers.authorization
         if (bearerToken !== undefined) {
             const decoded = jwt.verify(bearerToken?.replace('Bearer ', ''), this.jwtSecret);
-            return decoded.id != null;
+            if (typeof decoded === 'object' && decoded !== null) {
+                return decoded.loginId != null;
+            }
         }
         return false;
     }

@@ -19,8 +19,8 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
 
     private reminders: Reminder[] = [
         new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1"),
-        new Reminder("2", "title02", new Date("2011-10-02T14:48:00.000Z"), "2"),
-        new Reminder("3", "title03", new Date("2011-10-03T14:48:00.000Z"), "2"),
+        new Reminder("2", "title02", new Date("2011-10-02T14:48:00.000Z"), "1"),
+        new Reminder("3", "title03", new Date("2011-10-03T14:48:00.000Z"), "1"),
         new Reminder("4", "title04", new Date("2011-10-04T14:48:00.000Z"), "2"),
         new Reminder("5", "title05", new Date("2011-10-05T14:48:00.000Z"), "3"),
         new Reminder("6", "title06", new Date("2011-10-06T14:48:00.000Z"), "3"),
@@ -98,8 +98,12 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         return Promise.resolve(this.reminders.find(item => item.id === id) || null);
     }
 
-    getRemindersByUser(userId: string): Promise<Reminder[] | null> {
-        return Promise.resolve(this.reminders.filter(item => item.ownerId === userId) || null);
+    getRemindersByUserId(userId: string): Promise<Reminder[] | null> {
+        const reminders = this.reminders.filter(item => item.ownerId === userId);
+        if (reminders.length > 0){
+            return Promise.resolve(reminders);
+        }
+        return Promise.resolve(null);
     }
 
     getUserById(id: string): Promise<User | null> {

@@ -333,7 +333,7 @@ export class RedisRepository
     });
   }
 
-  getRemindersByUser(userId: string): Promise<Reminder[] | null> {
+  getRemindersByUserId(userId: string): Promise<Reminder[] | null> {
     return new Promise<Reminder[] | null>(async (resolve, reject) => {
       // this.redis.sAdd("user:" + ownerId + "reminders", reminderId.toString())
       const reminderIds = await this.redis.sMembers(
