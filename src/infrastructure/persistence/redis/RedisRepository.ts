@@ -99,14 +99,14 @@ export class RedisRepository
 
   async addReminder(
     title: string,
-    date: Date,
+    dateTimeToRemind: Date,
     ownerId: string
   ): Promise<Reminder> {
     const reminderId = await this.redis.incr("next_reminder_id");
     await this.redis.hSet("reminder:" + reminderId.toString(), [
       ...Object.entries({
         title: title,
-        date: date.toISOString(),
+        date: dateTimeToRemind.toISOString(),
         ownerId: ownerId,
       }).flat(),
     ]);
@@ -115,7 +115,7 @@ export class RedisRepository
       reminderId.toString()
     );
     return Promise.resolve(
-      new Reminder(reminderId.toString(), title, date, ownerId)
+      new Reminder(reminderId.toString(), title, dateTimeToRemind, ownerId)
     );
   }
 
@@ -197,16 +197,22 @@ export class RedisRepository
 
   async deleteReminder(id: string): Promise<boolean> {
     const reminderData = await this.redis.hGetAll("reminder:" + id);
-    if (!reminderData) {
+    if (!(reminderData.date != undefined && reminderData.ownerId != undefined && reminderData.title != undefined)) {
       return Promise.reject("No reminderData found with id: " + id);
     }
-    await this.redis.sRem("user:" + reminderData.ownerId + "reminders", id);
-    const allFields = await this.redis.hKeys("reminder:" + id);
-    const nbrOfDeletedFields = await this.redis.hDel(
-      "reminder:" + id,
-      allFields
-    );
-    return Promise.resolve(nbrOfDeletedFields > 0);
+    else {
+      await this.redis.sRem("user:" + reminderData.ownerId + "reminders", id);
+      const allFields = await this.redis.hKeys("reminder:" + id);
+      if (allFields.length == 0){
+        return Promise.reject("No fields to delete");
+      }
+      const nbrOfDeletedFields = await this.redis.hDel(
+          "reminder:" + id,
+          allFields
+      );
+      return Promise.resolve(nbrOfDeletedFields > 0);
+    }
+
   }
 
   async deleteUser(id: string): Promise<boolean> {
@@ -296,7 +302,7 @@ export class RedisRepository
   getReminderById(id: string): Promise<Reminder | null> {
     return new Promise<Reminder | null>(async (resolve, reject) => {
       const reminderData = await this.redis.hGetAll("reminder:" + id);
-      if (reminderData) {
+      if (reminderData.date != undefined && reminderData.ownerId != undefined && reminderData.title != undefined) {
         return resolve(
           new Reminder(
             id,
@@ -333,11 +339,11 @@ export class RedisRepository
     });
   }
 
-  getRemindersByUserId(userId: string): Promise<Reminder[] | null> {
+  getRemindersByOwnerId(ownerId: string): Promise<Reminder[] | null> {
     return new Promise<Reminder[] | null>(async (resolve, reject) => {
       // this.redis.sAdd("user:" + ownerId + "reminders", reminderId.toString())
       const reminderIds = await this.redis.sMembers(
-        "user:" + userId + "reminders"
+        "user:" + ownerId + "reminders"
       );
       let remindersToReturn = [];
       for (const reminderId of reminderIds) {
@@ -346,7 +352,12 @@ export class RedisRepository
           remindersToReturn.push(reminder);
         }
       }
-      resolve(remindersToReturn);
+      if (remindersToReturn.length > 0){
+        resolve(remindersToReturn);
+      }
+      else {
+        resolve(null);
+      }
     });
   }
 }

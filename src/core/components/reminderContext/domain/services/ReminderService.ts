@@ -109,6 +109,6 @@ export class ReminderService {
   }
 
   getRemindersByUserId(viewer: Viewer, userId: string): Promise<Reminder[] | null> {
-    return ReminderService.reminderRepository.getRemindersByUserId(userId);
+    return ReminderService.reminderRepository.getRemindersByOwnerId(userId);
   }
 }

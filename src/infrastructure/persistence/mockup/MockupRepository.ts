@@ -98,7 +98,7 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         return Promise.resolve(this.reminders.find(item => item.id === id) || null);
     }
 
-    getRemindersByUserId(userId: string): Promise<Reminder[] | null> {
+    getRemindersByOwnerId(userId: string): Promise<Reminder[] | null> {
         const reminders = this.reminders.filter(item => item.ownerId === userId);
         if (reminders.length > 0){
             return Promise.resolve(reminders);
