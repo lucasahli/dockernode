@@ -13,6 +13,7 @@
         roots: [
             "<rootDir>",
             "<rootDir>/tests",
+            "<rootDir>/src",
         ],
         testMatch: [
             "**/__tests__/**/*.+(ts|tsx)",

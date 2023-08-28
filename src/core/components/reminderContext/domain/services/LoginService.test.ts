@@ -1,16 +1,16 @@
-import {LoginService} from "../src/core/components/reminderContext/domain/services/LoginService.js";
-import {PasswordManager} from "../src/core/components/reminderContext/domain/services/PasswordManager.js";
-import {BcryptHasher} from "../src/infrastructure/security/BcryptHasher.js";
-import {MockupRepository} from "../src/infrastructure/persistence/mockup/MockupRepository.js";
-import {Viewer} from "../src/core/sharedKernel/Viewer.js";
-import {MockHeaders} from "../src/core/sharedKernel/MockHeaders.js";
-import {Login} from "../src/core/components/reminderContext/domain/entities/Login.js";
+import {jest} from "@jest/globals";
+import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
+import {LoginService, PasswordManager} from "./index.js";
+import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
+import {MockHeaders, Viewer} from "../../../../sharedKernel/index.js";
+import {Login} from "../entities/index.js";
+
 
 describe("LoginService", () => {
     const mockRepo = new MockupRepository();
     const loginService = new LoginService(mockRepo, new PasswordManager(new BcryptHasher()));
 
-    test("Can be instanciated", () => {
+    test("Can be instanced", () => {
         expect(loginService).toBeInstanceOf(LoginService);
     })
 
@@ -32,7 +32,7 @@ describe("LoginService", () => {
         })
 
         test("Can't create a new login with a used email", async () => {
-            return await expect(loginService.createNewLogin(viewer, "mockup01@test.com", "passwordTest")).rejects.toEqual("Login with that email already exists!!!");
+            return expect(loginService.createNewLogin(viewer, "mockup01@test.com", "passwordTest")).rejects.toEqual("Login with that email already exists!!!");
         })
     })
 

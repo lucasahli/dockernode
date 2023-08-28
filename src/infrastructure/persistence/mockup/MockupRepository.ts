@@ -19,8 +19,8 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
 
     private reminders: Reminder[] = [
         new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1"),
-        new Reminder("2", "title02", new Date("2011-10-02T14:48:00.000Z"), "2"),
-        new Reminder("3", "title03", new Date("2011-10-03T14:48:00.000Z"), "2"),
+        new Reminder("2", "title02", new Date("2011-10-02T14:48:00.000Z"), "1"),
+        new Reminder("3", "title03", new Date("2011-10-03T14:48:00.000Z"), "1"),
         new Reminder("4", "title04", new Date("2011-10-04T14:48:00.000Z"), "2"),
         new Reminder("5", "title05", new Date("2011-10-05T14:48:00.000Z"), "3"),
         new Reminder("6", "title06", new Date("2011-10-06T14:48:00.000Z"), "3"),
@@ -29,9 +29,9 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
     ];
 
     private users: User[] = [
-        new User("1", this.logins.at(0) || null, UserRole.freemium, "Firstname01", "Lastname01"),
-        new User("2", this.logins.at(1) || null, UserRole.freemium, "Firstname02", "Lastname02"),
-        new User("3", this.logins.at(2) || null, UserRole.freemium, "Firstname03", "Lastname03"),
+        new User("1", "1", UserRole.freemium, "Firstname01", "Lastname01"),
+        new User("2", "2", UserRole.freemium, "Firstname02", "Lastname02"),
+        new User("3", "3", UserRole.freemium, "Firstname03", "Lastname03"),
     ];
 
     async printPWS() {
@@ -48,8 +48,8 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         return Promise.resolve(new Reminder((this.reminders.length + 1).toString(), title, date, ownerId));
     }
 
-    addUser(login: Login, role: UserRole, firstname: string, lastname: string): Promise<User> {
-        return Promise.resolve(new User((this.users.length + 1).toString(), login, role, firstname, lastname));
+    addUser(loginId: string, role: UserRole, firstname: string, lastname: string): Promise<User> {
+        return Promise.resolve(new User((this.users.length + 1).toString(), loginId, role, firstname, lastname));
     }
 
     deleteLogin(id: string): Promise<boolean> {
@@ -98,8 +98,12 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         return Promise.resolve(this.reminders.find(item => item.id === id) || null);
     }
 
-    getRemindersByUser(userId: string): Promise<Reminder[] | null> {
-        return Promise.resolve(this.reminders.filter(item => item.ownerId === userId) || null);
+    getRemindersByOwnerId(userId: string): Promise<Reminder[] | null> {
+        const reminders = this.reminders.filter(item => item.ownerId === userId);
+        if (reminders.length > 0){
+            return Promise.resolve(reminders);
+        }
+        return Promise.resolve(null);
     }
 
     getUserById(id: string): Promise<User | null> {

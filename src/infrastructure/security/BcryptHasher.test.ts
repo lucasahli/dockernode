@@ -1,4 +1,5 @@
-import {BcryptHasher} from "../src/infrastructure/security/BcryptHasher.js";
+import {jest} from "@jest/globals";
+import {BcryptHasher} from "./BcryptHasher.js";
 
 describe("BcryptHasher", () => {
     const bcryptHasher = new BcryptHasher();

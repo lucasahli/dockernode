@@ -1,9 +1,9 @@
 import {Login} from "../../components/reminderContext/domain/entities/Login.js"
 
-export abstract class LoginRepository {
-    abstract getLoginById(id: string): Promise<Login | null>
-    abstract addLogin(email: string, password: string, associatedUserIds: string[]): Promise<Login>
-    abstract getLoginByEmail(email: string): Promise<Login | null>
-    abstract deleteLogin(id: string): Promise<boolean>
+export interface LoginRepository {
+     getLoginById(id: string): Promise<Login | null>
+     addLogin(email: string, password: string, associatedUserIds: string[]): Promise<Login>
+     getLoginByEmail(email: string): Promise<Login | null>
+     deleteLogin(id: string): Promise<boolean>
 }
 
