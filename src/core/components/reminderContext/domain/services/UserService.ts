@@ -14,6 +14,7 @@ export class UserService {
 
     // Single source of truth for fetching
     async generate(viewer: Viewer, id: string): Promise<User | null> {
+        // Todo: Get "Raw data" with dataloader
         const user = await this.userRepository.getUserById(id); // Nullable
         if(user === null) return null;
         const canSee = this.checkCanSee(viewer, user);
@@ -74,5 +75,13 @@ export class UserService {
 
     private checkCanDelete(viewer: Viewer, user: User): boolean {
         return true;
+    }
+
+    async getAllUsers(viewer: Viewer): Promise<(User | Error | null)[]> {
+        const ids = await this.userRepository.getAllUserIds();
+        if(ids !== null){
+            return this.userRepository.getManyUsersByIds(ids);
+        }
+        return [];
     }
 }

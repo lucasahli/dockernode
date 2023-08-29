@@ -6,16 +6,18 @@ export class AccountUseCaseHandler implements AccountUseCase{
 
     constructor(private accountService: AccountService) {
     }
-    deleteLogin(viewer: Viewer, id: string): Promise<boolean> {
-        return Promise.resolve(false);
+
+    signUp(viewer: Viewer, email: string, password: string): Promise<string | null> {
+        return this.accountService.signUp(viewer, email, password);
     }
 
     signIn(viewer: Viewer, email: string, password: string): Promise<string | null> {
         return this.accountService.signIn(viewer, email, password);
     }
 
-    signUp(viewer: Viewer, email: string, password: string): Promise<string | null> {
-        return this.accountService.signUp(viewer, email, password);
+    deleteLogin(viewer: Viewer, id: string): Promise<boolean> {
+        // Todo: Implement deleteLogin function
+        return Promise.resolve(false);
     }
 
 }

@@ -2,41 +2,34 @@ import { UserUseCase } from "../../core/portsAndInterfaces/ports/userUseCase.js"
 import { Viewer } from "../../core/sharedKernel/Viewer.js";
 import { ReminderUseCase } from "../../core/portsAndInterfaces/ports/ReminderUseCase.js";
 import { Reminder } from "../../core/components/reminderContext/domain/entities/Reminder.js";
-import { UserService } from "../../core/components/reminderContext/domain/services/UserService.js";
-import { PasswordManager } from "../../core/components/reminderContext/domain/services/PasswordManager.js";
+import { UserService, ReminderService, LoginService, AccountService, PasswordManager } from "../../core/components/reminderContext/domain/services/index.js";
 import { BcryptHasher } from "../../infrastructure/security/BcryptHasher.js";
 import { UserUseCaseHandler } from "../../core/components/reminderContext/useCases/UserUseCaseHandler.js";
-import { ReminderService } from "../../core/components/reminderContext/domain/services/ReminderService.js";
 import { ReminderUseCaseHandler } from "../../core/components/reminderContext/useCases/ReminderUseCaseHandler.js";
 import { RedisRepository } from "../../infrastructure/persistence/redis/RedisRepository.js";
 import { User } from "../../core/components/reminderContext/domain/entities/User.js";
-import { LoginUseCase } from "../../core/portsAndInterfaces/ports/LoginUseCase.js";
-import { LoginService } from "../../core/components/reminderContext/domain/services/LoginService.js";
-import { LoginUseCaseHandler } from "../../core/components/reminderContext/useCases/LoginUseCaseHandler.js";
 import { AccountUseCase } from "../../core/portsAndInterfaces/ports/AccountUseCase.js";
 import { AccountUseCaseHandler } from "../../core/components/reminderContext/useCases/AccountUseCaseHandler.js";
-import { AccountService } from "../../core/components/reminderContext/domain/services/AccountService.js";
 import jwt from "jsonwebtoken";
 
 class GraphQlApiPresenter {
   public userUseCase: UserUseCase;
   public reminderUseCase: ReminderUseCase;
-  public loginUseCase: LoginUseCase;
   public accountUseCase: AccountUseCase;
 
   constructor(
     userUseCase: UserUseCase,
     reminderUseCase: ReminderUseCase,
-    loginUseCase: LoginUseCase,
     accountUseCase: AccountUseCase
   ) {
     this.userUseCase = userUseCase;
     this.reminderUseCase = reminderUseCase;
-    this.loginUseCase = loginUseCase;
     this.accountUseCase = accountUseCase;
   }
 
+  //
   // Login
+  //
   public handleSignUpMutation(
     parent: any,
     args: any,
@@ -87,29 +80,32 @@ class GraphQlApiPresenter {
     return Promise.resolve(null);
   }
 
+  //
   // User
+  //
   public handleUserQuery(
     parent: any,
     args: any,
     viewer: Viewer
   ): Promise<User | null> {
     let { id } = args;
-    let result = this.userUseCase.getUserById(viewer, id);
-    result
-      .then((user) => {
-        return user;
-      })
-      .catch((error) => {
-        return error;
-      });
-    return result;
+    return this.userUseCase.getUserById(viewer, id);
+    // let result = this.userUseCase.getUserById(viewer, id);
+    // result
+    //   .then((user) => {
+    //     return user;
+    //   })
+    //   .catch((error) => {
+    //     return error;
+    //   });
+    // return result;
   }
 
   public handleUsersQuery(
     parent: any,
     args: any,
     viewer: Viewer
-  ): Promise<User[] | null> {
+  ): Promise<(User | Error | null)[]> {
     return this.userUseCase.getAllUsers(viewer);
   }
 
@@ -122,7 +118,9 @@ class GraphQlApiPresenter {
     return this.userUseCase.deleteUser(viewer, id);
   }
 
+  //
   // Reminder
+  //
   public handleReminderQuery(
     parent: any,
     args: any,
@@ -169,6 +167,10 @@ class GraphQlApiPresenter {
   }
 }
 
+
+//
+// Prepare the Class
+//
 const redisRepository = new RedisRepository(
   `${process.env.REDIS_HOST}`,
   `${process.env.REDIS_PORT}`
@@ -179,7 +181,6 @@ const loginService = new LoginService(
   new PasswordManager(new BcryptHasher())
 );
 const userUseCase: UserUseCase = new UserUseCaseHandler(userService);
-const loginUseCase: LoginUseCase = new LoginUseCaseHandler(loginService);
 const reminderService = new ReminderService(redisRepository);
 const reminderUseCase: ReminderUseCaseHandler = new ReminderUseCaseHandler(
   reminderService
@@ -195,6 +196,5 @@ const accountUseCaseHandler: AccountUseCaseHandler = new AccountUseCaseHandler(
 export const graphQlApiPresenter = new GraphQlApiPresenter(
   userUseCase,
   reminderUseCase,
-  loginUseCase,
   accountUseCaseHandler
 );
