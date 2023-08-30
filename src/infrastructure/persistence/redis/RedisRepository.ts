@@ -5,7 +5,6 @@ import { ReminderRepository } from "../../../core/portsAndInterfaces/interfaces/
 import { Login } from "../../../core/components/reminderContext/domain/entities/Login.js";
 import { Reminder } from "../../../core/components/reminderContext/domain/entities/Reminder.js";
 import { User } from "../../../core/components/reminderContext/domain/entities/User.js";
-import { rejects } from "assert";
 import { UserRole } from "../../../core/sharedKernel/UserRole.js";
 import DataLoader from "dataloader";
 
@@ -35,13 +34,18 @@ export class RedisRepository
     this.redis.connect().then(() => console.log("Redis connected"));
 
     // Create a DataLoader instance for user IDs
-    //  accept string keys (user IDs) and return a User | null type, where User is the type of your user object, and null indicates
+    //  accept string keys (user IDs) and return a User | null type,
+    //  where User is the type of your user object, and null indicates
     //  that the user may not be found in Redis.
+
     this.userLoader = new DataLoader<string, User | null>(async (userIds) => {
       // Fetch user data from Redis for the provided user IDs
       const userPromises = userIds.map(async (id) => {
         const userData = await this.redis.hGetAll("user:" + id);
-        if (id !== undefined && userData.firstname !== undefined && userData.lastname !== undefined && userData.role !== undefined) {
+        if (id !== undefined
+            && userData.firstname !== undefined
+            && userData.lastname !== undefined
+            && userData.role !== undefined) {
           return new User(
                   id,
                   userData.associatedLoginId,
@@ -52,9 +56,6 @@ export class RedisRepository
           console.log("No user data found in redis for id: ", id);
           return null;
         }
-        
-        // const userData = await this.redis.hgetall(`user:${userId}`);
-        // return userData ? { id: userId, ...userData } : null;
       });
 
       return Promise.all(userPromises);
@@ -80,10 +81,6 @@ export class RedisRepository
     //
     //         })
     //     });
-  }
-
-  getManyUsersByIds(ids: string[]): Promise<(User | Error | null)[]> {
-    return this.userLoader.loadMany(ids);
   }
 
   async connect() {
@@ -352,24 +349,11 @@ export class RedisRepository
   }
 
   getUserById(id: string): Promise<User | null> {
-    return new Promise<User | null>(async (resolve, reject) => {
-      const userData = await this.redis.hGetAll("user:" + id);
-      // const login = await this.getLoginById(userData.login);
-      if (id !== undefined && userData.firstname !== undefined && userData.lastname !== undefined && userData.role !== undefined) {
-        return resolve(
-          new User(
-            id,
-            userData.associatedLoginId,
-            userData.role as UserRole,
-            userData.firstname,
-            userData.lastname
-          )
-        );
-      } else {
-        console.log("No user data found in redis for id: ", id);
-        return resolve(null);
-      }
-    });
+    return this.userLoader.load(id);
+  }
+
+  getManyUsersByIds(ids: string[]): Promise<(User | Error | null)[]> {
+    return this.userLoader.loadMany(ids);
   }
 
   getRemindersByOwnerId(ownerId: string): Promise<Reminder[] | null> {
