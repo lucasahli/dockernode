@@ -5,9 +5,8 @@ import { ReminderRepository } from "../../../core/portsAndInterfaces/interfaces/
 import { Login } from "../../../core/components/reminderContext/domain/entities/Login.js";
 import { Reminder } from "../../../core/components/reminderContext/domain/entities/Reminder.js";
 import { User } from "../../../core/components/reminderContext/domain/entities/User.js";
-import { rejects } from "assert";
 import { UserRole } from "../../../core/sharedKernel/UserRole.js";
-// import DataLoader from "dataloader";
+import DataLoader from "dataloader";
 
 function generateRandomStringWithLength(length: number) {
   let result = "";
@@ -25,6 +24,7 @@ export class RedisRepository
   implements LoginRepository, UserRepository, ReminderRepository
 {
   redis: RedisClientType;
+  userLoader: DataLoader<string, User | null>
 
   constructor(redisHost: string | null, redisPort: string | null) {
     const redisUrl =
@@ -32,6 +32,34 @@ export class RedisRepository
     this.redis = createClient({ url: redisUrl });
     this.redis.on("error", (err) => console.log("Redis Client Error", err));
     this.redis.connect().then(() => console.log("Redis connected"));
+
+    // Create a DataLoader instance for user IDs
+    //  accept string keys (user IDs) and return a User | null type,
+    //  where User is the type of your user object, and null indicates
+    //  that the user may not be found in Redis.
+
+    this.userLoader = new DataLoader<string, User | null>(async (userIds) => {
+      // Fetch user data from Redis for the provided user IDs
+      const userPromises = userIds.map(async (id) => {
+        const userData = await this.redis.hGetAll("user:" + id);
+        if (id !== undefined
+            && userData.firstname !== undefined
+            && userData.lastname !== undefined
+            && userData.role !== undefined) {
+          return new User(
+                  id,
+                  userData.associatedLoginId,
+                  userData.role as UserRole,
+                  userData.firstname,
+                  userData.lastname);
+        } else {
+          console.log("No user data found in redis for id: ", id);
+          return null;
+        }
+      });
+
+      return Promise.all(userPromises);
+    });
 
     // @ts-ignore
     // const redisLoader = new DataLoader<string, User>(
@@ -57,12 +85,6 @@ export class RedisRepository
 
   async connect() {
     await this.redis.connect();
-  }
-
-  async doSomething() {
-    await this.redis.set("key", "value");
-    const value = await this.redis.get("key");
-    await this.redis.disconnect();
   }
 
   async addLogin(
@@ -161,6 +183,8 @@ export class RedisRepository
       "login:" + associatedLoginId + "associated_user_ids",
       userId.toString()
     );
+    await this.redis.sAdd('users', userId.toString());
+
     if(numberOfNewAddedFields > 0 && numberOfElementsAddedToSet > 0){
       return Promise.resolve(
           new User(userId.toString(), associatedLoginId, role, firstname, lastname)
@@ -226,6 +250,7 @@ export class RedisRepository
     );
     const allFields = await this.redis.hKeys("user:" + id);
     const nbrOfDeletedFields = await this.redis.hDel("user:" + id, allFields);
+    await this.redis.sRem('users', id);
     return Promise.resolve(nbrOfDeletedFields > 0);
   }
 
@@ -237,8 +262,13 @@ export class RedisRepository
     return Promise.resolve([]);
   }
 
-  getAllUserIds(): Promise<string[]> {
-    return Promise.resolve([]);
+  async getAllUserIds(): Promise<string[] | null> {
+    const setExists = await this.redis.exists('users');
+    if (setExists === 0) {
+      // The Set does not exist
+      return null;
+    }
+    return await this.redis.sMembers('users');
   }
 
   getLoginByEmail(email: string): Promise<Login | null> {
@@ -319,24 +349,11 @@ export class RedisRepository
   }
 
   getUserById(id: string): Promise<User | null> {
-    return new Promise<User | null>(async (resolve, reject) => {
-      const userData = await this.redis.hGetAll("user:" + id);
-      // const login = await this.getLoginById(userData.login);
-      if (id !== undefined && userData.firstname !== undefined && userData.lastname !== undefined && userData.role !== undefined) {
-        return resolve(
-          new User(
-            id,
-            userData.associatedLoginId,
-            userData.role as UserRole,
-            userData.firstname,
-            userData.lastname
-          )
-        );
-      } else {
-        console.log("No user data found in redis for id: ", id);
-        return resolve(null);
-      }
-    });
+    return this.userLoader.load(id);
+  }
+
+  getManyUsersByIds(ids: string[]): Promise<(User | Error | null)[]> {
+    return this.userLoader.loadMany(ids);
   }
 
   getRemindersByOwnerId(ownerId: string): Promise<Reminder[] | null> {
