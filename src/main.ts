@@ -3,7 +3,6 @@ import morgan from 'morgan'; // HTTP request logger.
 import helmet from "helmet"; // Helps secure your apps by setting various HTTP headers.
 import express, {Express, Request, Response} from 'express';
 import {Viewer} from "./core/sharedKernel/Viewer.js";
-import { graphqlHTTP } from 'express-graphql';
 import { createHandler } from 'graphql-http/lib/use/express';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { loadSchemaSync } from '@graphql-tools/load';
@@ -13,6 +12,8 @@ import { mergeResolvers } from "@graphql-tools/merge";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from 'path';
 import url from 'url';
+import cors from 'cors'; // Import the cors middleware
+
 
 // **************************************
 //          Environment Setup
@@ -39,6 +40,10 @@ const loggingMiddleware = (req: any, res: any, next: any) => {
     next();
 }
 app.use(loggingMiddleware);
+
+app.use(cors({
+    origin: 'http://localhost:56995',
+}));
 
 
 const createViewerMiddleware = async (req: any, res: any, next: any) => {
