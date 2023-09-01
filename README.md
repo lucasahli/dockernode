@@ -1,15 +1,16 @@
-# Welcome to Dockernode
+# Welcome to Reminder Backend
 
-The reminder app that utilizes location-based information to trigger notification.
+The reminder app that utilizes location-based information to trigger notifications.
+This is the backend to the [Reminder Frontend](https://github.com/lucasahli/reminder_frontend)
 
-## Getting started with Dockernode!
+## Getting started with Reminder Backend!
 
 ### System requirements
-To run Dockernode, your development environment must meet these minimum requirements:
+To run Reminder Backend, your development environment must meet these minimum requirements:
 - `Docker` and `docker-compose` are installed
 
-### Run Dockernode
-- Clone the Dockernode repository
+### Run Reminder Backend
+- Clone the Reminder Backend repository
 - At the root of the repository run:
 ```bash
 $ docker-compose up
