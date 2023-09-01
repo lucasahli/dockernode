@@ -1,4 +1,4 @@
-import { UserUseCase } from "../../core/portsAndInterfaces/ports/userUseCase.js";
+import { UserUseCase } from "../../core/portsAndInterfaces/ports/UserUseCase.js";
 import { Viewer } from "../../core/sharedKernel/Viewer.js";
 import { ReminderUseCase } from "../../core/portsAndInterfaces/ports/ReminderUseCase.js";
 import { Reminder } from "../../core/components/reminderContext/domain/entities/Reminder.js";
