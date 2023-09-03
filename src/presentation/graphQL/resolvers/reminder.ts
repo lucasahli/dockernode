@@ -35,6 +35,9 @@ export default {
         reminders: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleRemindersQuery(parent, args, viewer); },
         reminder: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleReminderQuery(parent, args, viewer); },
     },
+    Reminder: {
+        owner: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleReminderOwnerQuery(parent, args, viewer); },
+    },
     Mutation: {
         createReminder: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleCreateReminderMutation(parent, args, viewer); },
         deleteReminder: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleDeleteReminderMutation(parent, args, viewer); },

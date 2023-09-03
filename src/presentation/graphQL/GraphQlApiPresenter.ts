@@ -175,6 +175,11 @@ class GraphQlApiPresenter {
   handleRemindersQuery(parent: any, args: any, viewer: Viewer): Promise<(Reminder | Error | null)[]> {
     return this.reminderUseCase.getAllReminders(viewer);
   }
+
+  handleReminderOwnerQuery(parent: any, args: any, viewer: Viewer) {
+    const reminder = parent;
+    return this.userUseCase.getUserById(viewer, reminder.ownerId);
+  }
 }
 
 
