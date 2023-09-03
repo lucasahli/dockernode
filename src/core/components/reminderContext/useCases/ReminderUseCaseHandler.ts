@@ -3,12 +3,10 @@ import {ReminderUseCase} from "../../../portsAndInterfaces/ports/ReminderUseCase
 import {Reminder} from "../domain/entities/Reminder.js";
 import {ReminderService} from "../domain/services/ReminderService.js";
 import {Error} from "sequelize";
-import {User} from "../domain/entities/index.js";
-import {UserService} from "../domain/services/index.js";
 
 export class ReminderUseCaseHandler implements ReminderUseCase {
 
-    constructor(private reminderService: ReminderService, private userService: UserService) {
+    constructor(private reminderService: ReminderService) {
     }
 
     getReminderById(viewer: Viewer, id: string): Promise<Reminder | null> {

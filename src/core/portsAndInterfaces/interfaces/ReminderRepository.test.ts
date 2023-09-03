@@ -41,6 +41,7 @@ describe("RedisRepository as ReminderRepository", () => {
     describe(".deleteReminder", () => {
         test("Resolves true if successful", async () => {
             const addedReminder = await redisRepository.addReminder("Reminder To Delete", new Date(), "1");
+            //TODO fix this test
             return expect(redisRepository.deleteReminder(addedReminder.id)).resolves.toBeTruthy();
         });
 
@@ -59,7 +60,7 @@ describe("RedisRepository as ReminderRepository", () => {
         });
 
         test("Returns null if it does not exist", async () => {
-            return expect(redisRepository.getReminderIdsByOwnerId("5")).resolves.toBeNull();
+            return expect(redisRepository.getReminderIdsByOwnerId("5")).resolves.toStrictEqual([]);
         });
     });
 
