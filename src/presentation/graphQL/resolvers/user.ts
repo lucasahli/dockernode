@@ -15,6 +15,7 @@ export default {
 
     User: {
         reminders: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleUserRemindersFieldQuery(parent, args, viewer); },
+        login: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleUserLoginFieldQuery(parent, args, viewer); },
     },
 
     Mutation: {

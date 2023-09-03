@@ -11,6 +11,7 @@ import { User } from "../../core/components/reminderContext/domain/entities/User
 import { AccountUseCase } from "../../core/portsAndInterfaces/ports/AccountUseCase.js";
 import { AccountUseCaseHandler } from "../../core/components/reminderContext/useCases/AccountUseCaseHandler.js";
 import jwt from "jsonwebtoken";
+import {Login} from "../../core/components/reminderContext/domain/entities/index.js";
 
 class GraphQlApiPresenter {
   public userUseCase: UserUseCase;
@@ -116,6 +117,11 @@ class GraphQlApiPresenter {
   ): Promise<boolean> {
     let { id } = args;
     return this.userUseCase.deleteUser(viewer, id);
+  }
+
+  public handleUserLoginFieldQuery(parent: any, args: any, viewer: Viewer): Promise<Login> {
+    const user = parent;
+    return this.accountUseCase.getLoginByUser(viewer, user.id);
   }
 
   //

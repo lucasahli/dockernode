@@ -1,6 +1,8 @@
 import {AccountUseCase} from "../../../portsAndInterfaces/ports/AccountUseCase.js";
 import {Viewer} from "../../../sharedKernel/Viewer.js";
 import {AccountService} from "../domain/services/AccountService.js";
+import {Login} from "../domain/entities/index.js";
+import {rejects} from "assert";
 
 export class AccountUseCaseHandler implements AccountUseCase{
 
@@ -18,6 +20,11 @@ export class AccountUseCaseHandler implements AccountUseCase{
     deleteLogin(viewer: Viewer, id: string): Promise<boolean> {
         // Todo: Implement deleteLogin function
         return Promise.resolve(false);
+    }
+
+    async getLoginByUser(viewer: Viewer, userId: string): Promise<Login> {
+        const login = await this.accountService.getLoginByUser(viewer, userId);
+        return login ?? Promise.reject("User is not associated with a Login!");
     }
 
 }
