@@ -1,6 +1,7 @@
 import { Viewer } from "../../../../sharedKernel/Viewer.js";
 import { ReminderRepository } from "../../../../portsAndInterfaces/interfaces/ReminderRepository.js";
 import { Reminder } from "../entities/Reminder.js";
+import {User} from "../entities/index.js";
 
 
 //
@@ -26,32 +27,32 @@ console.log(Employee.headcount); // 2
  */
 
 export class ReminderService {
-  private static reminderRepository: ReminderRepository;
+  private reminderRepository: ReminderRepository;
 
   constructor(repo: ReminderRepository) {
-    ReminderService.reminderRepository = repo;
+    this.reminderRepository = repo;
   }
 
   // Single source of truth for fetching
-  static async generate(viewer: Viewer, id: string): Promise<Reminder | null> {
+  async generate(viewer: Viewer, id: string): Promise<Reminder | null> {
     const reminder = await this.reminderRepository.getReminderById(id); // Nullable
     if (reminder === null) return null;
     const canSee = this.checkCanSee(viewer, reminder);
     return canSee ? reminder : null;
   }
 
-  static checkCanSee(viewer: Viewer, reminder: Reminder): boolean {
-    return viewer.hasValidToken();
+  checkCanSee(viewer: Viewer, reminder: Reminder): boolean {
+    return true;
   }
 
   async createReminder(
     viewer: Viewer,
     title: string,
-    date: Date
+    dateTimeToRemind: Date
   ): Promise<Reminder | null> {
     const ownerId = viewer.userId;
-    const possibleReminder = await ReminderService.reminderRepository
-      .addReminder(title, date, ownerId)
+    const possibleReminder = await this.reminderRepository
+      .addReminder(title, dateTimeToRemind, ownerId)
       .then((reminder) => {
         return reminder;
       })
@@ -65,7 +66,7 @@ export class ReminderService {
     let canCreateReminder = ReminderService.checkCanCreate(
       viewer,
       title,
-      date,
+        dateTimeToRemind,
       possibleReminder
     );
     if (!canCreateReminder) return null;
@@ -82,7 +83,7 @@ export class ReminderService {
     return viewer.isLoggedIn();
   }
 
-  static async deleteReminder(viewer: Viewer, id: string): Promise<boolean> {
+  async deleteReminder(viewer: Viewer, id: string): Promise<boolean> {
     const reminderToDelete = await this.reminderRepository
       .getReminderById(id)
       .then((result) => {
@@ -97,18 +98,35 @@ export class ReminderService {
     if (reminderToDelete === null) return false;
     const canDelete = this.checkCanDelete(viewer, reminderToDelete);
     return canDelete
-      ? ReminderService.reminderRepository.deleteReminder(id)
+      ? this.reminderRepository.deleteReminder(id)
       : false;
   }
 
-  static checkCanDelete(viewer: Viewer, reminder: Reminder): boolean {
+  checkCanDelete(viewer: Viewer, reminder: Reminder): boolean {
     if(viewer.isLoggedIn()){
       return viewer.userId == reminder.ownerId;
     }
     return false;
   }
 
-  getRemindersByUserId(viewer: Viewer, userId: string): Promise<Reminder[] | null> {
-    return ReminderService.reminderRepository.getRemindersByOwnerId(userId);
+  async getRemindersByUserId(viewer: Viewer, userId: string): Promise<(Reminder | Error | null)[]> {
+    const ids = await this.reminderRepository.getReminderIdsByOwnerId(userId);
+    if(ids !== null){
+      return this.getMany(viewer, ids);
+    }
+    return [];
   }
+
+  async getAllReminders(viewer: Viewer): Promise<(Reminder | Error | null)[]> {
+    const ids = await this.reminderRepository.getAllReminderIds();
+    if(ids !== null){
+      return this.getMany(viewer, ids);
+    }
+    return [];
+  }
+
+  async getMany(viewer: Viewer, reminderIds: string[]): Promise<(Reminder | Error | null)[]> {
+    return Promise.all(reminderIds.map((id) => this.generate(viewer, id)));
+  }
+
 }

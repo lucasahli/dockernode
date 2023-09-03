@@ -25,6 +25,7 @@ export class RedisRepository
 {
   redis: RedisClientType;
   userLoader: DataLoader<string, User | null>
+  reminderLoader: DataLoader<string, Reminder | null>
 
   constructor(redisHost: string | null, redisPort: string | null) {
     const redisUrl =
@@ -59,6 +60,27 @@ export class RedisRepository
       });
 
       return Promise.all(userPromises);
+    });
+
+    this.reminderLoader = new DataLoader<string, Reminder | null>(async (reminderIds) => {
+      // Fetch user data from Redis for the provided user IDs
+      const reminderPromises = reminderIds.map(async (id) => {
+        const reminderData = await this.redis.hGetAll("reminder:" + id);
+        if (id !== undefined
+            && reminderData.title !== undefined
+            && reminderData.dateTimeToRemind !== undefined
+            && reminderData.ownerId !== undefined) {
+          return new Reminder(
+              id,
+              reminderData.title,
+              new Date(reminderData.dateTimeToRemind),
+              reminderData.ownerId);
+        } else {
+          console.log("No reminder data found in redis for id: ", id);
+          return null;
+        }
+      });
+      return Promise.all(reminderPromises);
     });
 
     // @ts-ignore
@@ -128,7 +150,7 @@ export class RedisRepository
     await this.redis.hSet("reminder:" + reminderId.toString(), [
       ...Object.entries({
         title: title,
-        date: dateTimeToRemind.toISOString(),
+        dateTimeToRemind: dateTimeToRemind.toISOString(),
         ownerId: ownerId,
       }).flat(),
     ]);
@@ -136,6 +158,7 @@ export class RedisRepository
       "user:" + ownerId + "reminders",
       reminderId.toString()
     );
+    await this.redis.sAdd('reminders', reminderId.toString());
     return Promise.resolve(
       new Reminder(reminderId.toString(), title, dateTimeToRemind, ownerId)
     );
@@ -234,6 +257,7 @@ export class RedisRepository
           "reminder:" + id,
           allFields
       );
+      await this.redis.sRem('reminders', id);
       return Promise.resolve(nbrOfDeletedFields > 0);
     }
 
@@ -258,8 +282,13 @@ export class RedisRepository
     return Promise.resolve([]);
   }
 
-  getAllReminderIds(): Promise<string[]> {
-    return Promise.resolve([]);
+  async getAllReminderIds(): Promise<string[] | null> {
+    const setExists = await this.redis.exists('reminders');
+    if (setExists === 0) {
+      // The Set does not exist
+      return null;
+    }
+    return await this.redis.sMembers('reminders');
   }
 
   async getAllUserIds(): Promise<string[] | null> {
@@ -330,22 +359,7 @@ export class RedisRepository
   }
 
   getReminderById(id: string): Promise<Reminder | null> {
-    return new Promise<Reminder | null>(async (resolve, reject) => {
-      const reminderData = await this.redis.hGetAll("reminder:" + id);
-      if (reminderData.date != undefined && reminderData.ownerId != undefined && reminderData.title != undefined) {
-        return resolve(
-          new Reminder(
-            id,
-            reminderData.title,
-            new Date(reminderData.date),
-            reminderData.ownerId
-          )
-        );
-      } else {
-        console.log("No reminder data found in redis for id: ", id);
-        return resolve(null);
-      }
-    });
+    return this.reminderLoader.load(id);
   }
 
   getUserById(id: string): Promise<User | null> {
@@ -356,25 +370,9 @@ export class RedisRepository
     return this.userLoader.loadMany(ids);
   }
 
-  getRemindersByOwnerId(ownerId: string): Promise<Reminder[] | null> {
-    return new Promise<Reminder[] | null>(async (resolve, reject) => {
-      // this.redis.sAdd("user:" + ownerId + "reminders", reminderId.toString())
-      const reminderIds = await this.redis.sMembers(
+  getReminderIdsByOwnerId(ownerId: string): Promise<string[]> {
+      return this.redis.sMembers(
         "user:" + ownerId + "reminders"
       );
-      let remindersToReturn = [];
-      for (const reminderId of reminderIds) {
-        const reminder = await this.getReminderById(reminderId);
-        if (reminder) {
-          remindersToReturn.push(reminder);
-        }
-      }
-      if (remindersToReturn.length > 0){
-        resolve(remindersToReturn);
-      }
-      else {
-        resolve(null);
-      }
-    });
   }
 }

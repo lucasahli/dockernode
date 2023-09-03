@@ -49,6 +49,7 @@ app.use(cors({
 const createViewerMiddleware = async (req: any, res: any, next: any) => {
     const myViewer = new Viewer(req.headers, process.env.SECRET as string);
     await myViewer.prepareViewer().then(() => {
+        console.log("Prepared Viewer");
         res.locals.myViewer = myViewer;
     });
     next();

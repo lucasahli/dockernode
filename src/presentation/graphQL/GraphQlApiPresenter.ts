@@ -149,10 +149,9 @@ class GraphQlApiPresenter {
     parent: any,
     args: any,
     viewer: Viewer
-  ): Promise<Reminder[] | null> {
+  ): Promise<(Reminder | Error | null)[]> {
     const user = parent;
     return this.reminderUseCase.getRemindersByUser(viewer, user.id);
-    // return new Promise<Reminder[] | null>( () => null);
   }
 
   public handleCreateReminderMutation(
@@ -160,8 +159,8 @@ class GraphQlApiPresenter {
     args: any,
     viewer: Viewer
   ): Promise<Reminder | null> {
-    let { title, date } = args;
-    return this.reminderUseCase.createReminder(viewer, title, date);
+    let { title, dateTimeToRemind } = args;
+    return this.reminderUseCase.createReminder(viewer, title, dateTimeToRemind);
   }
 
   public handleDeleteReminderMutation(
@@ -171,6 +170,10 @@ class GraphQlApiPresenter {
   ): Promise<boolean> {
     let { id } = args;
     return this.reminderUseCase.deleteReminderById(viewer, id);
+  }
+
+  handleRemindersQuery(parent: any, args: any, viewer: Viewer): Promise<(Reminder | Error | null)[]> {
+    return this.reminderUseCase.getAllReminders(viewer);
   }
 }
 
