@@ -78,4 +78,9 @@ export class AccountService {
         }
 
     }
+
+    async getUsersByLogin(viewer: Viewer, loginId: string): Promise<(User | Error | null)[] | null> {
+        const login = await this.loginService.generate(viewer, loginId);
+        return login ? this.userService.getMany(viewer, login.associatedUserIds) : null;
+    }
 }

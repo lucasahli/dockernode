@@ -77,8 +77,9 @@ class GraphQlApiPresenter {
     parent: any,
     args: any,
     viewer: Viewer
-  ): Promise<User[] | null> {
-    return Promise.resolve(null);
+  ): Promise<(User | Error | null)[] | null> {
+    const login = parent;
+    return this.accountUseCase.getUsersByLogin(viewer, login.id);
   }
 
   //

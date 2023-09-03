@@ -1,7 +1,7 @@
 import {AccountUseCase} from "../../../portsAndInterfaces/ports/AccountUseCase.js";
 import {Viewer} from "../../../sharedKernel/Viewer.js";
 import {AccountService} from "../domain/services/AccountService.js";
-import {Login} from "../domain/entities/index.js";
+import {Login, User} from "../domain/entities/index.js";
 import {rejects} from "assert";
 
 export class AccountUseCaseHandler implements AccountUseCase{
@@ -24,7 +24,13 @@ export class AccountUseCaseHandler implements AccountUseCase{
 
     async getLoginByUser(viewer: Viewer, userId: string): Promise<Login> {
         const login = await this.accountService.getLoginByUser(viewer, userId);
-        return login ?? Promise.reject("User is not associated with a Login!");
+        return login ?? Promise.reject("User is not associated with a login!");
     }
+
+    async getUsersByLogin(viewer: Viewer, loginId: string): Promise<(User | Error | null)[]> {
+        const user = await this.accountService.getUsersByLogin(viewer, loginId);
+        return user ?? Promise.reject("Login not associated with that user");
+    }
+
 
 }
