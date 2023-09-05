@@ -244,7 +244,7 @@ export class RedisRepository
 
   async deleteReminder(id: string): Promise<boolean> {
     const reminderData = await this.redis.hGetAll("reminder:" + id);
-    if (!(reminderData.date != undefined && reminderData.ownerId != undefined && reminderData.title != undefined)) {
+    if (!(reminderData.dateTimeToRemind != undefined && reminderData.ownerId != undefined && reminderData.title != undefined)) {
       return Promise.reject("No reminderData found with id: " + id);
     }
     else {

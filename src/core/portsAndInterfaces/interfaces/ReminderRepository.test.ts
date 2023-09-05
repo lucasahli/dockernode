@@ -42,6 +42,7 @@ describe("RedisRepository as ReminderRepository", () => {
         test("Resolves true if successful", async () => {
             const addedReminder = await redisRepository.addReminder("Reminder To Delete", new Date(), "1");
             //TODO fix this test
+            console.log("Added Reminder Id: ", addedReminder.id);
             return expect(redisRepository.deleteReminder(addedReminder.id)).resolves.toBeTruthy();
         });
 

@@ -7,6 +7,9 @@ import {User} from "../../../core/components/reminderContext/domain/entities/Use
 import {UserRole} from "../../../core/sharedKernel/UserRole.js";
 import {PasswordManager} from "../../../core/components/reminderContext/domain/services/PasswordManager.js";
 import {BcryptHasher} from "../../security/BcryptHasher.js";
+import login from "../../../presentation/graphQL/resolvers/login.js";
+import {Error} from "sequelize";
+import reminder from "../../../presentation/graphQL/resolvers/reminder.js";
 
 export class MockupRepository implements LoginRepository, UserRepository, ReminderRepository {
     private passwordManager = new PasswordManager(new BcryptHasher());
@@ -101,13 +104,25 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
     getReminderIdsByOwnerId(ownerId: string): Promise<string[]> {
         const reminders = this.reminders.filter(item => item.ownerId === ownerId);
         if (reminders.length > 0){
-            return Promise.resolve(reminders);
+            return Promise.resolve(reminders.map(reminder => reminder.id));
         }
-        return Promise.resolve(null);
+        return Promise.resolve([]);
     }
 
     getUserById(id: string): Promise<User | null> {
         return Promise.resolve(this.users.find(item => item.id === id) || null);
+    }
+
+    getAllReminderIds(): Promise<string[] | null> {
+        return Promise.resolve(this.reminders.map(reminder => reminder.id));
+    }
+
+    getAllUserIds(): Promise<string[] | null> {
+        return Promise.resolve(this.users.map(user => user.id));
+    }
+
+    getManyUsersByIds(ids: string[]): Promise<(User | Error | null)[]> {
+        return Promise.resolve([]);
     }
 
 }

@@ -118,8 +118,8 @@ describe("ReminderService", () => {
             await viewerAuthenticated.prepareViewer();
             expect(reminderService.getRemindersByUserId(viewerAuthenticated, "3")).resolves.toHaveLength(4);
         })
-        test("Returns null if the user does not have any", async () => {
-            expect(reminderService.getRemindersByUserId(viewerUnknown,"4")).resolves.toBeNull();
+        test("Returns [] if the user does not have any reminders", async () => {
+            expect(reminderService.getRemindersByUserId(viewerUnknown,"4")).resolves.toHaveLength(0);
         })
     })
 
