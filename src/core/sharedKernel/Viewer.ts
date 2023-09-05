@@ -10,10 +10,10 @@ export class Viewer {
     headers: IncomingHttpHeaders;
     cookies: any;
 
-    loginId: string;
-    loginEmail: string;
-    userId: string;
-    userRole: UserRole;
+    loginId: string | undefined;
+    loginEmail: string | undefined;
+    userId: string | undefined;
+    userRole: UserRole | undefined;
 
     constructor(headers: IncomingHttpHeaders, secret: string = 'SomeWrongSecret') {
         this.headers = headers;
@@ -90,11 +90,7 @@ export class Viewer {
 
         // Check if each part is a valid Base64Url string
         const base64UrlRegex = /^[A-Za-z0-9-_]+$/;
-        if (!parts.every(part => base64UrlRegex.test(part))) {
-            return false;
-        }
-
-        return true;
+        return parts.every(part => base64UrlRegex.test(part));
     }
 
     isJWT(jwtString: string): boolean {

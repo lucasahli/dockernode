@@ -51,6 +51,9 @@ export class ReminderService {
     dateTimeToRemind: Date
   ): Promise<Reminder | null> {
     const ownerId = viewer.userId;
+    if (ownerId === undefined){
+      return null;
+    }
     const possibleReminder = await this.reminderRepository
       .addReminder(title, dateTimeToRemind, ownerId)
       .then((reminder) => {
