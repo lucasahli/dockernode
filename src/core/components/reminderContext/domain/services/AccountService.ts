@@ -64,7 +64,23 @@ export class AccountService {
         return canSignIn ? this.createToken(login, possibleUser as User, process.env.SECRET!, '30m') : null;
     }
 
-    public checkCanSignIn(viewer: Viewer, email: string, password: string, login: Login): Promise<boolean> {
+    checkCanSignIn(viewer: Viewer, email: string, password: string, login: Login): Promise<boolean> {
         return this.passwordManager.checkIsCorrect(password, login.password);
+    }
+
+    async getLoginByUser(viewer: Viewer, userId: string): Promise<Login | null> {
+        const user = await this.userService.generate(viewer, userId);
+        if(user !== undefined){
+            return this.loginService.generate(viewer, user!.associatedLoginId);
+        }
+        else {
+            return null;
+        }
+
+    }
+
+    async getUsersByLogin(viewer: Viewer, loginId: string): Promise<(User | Error | null)[] | null> {
+        const login = await this.loginService.generate(viewer, loginId);
+        return login ? this.userService.getMany(viewer, login.associatedUserIds) : null;
     }
 }

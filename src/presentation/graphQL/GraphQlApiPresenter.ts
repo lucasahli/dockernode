@@ -11,6 +11,7 @@ import { User } from "../../core/components/reminderContext/domain/entities/User
 import { AccountUseCase } from "../../core/portsAndInterfaces/ports/AccountUseCase.js";
 import { AccountUseCaseHandler } from "../../core/components/reminderContext/useCases/AccountUseCaseHandler.js";
 import jwt from "jsonwebtoken";
+import {Login} from "../../core/components/reminderContext/domain/entities/index.js";
 
 class GraphQlApiPresenter {
   public userUseCase: UserUseCase;
@@ -76,8 +77,9 @@ class GraphQlApiPresenter {
     parent: any,
     args: any,
     viewer: Viewer
-  ): Promise<User[] | null> {
-    return Promise.resolve(null);
+  ): Promise<(User | Error | null)[] | null> {
+    const login = parent;
+    return this.accountUseCase.getUsersByLogin(viewer, login.id);
   }
 
   //
@@ -118,6 +120,11 @@ class GraphQlApiPresenter {
     return this.userUseCase.deleteUser(viewer, id);
   }
 
+  public handleUserLoginFieldQuery(parent: any, args: any, viewer: Viewer): Promise<Login> {
+    const user = parent;
+    return this.accountUseCase.getLoginByUser(viewer, user.id);
+  }
+
   //
   // Reminder
   //
@@ -142,10 +149,9 @@ class GraphQlApiPresenter {
     parent: any,
     args: any,
     viewer: Viewer
-  ): Promise<Reminder[] | null> {
+  ): Promise<(Reminder | Error | null)[]> {
     const user = parent;
     return this.reminderUseCase.getRemindersByUser(viewer, user.id);
-    // return new Promise<Reminder[] | null>( () => null);
   }
 
   public handleCreateReminderMutation(
@@ -153,8 +159,8 @@ class GraphQlApiPresenter {
     args: any,
     viewer: Viewer
   ): Promise<Reminder | null> {
-    let { title, date } = args;
-    return this.reminderUseCase.createReminder(viewer, title, date);
+    let { title, dateTimeToRemind } = args;
+    return this.reminderUseCase.createReminder(viewer, title, dateTimeToRemind);
   }
 
   public handleDeleteReminderMutation(
@@ -164,6 +170,15 @@ class GraphQlApiPresenter {
   ): Promise<boolean> {
     let { id } = args;
     return this.reminderUseCase.deleteReminderById(viewer, id);
+  }
+
+  handleRemindersQuery(parent: any, args: any, viewer: Viewer): Promise<(Reminder | Error | null)[]> {
+    return this.reminderUseCase.getAllReminders(viewer);
+  }
+
+  handleReminderOwnerQuery(parent: any, args: any, viewer: Viewer) {
+    const reminder = parent;
+    return this.userUseCase.getUserById(viewer, reminder.ownerId);
   }
 }
 

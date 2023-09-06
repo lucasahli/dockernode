@@ -1,7 +1,7 @@
 type Reminder {
     id: ID!
     title: String
-    date: Date
+    dateTimeToRemind: DateTime
     owner: User
 }
 
@@ -11,6 +11,6 @@ extend type Query {
 }
 
 extend type Mutation {
-    createReminder(title: String!, date: Date!): Reminder
+    createReminder(title: String!, dateTimeToRemind: DateTime!): Reminder
     deleteReminder(id: ID!): Boolean!
 }

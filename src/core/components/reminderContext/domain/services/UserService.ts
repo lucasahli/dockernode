@@ -79,8 +79,12 @@ export class UserService {
     async getAllUsers(viewer: Viewer): Promise<(User | Error | null)[]> {
         const ids = await this.userRepository.getAllUserIds();
         if(ids !== null){
-            return Promise.all(ids.map((id) => this.generate(viewer, id)));
+            return this.getMany(viewer, ids);
         }
         return [];
+    }
+
+    async getMany(viewer: Viewer, userIds: string[]): Promise<(User | Error | null)[]> {
+        return Promise.all(userIds.map((id) => this.generate(viewer, id)));
     }
 }

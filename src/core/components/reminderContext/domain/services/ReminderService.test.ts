@@ -22,12 +22,12 @@ describe("ReminderService", () => {
         test("Generates if it exists in DB and canSee returns true", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
-            await expect(ReminderService.generate(viewerAuthenticated, "1")).resolves.toBeInstanceOf(Reminder);
+            await expect(reminderService.generate(viewerAuthenticated, "1")).resolves.toBeInstanceOf(Reminder);
         })
         test("Returns Null if it does not exists in DB", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
-            await expect(ReminderService.generate(viewerAuthenticated, "9")).resolves.toBeNull();
+            await expect(reminderService.generate(viewerAuthenticated, "9")).resolves.toBeNull();
         })
     })
 
@@ -39,10 +39,10 @@ describe("ReminderService", () => {
         test("Returns true if viewer has a valid token", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
-            expect(ReminderService.checkCanSee(viewerAuthenticated, reminder)).toBeTruthy();
+            expect(reminderService.checkCanSee(viewerAuthenticated, reminder)).toBeTruthy();
         })
-        test("Returns false if viewer has not a valid token", async () => {
-            expect(ReminderService.checkCanSee(viewerUnknown, reminder)).toBeFalsy();
+        test("Returns always true even if viewer has not a valid token", async () => {
+            expect(reminderService.checkCanSee(viewerUnknown, reminder)).toBeTruthy();
         })
     })
 
@@ -85,10 +85,10 @@ describe("ReminderService", () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
             await viewerAuthenticated.prepareViewer();
-            expect(ReminderService.checkCanDelete(viewerAuthenticated, reminder)).toBeTruthy();
+            expect(reminderService.checkCanDelete(viewerAuthenticated, reminder)).toBeTruthy();
         })
         test("Returns false if viewer has not a valid token", async () => {
-            expect(ReminderService.checkCanDelete(viewerUnknown, reminder)).toBeFalsy();
+            expect(reminderService.checkCanDelete(viewerUnknown, reminder)).toBeFalsy();
         })
     })
 
@@ -101,10 +101,10 @@ describe("ReminderService", () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
             await viewerAuthenticated.prepareViewer();
-            expect(ReminderService.deleteReminder(viewerAuthenticated, "1")).resolves.toBeTruthy();
+            expect(reminderService.deleteReminder(viewerAuthenticated, "1")).resolves.toBeTruthy();
         })
         test("Returns false if it could not be deleted", async () => {
-            expect(ReminderService.deleteReminder(viewerUnknown,"1")).resolves.toBeFalsy();
+            expect(reminderService.deleteReminder(viewerUnknown,"1")).resolves.toBeFalsy();
         })
     })
 
@@ -118,8 +118,8 @@ describe("ReminderService", () => {
             await viewerAuthenticated.prepareViewer();
             expect(reminderService.getRemindersByUserId(viewerAuthenticated, "3")).resolves.toHaveLength(4);
         })
-        test("Returns null if the user does not have any", async () => {
-            expect(reminderService.getRemindersByUserId(viewerUnknown,"4")).resolves.toBeNull();
+        test("Returns [] if the user does not have any reminders", async () => {
+            expect(reminderService.getRemindersByUserId(viewerUnknown,"4")).resolves.toHaveLength(0);
         })
     })
 

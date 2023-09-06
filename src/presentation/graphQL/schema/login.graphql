@@ -2,6 +2,7 @@ type Token {
   token: String!
 }
 
+# TODO: add currentUserId
 type Login {
   id: ID!
   email: String!
