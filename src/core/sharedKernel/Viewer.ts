@@ -19,8 +19,6 @@ export class Viewer {
         this.headers = headers;
         this.jwtSecret = secret;
         this.user = null;
-        // const token = this.headers.authorization;
-        // const user = this.getUserFromToken(token.replace('Bearer ', ''), secret);
     }
 
     public getPayloadFromToken(): any | null {
