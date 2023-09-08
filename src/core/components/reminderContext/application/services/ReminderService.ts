@@ -1,7 +1,7 @@
 import { Viewer } from "../../../../sharedKernel/Viewer.js";
 import { ReminderRepository } from "../../../../portsAndInterfaces/interfaces/ReminderRepository.js";
-import { Reminder } from "../entities/Reminder.js";
-import {User} from "../entities/index.js";
+import { Reminder } from "../../domain/entities/Reminder.js";
+import {User} from "../../domain/entities/index.js";
 
 
 //
@@ -66,7 +66,7 @@ export class ReminderService {
         );
         return null;
       });
-    let canCreateReminder = ReminderService.checkCanCreate(
+    let canCreateReminder = this.checkCanCreate(
       viewer,
       title,
         dateTimeToRemind,
@@ -76,7 +76,7 @@ export class ReminderService {
     return possibleReminder;
   }
 
-  static checkCanCreate(
+  checkCanCreate(
     viewer: Viewer,
     title: string,
     dateTimeToRemind: Date,
@@ -106,13 +106,27 @@ export class ReminderService {
   }
 
   checkCanDelete(viewer: Viewer, reminder: Reminder): boolean {
-    if(viewer.isLoggedIn()){
-      return viewer.userId == reminder.ownerId;
+    try {
+      const isLoggedIn = viewer.isLoggedIn();
+      if(isLoggedIn){
+        const userId: string = viewer.userId ?? "";
+        const ownerId: string = reminder.ownerId;
+        const viewerOwnsThisReminder: boolean = (userId === ownerId) ? true : false;
+        console.log("VIEWER CAN DELETE: ", viewerOwnsThisReminder);
+        return viewerOwnsThisReminder;
+      }
+      else {
+        return false;
+      }
+      return false;
     }
-    return false;
+    catch (e) {
+      console.log("Error", e);
+      return false;
+    }
   }
 
-  async getRemindersByUserId(viewer: Viewer, userId: string): Promise<(Reminder | Error | null)[]> {
+  async getRemindersByOwnerId(viewer: Viewer, userId: string): Promise<(Reminder | Error | null)[]> {
     const ids = await this.reminderRepository.getReminderIdsByOwnerId(userId);
     if(ids !== null){
       return this.getMany(viewer, ids);

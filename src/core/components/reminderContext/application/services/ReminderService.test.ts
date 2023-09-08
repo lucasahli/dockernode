@@ -1,8 +1,9 @@
 import {jest} from "@jest/globals";
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {AccountService, LoginService, PasswordManager, ReminderService, UserService} from "./index.js";
+import {PasswordManager} from "../../domain/services/index.js";
+import {AccountService, LoginService, ReminderService, UserService} from "../../application/services/index.js";
 import {MockHeaders, Viewer, UserRole} from "../../../../sharedKernel/index.js";
-import {Reminder, User} from "../entities/index.js";
+import {Reminder, User} from "../../domain/entities/index.js";
 import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
 
 describe("ReminderService", () => {
@@ -54,10 +55,10 @@ describe("ReminderService", () => {
         test("Returns true if viewer is logged in ", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
-            expect(ReminderService.checkCanCreate(viewerAuthenticated, "ReminderTitle", new Date(), reminder)).toBeTruthy();
+            expect(reminderService.checkCanCreate(viewerAuthenticated, "ReminderTitle", new Date(), reminder)).toBeTruthy();
         })
         test("Returns false if viewer has not a valid token", async () => {
-            expect(ReminderService.checkCanCreate(viewerUnknown,"ReminderTitle", new Date(), reminder)).toBeFalsy();
+            expect(reminderService.checkCanCreate(viewerUnknown,"ReminderTitle", new Date(), reminder)).toBeFalsy();
         })
     })
 
@@ -69,6 +70,7 @@ describe("ReminderService", () => {
         test("Returns the created reminder if it could be created", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
+            await viewerAuthenticated.prepareViewer();
             expect(reminderService.createReminder(viewerAuthenticated, "ReminderTitle", new Date())).resolves.toBeInstanceOf(Reminder);
         })
         test("Returns null if it could not be created", async () => {
@@ -77,9 +79,7 @@ describe("ReminderService", () => {
     })
 
     describe(".checkCanDelete", () => {
-
-        const viewerUnknown = new Viewer(new MockHeaders(undefined),);
-
+        const viewerUnknown = new Viewer(new MockHeaders(undefined),"");
         const reminder = new Reminder("3", "title03", new Date("2011-10-01T14:48:00.000Z"), "1");
         test("Returns true if viewer owns the reminder", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
@@ -108,7 +108,7 @@ describe("ReminderService", () => {
         })
     })
 
-    describe(".getRemindersByUserId", () => {
+    describe(".getRemindersByOwnerId", () => {
 
         const viewerUnknown = new Viewer(new MockHeaders(undefined),);
 
@@ -116,10 +116,10 @@ describe("ReminderService", () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
             await viewerAuthenticated.prepareViewer();
-            expect(reminderService.getRemindersByUserId(viewerAuthenticated, "3")).resolves.toHaveLength(4);
+            expect(reminderService.getRemindersByOwnerId(viewerAuthenticated, "3")).resolves.toHaveLength(4);
         })
         test("Returns [] if the user does not have any reminders", async () => {
-            expect(reminderService.getRemindersByUserId(viewerUnknown,"4")).resolves.toHaveLength(0);
+            expect(reminderService.getRemindersByOwnerId(viewerUnknown,"4")).resolves.toHaveLength(0);
         })
     })
 

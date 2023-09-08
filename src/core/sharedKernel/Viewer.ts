@@ -40,7 +40,7 @@ export class Viewer {
     public hasValidToken(): boolean {
         const decodedPayload = this.getPayloadFromToken();
         if (typeof decodedPayload === 'object' && decodedPayload !== null) {
-            return decodedPayload.loginId != null;
+            return decodedPayload.loginId !== null;
         }
         return false;
     }

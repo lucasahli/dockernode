@@ -3,9 +3,9 @@ import {MockHeaders, UserRole, Viewer} from "./index.js";
 import {
     AccountService,
     LoginService,
-    PasswordManager,
     UserService
-} from "../components/reminderContext/domain/services/index.js";
+} from "../components/reminderContext/application/services/index.js";
+import {PasswordManager} from "../components/reminderContext/domain/services/index.js";
 import {BcryptHasher} from "../../infrastructure/security/BcryptHasher.js";
 import {MockupRepository} from "../../infrastructure/persistence/mockup/MockupRepository.js";
 

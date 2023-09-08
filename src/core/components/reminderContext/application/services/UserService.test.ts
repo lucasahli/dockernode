@@ -1,19 +1,19 @@
 import {jest} from "@jest/globals";
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {UserService} from "./index.js";
+import {UserService} from "../../application/services/index.js";
 import {MockHeaders, Viewer, UserRole} from "../../../../sharedKernel/index.js";
-import {User, Login} from "../entities/index.js";
+import {User, Login} from "../../domain/entities/index.js";
 
 describe("UserService", () => {
     const mockRepo = new MockupRepository();
     const userService = new UserService(mockRepo);
 
-    test("Can be instanciated", () => {
+    test("Can be instanced", () => {
         expect(userService).toBeInstanceOf(UserService);
     })
 
     describe(".generate", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         test("Generates if it exists in DB and canSee returns true", async () => {
             await expect(userService.generate(viewer, "1")).resolves.toBeInstanceOf(User);
         })
@@ -44,7 +44,7 @@ describe("UserService", () => {
     })
 
     describe(".deleteUser", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         test("Returns true if the user could be deleted", async () => {
             await expect(userService.deleteUser(viewer, "1")).resolves.toBeTruthy();
         })
@@ -72,7 +72,7 @@ describe("UserService", () => {
     })
 
     describe(".checkCanSee", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         const login = new Login("3", "mockup03@test.com", "$2b$08$v0J1QjRiYvrmwoDTuKXK0.f06pFwmXXMM1D5cufuUROSAPzsigmH6", ["3"]);
         const user = new User("3", login.id, UserRole.freemium, "Firstname01", "Lastname01");
         test("Returns true", () => {
@@ -81,7 +81,7 @@ describe("UserService", () => {
     })
 
     describe(".checkCanDelete", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         const login = new Login("3", "mockup03@test.com", "$2b$08$v0J1QjRiYvrmwoDTuKXK0.f06pFwmXXMM1D5cufuUROSAPzsigmH6", ["3"]);
         const user = new User("3", login.id, UserRole.freemium, "Firstname01", "Lastname01");
         test("Returns true", () => {

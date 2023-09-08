@@ -1,9 +1,10 @@
 import {jest} from "@jest/globals";
 import {describe, expect, test} from '@jest/globals';
 
-import {AccountService, LoginService, PasswordManager, UserService} from "./index.js";
+import {PasswordManager} from "../../domain/services/index.js";
+import {AccountService, LoginService, UserService} from "../../application/services/index.js";
 import {MockHeaders, UserRole, Viewer} from "../../../../sharedKernel/index.js";
-import {Login, User} from "../entities/index.js";
+import {Login, User} from "../../domain/entities/index.js";
 
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
 import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";

@@ -4,12 +4,12 @@ import { ReminderUseCase } from "../../core/portsAndInterfaces/ports/ReminderUse
 import { Reminder } from "../../core/components/reminderContext/domain/entities/Reminder.js";
 import { UserService, ReminderService, LoginService, AccountService, PasswordManager } from "../../core/components/reminderContext/domain/services/index.js";
 import { BcryptHasher } from "../../infrastructure/security/BcryptHasher.js";
-import { UserUseCaseHandler } from "../../core/components/reminderContext/useCases/UserUseCaseHandler.js";
-import { ReminderUseCaseHandler } from "../../core/components/reminderContext/useCases/ReminderUseCaseHandler.js";
+import { UserUseCaseHandler } from "../../core/components/reminderContext/application/UserUseCaseHandler.js";
+import { ReminderUseCaseHandler } from "../../core/components/reminderContext/application/ReminderUseCaseHandler.js";
 import { RedisRepository } from "../../infrastructure/persistence/redis/RedisRepository.js";
 import { User } from "../../core/components/reminderContext/domain/entities/User.js";
 import { AccountUseCase } from "../../core/portsAndInterfaces/ports/AccountUseCase.js";
-import { AccountUseCaseHandler } from "../../core/components/reminderContext/useCases/AccountUseCaseHandler.js";
+import { AccountUseCaseHandler } from "../../core/components/reminderContext/application/AccountUseCaseHandler.js";
 import jwt from "jsonwebtoken";
 import {Login} from "../../core/components/reminderContext/domain/entities/index.js";
 

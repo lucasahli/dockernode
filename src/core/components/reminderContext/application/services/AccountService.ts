@@ -1,9 +1,9 @@
 import {LoginService} from "./LoginService.js";
 import {UserService} from "./UserService.js";
 import {Viewer} from "../../../../sharedKernel/Viewer.js";
-import {Login} from "../entities/Login.js";
-import {User} from "../entities/User.js";
-import {PasswordManager} from "./PasswordManager.js";
+import {Login} from "../../domain/entities/Login.js";
+import {User} from "../../domain/entities/User.js";
+import {PasswordManager} from "../../domain/services/PasswordManager.js";
 import jwt from 'jsonwebtoken';
 
 
