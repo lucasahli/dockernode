@@ -3,6 +3,18 @@ import {graphQlApiPresenter} from "../GraphQlApiPresenter.js";
 
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql';
+import {
+    CreateReminderUseCase, DeleteReminderByIdUseCase,
+    GetAllRemindersUseCase,
+    GetReminderByIdUseCase,
+    GetUserByIdUseCase
+} from "../../../core/portsAndInterfaces/ports/index.js";
+import {
+    CreateReminderUseCaseHandler, DeleteReminderByIdUseCaseHandler,
+    GetAllRemindersUseCaseHandler,
+    GetReminderByIdUseCaseHandler, GetUserByIdUseCaseHandler
+} from "../../../core/components/reminderContext/application/useCases/index.js";
+import {GraphQlContext} from "../../../main.js";
 
 
 export default {
@@ -32,14 +44,29 @@ export default {
       }),
 
     Query: {
-        reminders: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleRemindersQuery(parent, args, viewer); },
-        reminder: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleReminderQuery(parent, args, viewer); },
+        reminders: async (parent: any, args: any, context: GraphQlContext) => {
+            const getAllRemindersUseCase: GetAllRemindersUseCase = new GetAllRemindersUseCaseHandler(context.reminderService)
+            return getAllRemindersUseCase.execute(context.viewer);
+            },
+        reminder: async (parent: any, args: any, context: GraphQlContext) => {
+            const getReminderByIdUseCase: GetReminderByIdUseCase = new GetReminderByIdUseCaseHandler(context.reminderService);
+            return getReminderByIdUseCase.execute(context.viewer, args.id);
+            },
     },
     Reminder: {
-        owner: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleReminderOwnerQuery(parent, args, viewer); },
+        owner: async (parent: any, args: any, context: GraphQlContext) => {
+            const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService);
+            return getUserByIdUseCase.execute(context.viewer, parent.ownerId);
+            },
     },
     Mutation: {
-        createReminder: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleCreateReminderMutation(parent, args, viewer); },
-        deleteReminder: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleDeleteReminderMutation(parent, args, viewer); },
+        createReminder: async (parent: any, args: any, context: GraphQlContext) => {
+            const createReminderUseCase: CreateReminderUseCase = new CreateReminderUseCaseHandler(context.reminderService);
+            return createReminderUseCase.execute(context.viewer, args.title, args.dateTimeToRemind);
+            },
+        deleteReminder: async (parent: any, args: any, context: GraphQlContext) => {
+            const deleteReminderByIdUseCase: DeleteReminderByIdUseCase = new DeleteReminderByIdUseCaseHandler(context.reminderService);
+            return deleteReminderByIdUseCase.execute(context.viewer, args.id);
+            },
     },
 };

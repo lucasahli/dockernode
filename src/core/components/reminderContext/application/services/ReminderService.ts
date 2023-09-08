@@ -112,7 +112,6 @@ export class ReminderService {
         const userId: string = viewer.userId ?? "";
         const ownerId: string = reminder.ownerId;
         const viewerOwnsThisReminder: boolean = (userId === ownerId) ? true : false;
-        console.log("VIEWER CAN DELETE: ", viewerOwnsThisReminder);
         return viewerOwnsThisReminder;
       }
       else {

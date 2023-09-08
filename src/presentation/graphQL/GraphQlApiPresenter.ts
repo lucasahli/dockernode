@@ -1,31 +1,16 @@
-import { UserUseCase } from "../../core/portsAndInterfaces/ports/UserUseCase.js";
 import { Viewer } from "../../core/sharedKernel/Viewer.js";
-import { ReminderUseCase } from "../../core/portsAndInterfaces/ports/ReminderUseCase.js";
 import { Reminder } from "../../core/components/reminderContext/domain/entities/Reminder.js";
-import { UserService, ReminderService, LoginService, AccountService, PasswordManager } from "../../core/components/reminderContext/domain/services/index.js";
+import { UserService, ReminderService, LoginService, AccountService } from "../../core/components/reminderContext/application/services/index.js";
+import { PasswordManager } from "../../core/components/reminderContext/domain/services/index.js";
 import { BcryptHasher } from "../../infrastructure/security/BcryptHasher.js";
-import { UserUseCaseHandler } from "../../core/components/reminderContext/application/UserUseCaseHandler.js";
-import { ReminderUseCaseHandler } from "../../core/components/reminderContext/application/ReminderUseCaseHandler.js";
 import { RedisRepository } from "../../infrastructure/persistence/redis/RedisRepository.js";
 import { User } from "../../core/components/reminderContext/domain/entities/User.js";
-import { AccountUseCase } from "../../core/portsAndInterfaces/ports/AccountUseCase.js";
-import { AccountUseCaseHandler } from "../../core/components/reminderContext/application/AccountUseCaseHandler.js";
 import jwt from "jsonwebtoken";
 import {Login} from "../../core/components/reminderContext/domain/entities/index.js";
 
 class GraphQlApiPresenter {
-  public userUseCase: UserUseCase;
-  public reminderUseCase: ReminderUseCase;
-  public accountUseCase: AccountUseCase;
 
-  constructor(
-    userUseCase: UserUseCase,
-    reminderUseCase: ReminderUseCase,
-    accountUseCase: AccountUseCase
-  ) {
-    this.userUseCase = userUseCase;
-    this.reminderUseCase = reminderUseCase;
-    this.accountUseCase = accountUseCase;
+  constructor() {
   }
 
   //
@@ -195,21 +180,12 @@ const loginService = new LoginService(
   redisRepository,
   new PasswordManager(new BcryptHasher())
 );
-const userUseCase: UserUseCase = new UserUseCaseHandler(userService);
 const reminderService = new ReminderService(redisRepository);
-const reminderUseCase: ReminderUseCaseHandler = new ReminderUseCaseHandler(
-  reminderService
-);
+
 const accountService: AccountService = new AccountService(
   loginService,
   userService,
   new PasswordManager(new BcryptHasher())
 );
-const accountUseCaseHandler: AccountUseCaseHandler = new AccountUseCaseHandler(
-  accountService
-);
-export const graphQlApiPresenter = new GraphQlApiPresenter(
-  userUseCase,
-  reminderUseCase,
-  accountUseCaseHandler
-);
+
+export const graphQlApiPresenter = new GraphQlApiPresenter();

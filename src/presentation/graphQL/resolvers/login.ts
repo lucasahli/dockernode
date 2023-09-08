@@ -1,5 +1,9 @@
-import { graphQlApiPresenter } from "../GraphQlApiPresenter.js";
-import {Viewer} from "../../../core/sharedKernel/Viewer.js";
+import {GraphQlContext} from "../../../main.js";
+import {
+  GetUsersByLoginUseCaseHandler, SignInUseCaseHandler,
+  SignUpUseCaseHandler
+} from "../../../core/components/reminderContext/application/useCases/index.js";
+import {GetUsersByLoginUseCase, SignInUseCase, SignUpUseCase} from "../../../core/portsAndInterfaces/ports/index.js";
 
 /** When setting up a field whose value is a custom type,
  * we have to define a function that tells GraphQL how to get that custom type.
@@ -9,11 +13,20 @@ import {Viewer} from "../../../core/sharedKernel/Viewer.js";
 
 export default {
   Login: {
-    users: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleLoginUsersFieldQuery(parent, args, viewer); },
+    users: async (parent: any, args: any, context: GraphQlContext) => {
+      const getUsersByLoginUseCase: GetUsersByLoginUseCase = new GetUsersByLoginUseCaseHandler(context.accountService);
+      return getUsersByLoginUseCase.execute(context.viewer, parent.id);
+    },
   },
 
   Mutation: {
-    signUp: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleSignUpMutation(parent, args, viewer); },
-    signIn: async (parent: any, args: any, viewer: Viewer) => { return graphQlApiPresenter.handleSignInMutation(parent, args, viewer); },
+    signUp: async (parent: any, args: any, context: GraphQlContext) => {
+      const signUpUseCase: SignUpUseCase = new SignUpUseCaseHandler(context.accountService);
+      return signUpUseCase.execute(context.viewer, args.email, args.password);
+    },
+    signIn: async (parent: any, args: any, context: GraphQlContext) => {
+      const signInUseCase: SignInUseCase = new SignInUseCaseHandler(context.accountService);
+      return signInUseCase.execute(context.viewer, args.email, args.password);
+      },
   },
 };
