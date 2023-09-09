@@ -99,7 +99,7 @@ describe("ReminderService", () => {
         const reminder = new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1");
         test("Returns true if it could be deleted", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
-            const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
+            const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token.token), process.env.SECRET);
             await viewerAuthenticated.prepareViewer();
             expect(reminderService.deleteReminder(viewerAuthenticated, "1")).resolves.toBeTruthy();
         })
