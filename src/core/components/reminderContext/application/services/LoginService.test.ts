@@ -1,9 +1,10 @@
 import {jest} from "@jest/globals";
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {LoginService, PasswordManager} from "./index.js";
+import {PasswordManager} from "../../domain/services/index.js";
+import {LoginService} from "../../application/services/index.js";
 import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
 import {MockHeaders, Viewer} from "../../../../sharedKernel/index.js";
-import {Login} from "../entities/index.js";
+import {Login} from "../../domain/entities/index.js";
 
 
 describe("LoginService", () => {
@@ -15,7 +16,7 @@ describe("LoginService", () => {
     })
 
     describe(".generate", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         test("Generates if it exists in DB and canSee returns true", async () => {
             await expect(loginService.generate(viewer, "1")).resolves.toBeInstanceOf(Login);
         })
@@ -25,7 +26,7 @@ describe("LoginService", () => {
     })
 
     describe(".createNewLogin", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         test("Any viewer can create a new login with an unused email and a valid password", async () => {
             const createdLogin = await loginService.createNewLogin(viewer, "newEmail@test.com", "passwordTest");
             expect(createdLogin).toBeInstanceOf(Login);
@@ -50,7 +51,7 @@ describe("LoginService", () => {
     })
 
     describe(".deleteLogin", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         test("Can delete login if it exists", async () => {
             await expect(loginService.deleteLogin(viewer, "1")).resolves.toBeTruthy();
         })
@@ -60,7 +61,7 @@ describe("LoginService", () => {
     })
 
     describe(".checkCanSee", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         const login = new Login("7", "mockup07@test.com", "pw07TestPassword", []);
         test("Returns true", () => {
             expect((loginService as any).checkCanSee(viewer, login)).toBeTruthy();
@@ -68,7 +69,7 @@ describe("LoginService", () => {
     })
 
     describe(".checkCanDelete", () => {
-        const viewer = new Viewer(new MockHeaders());
+        const viewer = new Viewer(new MockHeaders(undefined));
         const login = new Login("7", "mockup07@test.com", "pw07TestPassword", []);
         test("Returns true", () => {
             expect((loginService as any).checkCanDelete(viewer, login)).toBeTruthy();

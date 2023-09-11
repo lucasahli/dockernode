@@ -19,8 +19,6 @@ export class Viewer {
         this.headers = headers;
         this.jwtSecret = secret;
         this.user = null;
-        // const token = this.headers.authorization;
-        // const user = this.getUserFromToken(token.replace('Bearer ', ''), secret);
     }
 
     public getPayloadFromToken(): any | null {
@@ -42,7 +40,7 @@ export class Viewer {
     public hasValidToken(): boolean {
         const decodedPayload = this.getPayloadFromToken();
         if (typeof decodedPayload === 'object' && decodedPayload !== null) {
-            return decodedPayload.loginId != null;
+            return decodedPayload.loginId !== null;
         }
         return false;
     }

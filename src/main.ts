@@ -12,7 +12,16 @@ import { mergeResolvers } from "@graphql-tools/merge";
 import { loadFilesSync } from "@graphql-tools/load-files";
 import path from 'path';
 import url from 'url';
-import cors from 'cors'; // Import the cors middleware
+import cors from 'cors';
+import {RedisRepository} from "./infrastructure/persistence/redis/RedisRepository.js";
+import {
+    AccountService,
+    LoginService, ReminderService,
+    UserService
+} from "./core/components/reminderContext/application/services/index.js";
+import {PasswordManager} from "./core/components/reminderContext/domain/services/index.js";
+import {BcryptHasher} from "./infrastructure/security/BcryptHasher.js";
+import {Hasher} from "./core/portsAndInterfaces/interfaces/Hasher.js"; // Import the cors middleware
 
 
 // **************************************
@@ -76,28 +85,46 @@ const executableSchema = makeExecutableSchema({
 // **************************************
 //          GraphQl: Endpoint
 // **************************************
+const redisRepository = new RedisRepository(
+    `${process.env.REDIS_HOST}`,
+    `${process.env.REDIS_PORT}`
+);
+const hasher: Hasher = new BcryptHasher();
+const passwordManager = new PasswordManager(hasher);
+const userService = new UserService(redisRepository);
+const loginService = new LoginService(redisRepository, passwordManager);
+const accountService = new AccountService(loginService, userService, passwordManager);
+const reminderService = new ReminderService(redisRepository);
+
+export interface GraphQlContext {
+    viewer: Viewer;
+    userService: UserService;
+    passwordManager: PasswordManager;
+    loginService: LoginService;
+    accountService: AccountService;
+    reminderService: ReminderService;
+    // Add other properties as needed
+}
+
 const graphqlContext = {
-    ip: function (args: any, request: any) {
-        return request.ip;
-    }
+    userService: userService,
+    passwordManager: passwordManager,
+    loginService: loginService,
+    accountService: accountService,
+    reminderService: reminderService,
 };
 
 
 app.use('/graphql', createHandler({
     schema: executableSchema, 
-    context: async (req, args) => { 
-        // console.log("req.context.res.locals.myViewer:\n", req.context.res.locals.myViewer);
-        // console.log("args:\n", args);
-        return req.context.res.locals.myViewer; 
+    context: async (req, args) => {
+        return {
+            ...graphqlContext,
+            viewer: req.context.res.locals.myViewer,
+        };
     },
-}
-),);
-// app.use('/graphql', graphqlHTTP((req: Request, res: Response) => ({
-//         schema: executableSchema,
-//         context: res.locals.myViewer, //new Viewer(req.headers, process.env.SECRET as string).prepareViewer().then(() => console.log("Prepared Viewer...")),        // { req , secret: process.env.SECRET },
-//         graphiql: true,
-//     })),
-// );
+}),);
+
 app.listen(process.env.API_SERVER_PORT,
     () => console.log(`Running a GraphQL API server at http://127.0.0.1:${process.env.API_SERVER_PORT}/graphql`)
 );

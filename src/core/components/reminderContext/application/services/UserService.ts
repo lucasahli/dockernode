@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import {Viewer} from "../../../../sharedKernel/Viewer.js";
 import {UserRepository} from "../../../../portsAndInterfaces/interfaces/UserRepository.js";
-import {User} from "../entities/User.js";
-import {Login} from "../entities/Login.js";
+import {User} from "../../domain/entities/User.js";
+import {Login} from "../../domain/entities/Login.js";
 import {UserRole} from "../../../../sharedKernel/UserRole.js";
 
 export class UserService {

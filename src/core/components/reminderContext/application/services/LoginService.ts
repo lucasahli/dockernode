@@ -1,8 +1,8 @@
 import {LoginRepository} from "../../../../portsAndInterfaces/interfaces/LoginRepository.js"
-import {Login} from "../entities/Login.js";
+import {Login} from "../../domain/entities/Login.js";
 import 'dotenv/config';
 import {Viewer} from "../../../../sharedKernel/Viewer.js";
-import {PasswordManager} from "./PasswordManager.js";
+import {PasswordManager} from "../../domain/services/PasswordManager.js";
 import {UserRepository} from "../../../../portsAndInterfaces/interfaces/UserRepository.js";
 import {rejects} from "assert";
 

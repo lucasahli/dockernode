@@ -1,10 +1,11 @@
 import {LoginService} from "./LoginService.js";
 import {UserService} from "./UserService.js";
 import {Viewer} from "../../../../sharedKernel/Viewer.js";
-import {Login} from "../entities/Login.js";
-import {User} from "../entities/User.js";
-import {PasswordManager} from "./PasswordManager.js";
+import {Login} from "../../domain/entities/Login.js";
+import {User} from "../../domain/entities/User.js";
+import {PasswordManager} from "../../domain/services/PasswordManager.js";
 import jwt from 'jsonwebtoken';
+import {Token} from "../../domain/valueObjects/Token.js";
 
 
 export class AccountService {
@@ -16,7 +17,7 @@ export class AccountService {
         this.userService = userService;
     }
 
-    async signUp(viewer: Viewer, email: string, password: string): Promise<string | null> {
+    async signUp(viewer: Viewer, email: string, password: string): Promise<Token | null> {
         return this.loginService.createNewLogin(viewer, email, password)
             .then( (login) => {
                 if(login) {
@@ -46,17 +47,17 @@ export class AccountService {
 
     }
 
-    private createToken(login: Login, user: User, secret: string, expiresIn: string): string {
+    private createToken(login: Login, user: User, secret: string, expiresIn: string): Token {
         const { id, email } = login;
         const { role } = user;
-        return jwt.sign({loginId: id, loginEmail: email, userId: user.id, userRole: role}, secret, {expiresIn});
+        return new Token(jwt.sign({loginId: id, loginEmail: email, userId: user.id, userRole: role}, secret, {expiresIn}));
     }
 
     private checkCanSignUp(viewer: Viewer, email: string, password: string, potentialToken: any): boolean {
         return !!potentialToken;
     }
 
-    async signIn(viewer: Viewer, email: string, password: string): Promise<string | null> {
+    async signIn(viewer: Viewer, email: string, password: string): Promise<Token | null> {
         const login = await this.loginService.getLoginByEmail(email);
         if(login === null) return null;
         const canSignIn = await this.checkCanSignIn(viewer, email, password, login);

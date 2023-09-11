@@ -1,14 +1,16 @@
 import {jest} from "@jest/globals";
 import {describe, expect, test} from '@jest/globals';
 
-import {AccountService, LoginService, PasswordManager, UserService} from "./index.js";
+import {PasswordManager} from "../../domain/services/index.js";
+import {AccountService, LoginService, UserService} from "../../application/services/index.js";
 import {MockHeaders, UserRole, Viewer} from "../../../../sharedKernel/index.js";
-import {Login, User} from "../entities/index.js";
+import {Login, User} from "../../domain/entities/index.js";
 
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
 import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
 
 import jwt from 'jsonwebtoken';
+import {Token} from "../../domain/valueObjects/Token.js";
 
 describe("AccountService", () => {
     const mockRepo = new MockupRepository();
@@ -26,7 +28,7 @@ describe("AccountService", () => {
             expect.assertions(1);
             const viewer = new Viewer(new MockHeaders(undefined));
             const result = await accountService.signUp(viewer, "newEmail@test.com", "passwordTest");
-            return expect(result).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
+            return expect(result.token).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
         })
 
         test("can not create a login with an email that exists", async () => {
@@ -41,14 +43,14 @@ describe("AccountService", () => {
         test("creates a new token string when given a login with id and email and a user with a role", () => {
             const login = new Login("1", "mockup01@test.com", "superSecretPassword01", ["1"]);
             const user = new User("1", login.id, UserRole.freemium, "Firstname01", "Lastname01")
-            expect((accountService as any).createToken(login, user, process.env.SECRET!, '30m')).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/) // Match a JWT
+            expect((accountService as any).createToken(login, user, process.env.SECRET!, '30m').token).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/) // Match a JWT
         })
     })
 
     describe(".checkCanSignUp", () => {
         test("Can signUp if a token was created", () => {
             const unknownViewer = new Viewer(new MockHeaders(undefined));
-            const token = "someToken";
+            const token = new Token("someToken");
             expect((accountService as any).checkCanSignUp(unknownViewer, "unused.email@test.com", "somePassword", token)).toBeTruthy();
         })
 
@@ -64,7 +66,7 @@ describe("AccountService", () => {
             expect.assertions(1);
             const unknownViewer = new Viewer(new MockHeaders(undefined));
             const result = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
-            return expect(result).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
+            return expect(result.token).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
         })
 
         test("Can not sign in without correct password", async () => {
