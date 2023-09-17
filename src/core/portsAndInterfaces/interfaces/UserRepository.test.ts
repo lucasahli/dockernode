@@ -22,7 +22,7 @@ describe("RedisRepository as UserRepository", () => {
   describe(".addUser", () => {
     test("Returns User if it could be added", async () => {
       expect.assertions(1);
-      const existingLogin = await redisRepository.addLogin("usertest@mail.com", "passwordTest", []);
+      const existingLogin = await redisRepository.createLogin("usertest@mail.com", "passwordTest", []);
       const result = await redisRepository.addUser(
           existingLogin.id,
           UserRole.freemium,

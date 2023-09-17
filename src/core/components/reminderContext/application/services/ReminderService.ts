@@ -55,8 +55,8 @@ export class ReminderService {
       return null;
     }
     const possibleReminder = await this.reminderRepository
-      .addReminder(title, dateTimeToRemind, ownerId)
-      .then((reminder) => {
+      .addReminder(title, ownerId)
+        .then((reminder) => {
         return reminder;
       })
       .catch((error) => {

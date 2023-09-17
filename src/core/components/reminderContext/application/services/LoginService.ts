@@ -30,7 +30,7 @@ export class LoginService {
                     if (existingLogin) {
                         return reject("Login with that email already exists!!!");
                     } else {
-                        return this.loginRepository.addLogin(email, await this.passwordManager.hashPassword(password), [])
+                        return this.loginRepository.createLogin(email, await this.passwordManager.hashPassword(password), [])
                             .then(addedLogin => {
                                 return resolve(addedLogin);
                             })
@@ -40,7 +40,7 @@ export class LoginService {
                     }
                 })
                 .catch(async () => {
-                    return this.loginRepository.addLogin(email, await this.passwordManager.hashPassword(password), [])
+                    return this.loginRepository.createLogin(email, await this.passwordManager.hashPassword(password), [])
                         .then(addedLogin => {
                             return resolve(addedLogin);
                         })

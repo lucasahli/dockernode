@@ -36,7 +36,7 @@ describe("ReminderService", () => {
 
         const viewerUnknown = new Viewer(new MockHeaders(undefined),);
 
-        const reminder = new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1");
+        const reminder = new Reminder("1", "title01", "1", ["1"], false, new Date("2011-10-01T14:48:00.000Z"));
         test("Returns true if viewer has a valid token", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token), process.env.SECRET);
@@ -51,7 +51,7 @@ describe("ReminderService", () => {
 
         const viewerUnknown = new Viewer(new MockHeaders(undefined),);
 
-        const reminder = new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1");
+        const reminder = new Reminder("1", "title01", "1", ["1"], false, new Date("2011-10-01T14:48:00.000Z"));
         test("Returns true if viewer is logged in ", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token.token), process.env.SECRET);
@@ -66,7 +66,7 @@ describe("ReminderService", () => {
 
         const viewerUnknown = new Viewer(new MockHeaders(undefined),);
 
-        const reminder = new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1");
+        const reminder = new Reminder("1", "title01", "1", ["1"], false, new Date("2011-10-01T14:48:00.000Z"));
         test("Returns the created reminder if it could be created", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token.token), process.env.SECRET);
@@ -80,7 +80,7 @@ describe("ReminderService", () => {
 
     describe(".checkCanDelete", () => {
         const viewerUnknown = new Viewer(new MockHeaders(undefined),"");
-        const reminder = new Reminder("3", "title03", new Date("2011-10-01T14:48:00.000Z"), "1");
+        const reminder = new Reminder("3", "title03", "1", ["1"], false, new Date("2011-10-01T14:48:00.000Z"));
         test("Returns true if viewer owns the reminder", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token.token), process.env.SECRET);
@@ -96,7 +96,7 @@ describe("ReminderService", () => {
 
         const viewerUnknown = new Viewer(new MockHeaders(undefined),);
 
-        const reminder = new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1");
+        const reminder = new Reminder("1", "title01", "1", ["1"], false, new Date("2011-10-01T14:48:00.000Z"));
         test("Returns true if it could be deleted", async () => {
             const token = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + token.token), process.env.SECRET);
