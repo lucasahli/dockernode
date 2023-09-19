@@ -9,4 +9,6 @@ export interface ReminderRepository {
 
   getReminderIdsByOwnerId(ownerId: string): Promise<string[]>;
   getAllReminderIds(): Promise<string[] | null>;
+
+  updateReminder(reminder: Reminder): Promise<boolean>;
 }

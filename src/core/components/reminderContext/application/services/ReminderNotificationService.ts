@@ -20,7 +20,8 @@ export class ReminderNotificationService {
         for (const reminder of allReminders) {
             if (reminder instanceof Reminder){
                 console.log("Checking: ", reminder.title);
-                if(reminder.checkShouldRemind(currentDateTime, undefined)){
+
+                if(!reminder.isCompleted && reminder.checkShouldRemind(currentDateTime, undefined)){
                     // Trigger the reminder
                     console.log("should send notification for: ", reminder.title);
                     await this.sendTimeBasedPushNotification(reminder);
@@ -41,7 +42,7 @@ export class ReminderNotificationService {
                 // TODO: Implement Device Tokens for Notifications
                 // this.pushNotificationService.sendNotification()
                 reminder.complete();
-                this.reminderService.updateReminder(Viewer.Root(), reminder);
+                const success = await this.reminderService.updateReminder(Viewer.Root(), reminder);
             }
             else {
                 console.log("user not found with Id: ", userId);

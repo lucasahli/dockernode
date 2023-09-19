@@ -24,8 +24,8 @@ export class Viewer {
         this.isRootViewer = isRootViewer ?? false;
     }
 
-    static Root() {
-        return new Viewer()
+    static Root(): Viewer {
+        return new Viewer(undefined, undefined, true);
     }
 
     public isRootUser(): boolean {

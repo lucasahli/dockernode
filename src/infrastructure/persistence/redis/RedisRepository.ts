@@ -345,6 +345,7 @@ export class RedisRepository
     else{
       console.error("Reminder can not be added to Redis: Does not have dateTimeToRemind || locationWithRadius");
     }
+
     // Add owner association
     await this.redis.sAdd(
       "user:" + ownerId + "reminders",
@@ -382,6 +383,48 @@ export class RedisRepository
     return this.redis.sMembers(
         "user:" + ownerId + "reminders"
     );
+  }
+
+  async updateReminder(reminder: Reminder): Promise<boolean> {
+    const oldReminder = await this.getReminderById(reminder.id);
+
+    if(!oldReminder){
+      return false;
+    }
+    if(oldReminder.ownerId !== reminder.ownerId){
+      // Update owner association
+      await this.redis.sRem(
+          "user:" + oldReminder.ownerId + "reminders",
+          reminder.id
+      );
+    }
+
+    if(JSON.stringify(oldReminder.idsOfUsersToRemind) !== JSON.stringify(reminder.idsOfUsersToRemind)){
+      // Update users to remind association
+      for (const userToRemindId of oldReminder.idsOfUsersToRemind){
+        await this.redis.sRem(
+            "user:" + userToRemindId + "reminderSubscriptions",
+            reminder.id
+        );
+      }
+      for (const userToRemindId of reminder.idsOfUsersToRemind){
+        await this.redis.sAdd(
+            "user:" + userToRemindId + "reminderSubscriptions",
+            reminder.id
+        );
+      }
+    }
+
+
+    const args = ['HMSET', `reminder:${reminder.id}`, ...Object.entries(reminder.toJSON()).filter(([key]) => key !== 'id').flat()];
+
+    return this.redis.sendCommand(args)
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
   }
 
   async deleteReminder(id: string): Promise<boolean> {

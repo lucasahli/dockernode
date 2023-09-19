@@ -134,4 +134,16 @@ export class ReminderService {
     return Promise.all(reminderIds.map((id) => this.generate(viewer, id)));
   }
 
+  checkCanUpdate(viewer: Viewer, reminder: Reminder): boolean {
+    if(viewer.isRootUser()){
+      return true;
+    }
+    return viewer.isLoggedIn() && reminder.ownerId === viewer.userId;
+  }
+
+  async updateReminder(viewer: Viewer, reminder: Reminder): Promise<boolean> {
+    const canUpdate = this.checkCanUpdate(viewer, reminder);
+    return canUpdate ? this.reminderRepository.updateReminder(reminder) : false;
+  }
+
 }
