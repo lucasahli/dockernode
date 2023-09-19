@@ -1,7 +1,6 @@
-import { Viewer } from "../../../../sharedKernel/Viewer.js";
-import { ReminderRepository } from "../../../../portsAndInterfaces/interfaces/ReminderRepository.js";
-import { Reminder } from "../../domain/entities/Reminder.js";
-import {User} from "../../domain/entities/index.js";
+import {Viewer} from "../../../../sharedKernel/Viewer.js";
+import {ReminderRepository} from "../../../../portsAndInterfaces/interfaces/ReminderRepository.js";
+import {Reminder} from "../../domain/entities/Reminder.js";
 
 
 //
@@ -55,7 +54,7 @@ export class ReminderService {
       return null;
     }
     const possibleReminder = await this.reminderRepository
-      .addReminder(title, ownerId)
+      .addReminder(title, ownerId, [ownerId], false, dateTimeToRemind)
         .then((reminder) => {
         return reminder;
       })
@@ -66,24 +65,17 @@ export class ReminderService {
         );
         return null;
       });
-    let canCreateReminder = this.checkCanCreate(
-      viewer,
-      title,
-        dateTimeToRemind,
-      possibleReminder
-    );
+    let canCreateReminder = this.checkCanCreate(viewer, possibleReminder);
     if (!canCreateReminder) return null;
     return possibleReminder;
   }
 
-  checkCanCreate(
-    viewer: Viewer,
-    title: string,
-    dateTimeToRemind: Date,
-    potentialReminder: any
-  ): boolean {
+  checkCanCreate(viewer: Viewer, potentialReminder: Reminder | null): boolean {
     console.log("CheckCanCreate: ", potentialReminder);
-    return viewer.isLoggedIn();
+    if (potentialReminder && potentialReminder.dateTimeToRemind){
+      return viewer.isLoggedIn() && potentialReminder.dateTimeToRemind?.getTime() > Date.now();
+    }
+    return false;
   }
 
   async deleteReminder(viewer: Viewer, id: string): Promise<boolean> {
@@ -110,14 +102,11 @@ export class ReminderService {
       const isLoggedIn = viewer.isLoggedIn();
       if(isLoggedIn){
         const userId: string = viewer.userId ?? "";
-        const ownerId: string = reminder.ownerId;
-        const viewerOwnsThisReminder: boolean = (userId === ownerId) ? true : false;
-        return viewerOwnsThisReminder;
+        return (userId === reminder.ownerId);
       }
       else {
         return false;
       }
-      return false;
     }
     catch (e) {
       console.log("Error", e);

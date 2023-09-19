@@ -16,12 +16,18 @@ import cors from 'cors';
 import {RedisRepository} from "./infrastructure/persistence/redis/RedisRepository.js";
 import {
     AccountService,
-    LoginService, ReminderService,
+    LoginService, ReminderNotificationService, ReminderService,
     UserService
 } from "./core/components/reminderContext/application/services/index.js";
 import {PasswordManager} from "./core/components/reminderContext/domain/services/index.js";
 import {BcryptHasher} from "./infrastructure/security/BcryptHasher.js";
-import {Hasher} from "./core/portsAndInterfaces/interfaces/Hasher.js"; // Import the cors middleware
+import {Hasher} from "./core/portsAndInterfaces/interfaces/Hasher.js";
+import {MyJobScheduler} from "./infrastructure/scheduledJobs/MyJobScheduler.js";
+import {MyPushNotificationService} from "./infrastructure/notifications/MyPushNotificationService.js";
+import {InitializePeriodicReminderChecksUseCase} from "./core/portsAndInterfaces/ports/index.js";
+import {
+    InitializePeriodicReminderChecksUseCaseHandler
+} from "./core/components/reminderContext/application/useCases/index.js"; // Import the cors middleware
 
 
 // **************************************
@@ -85,16 +91,34 @@ const executableSchema = makeExecutableSchema({
 // **************************************
 //          GraphQl: Endpoint
 // **************************************
+
+// Infrastructure:
 const redisRepository = new RedisRepository(
     `${process.env.REDIS_HOST}`,
     `${process.env.REDIS_PORT}`
 );
 const hasher: Hasher = new BcryptHasher();
+const jobScheduler = new MyJobScheduler();
+const pushNotificationService = new MyPushNotificationService();
+
+// Core:
 const passwordManager = new PasswordManager(hasher);
 const userService = new UserService(redisRepository);
 const loginService = new LoginService(redisRepository, passwordManager);
 const accountService = new AccountService(loginService, userService, passwordManager);
 const reminderService = new ReminderService(redisRepository);
+const reminderNotificationService = new ReminderNotificationService(reminderService, userService, pushNotificationService)
+
+// Presentation
+const initializePeriodicReminderChecksUseCase: InitializePeriodicReminderChecksUseCase = new InitializePeriodicReminderChecksUseCaseHandler(jobScheduler, reminderNotificationService)
+console.log("Current Date and Time: ", new Date().toISOString());
+initializePeriodicReminderChecksUseCase.execute()
+    .then(() => {
+        console.log('Started periodic Reminder Checks...');
+    })
+    .catch(() => {
+        console.log('Could not start periodic Reminder Checks!!!');
+    });
 
 export interface GraphQlContext {
     viewer: Viewer;

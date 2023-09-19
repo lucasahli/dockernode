@@ -1,13 +1,15 @@
 import {IncomingHttpHeaders} from "http";
 import {User} from "../components/reminderContext/domain/entities/User.js";
 import {UserRole} from "./UserRole.js";
+import {Token} from "../components/reminderContext/domain/valueObjects/Token.js";
 
 import jwt from "jsonwebtoken";
 
 export class Viewer {
+    private isRootViewer: boolean = false;
     user: User | null;
     jwtSecret: string;
-    headers: IncomingHttpHeaders;
+    headers: IncomingHttpHeaders | undefined;
     cookies: any;
 
     loginId: string | undefined;
@@ -15,13 +17,25 @@ export class Viewer {
     userId: string | undefined;
     userRole: UserRole | undefined;
 
-    constructor(headers: IncomingHttpHeaders, secret: string = 'SomeWrongSecret') {
-        this.headers = headers;
-        this.jwtSecret = secret;
+    constructor(headers?: IncomingHttpHeaders, secret?: string, isRootViewer?: boolean) {
+        this.headers = headers ?? undefined;
+        this.jwtSecret = secret ?? "SomeWrongSecret";
         this.user = null;
+        this.isRootViewer = isRootViewer ?? false;
+    }
+
+    static Root() {
+        return new Viewer()
+    }
+
+    public isRootUser(): boolean {
+        return this.isRootViewer;
     }
 
     public getPayloadFromToken(): any | null {
+        if (!this.headers){
+            return null;
+        }
         const bearerToken = this.headers.authorization;
         if (bearerToken !== undefined) {
             const isBearer = this.isBearerToken(bearerToken);
@@ -38,6 +52,9 @@ export class Viewer {
     }
 
     public hasValidToken(): boolean {
+        if(this.isRootViewer){
+            return true;
+        }
         const decodedPayload = this.getPayloadFromToken();
         if (typeof decodedPayload === 'object' && decodedPayload !== null) {
             return decodedPayload.loginId !== null;
@@ -46,6 +63,9 @@ export class Viewer {
     }
 
     async prepareViewer() {
+        if(this.isRootViewer){
+            return;
+        }
         const payloadFromToken = this.getPayloadFromToken();
         if (payloadFromToken) {
             console.log("PAYLOAD: ", payloadFromToken);

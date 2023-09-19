@@ -1,32 +1,51 @@
-import {ReminderService} from "./index.js";
+import {ReminderService, UserService} from "./index.js";
 import {LocationWithRadius, Reminder} from "../../domain/entities/index.js";
+import {PushNotificationService} from "../../../../portsAndInterfaces/interfaces/index.js";
+import {Viewer} from "../../../../sharedKernel/index.js";
 
 
-class ReminderNotificationService {
-    private reminderService: ReminderService;
+export class ReminderNotificationService {
 
-    constructor(reminderService: ReminderService) {
-        this.reminderService = reminderService;
-    }
+    constructor(
+        private reminderService: ReminderService,
+        private userService: UserService,
+        private pushNotificationService: PushNotificationService
+    ) {}
 
     // Check reminders and send push notifications if they should be triggered
-    async checkRemindersForNotifications(currentDateTime: Date, userLocation: LocationWithRadius | null) {
+    async checkDateTimeBasedRemindersForNotifications(currentDateTime: Date) {
         // TODO: Improve --> Do not get all reminders (better performance)
-        const allReminders = await this.reminderService.getAllReminders(); // TODO: Add Viewer or change something
+        const allReminders = await this.reminderService.getAllReminders(Viewer.Root());
 
         for (const reminder of allReminders) {
             if (reminder instanceof Reminder){
-                if(reminder.checkShouldRemind(currentDateTime, userLocation)){
+                console.log("Checking: ", reminder.title);
+                if(reminder.checkShouldRemind(currentDateTime, undefined)){
                     // Trigger the reminder
-                    this.sendPushNotification(reminder);
+                    console.log("should send notification for: ", reminder.title);
+                    await this.sendTimeBasedPushNotification(reminder);
                 }
             }
         }
     }
 
     // Simulate sending a push notification (replace with actual implementation)
-    private sendPushNotification(reminder: Reminder): void {
-        console.log(`Push notification sent for reminder: ${reminder.title}`);
-        // Implement the logic to send push notifications here
+    private async sendTimeBasedPushNotification(reminder: Reminder): Promise<void> {
+        console.log("Getting Users to remind: ", reminder.idsOfUsersToRemind);
+        for (const userId of reminder.idsOfUsersToRemind) {
+            console.log("User to remind: ", userId);
+            const user = await this.userService.generate(Viewer.Root(), userId);
+            if (user){
+                console.log(`Push notification sent for reminder: ${reminder.title}`);
+                console.log(`Push notification sent to user: ${user.id}`);
+                // TODO: Implement Device Tokens for Notifications
+                // this.pushNotificationService.sendNotification()
+                reminder.complete();
+                this.reminderService.updateReminder(Viewer.Root(), reminder);
+            }
+            else {
+                console.log("user not found with Id: ", userId);
+            }
+        }
     }
 }

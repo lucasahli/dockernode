@@ -69,7 +69,7 @@ export class Reminder {
     }
 
     // Check if a reminder should be triggered based on the current date/time or location
-    checkShouldRemind(currentDateTime: Date, userLocation: LocationWithRadius | null): boolean {
+    checkShouldRemind(currentDateTime?: Date, userLocation?: LocationWithRadius): boolean {
         if (this.locationWithRadius) {
             // If a location is specified, check proximity
             if (!userLocation) {
@@ -78,8 +78,11 @@ export class Reminder {
             // Trigger the reminder if the user is close enough
             return userLocation.overlaps(this.locationWithRadius);
         } else if (this.dateTimeToRemind){
-            // Trigger based on date/time if no location is specified
-            return currentDateTime >= this.dateTimeToRemind;
+            if (currentDateTime){
+                // Trigger based on date/time if no location is specified
+                return currentDateTime >= this.dateTimeToRemind;
+            }
+            return false; // Time-based reminder, but current time is not available
         }
         return false;
     }
