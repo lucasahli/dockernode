@@ -20,17 +20,14 @@ describe("RedisRepository as ReminderRepository", () => {
 
     describe(".addReminder", () => {
         test("Returns added Reminder if it could be added", async () => {
-            return expect(redisRepository.addReminder(
-                "Reminder Title",
-                new Date(),
-                "1",
-            )).resolves.toBeInstanceOf(Reminder);
+            return expect(redisRepository.addReminder("Reminder Title", "1", ["1"], false, new Date(Date.now() + 15 * 60 * 1000), undefined)).resolves.toBeInstanceOf(Reminder);
         });
     });
 
     describe(".getReminderById", () => {
         test("Returns Reminder if it exists", async () => {
-            return expect(redisRepository.getReminderById("1")).resolves.toBeInstanceOf(Reminder);
+            const reminderToGet = await redisRepository.addReminder("Reminder Title", "8", ["8"], false, new Date(Date.now() + 15 * 60 * 1000), undefined)
+            return expect(redisRepository.getReminderById(reminderToGet.id)).resolves.toBeInstanceOf(Reminder);
         });
 
         test("Returns null if it does not exist", async () => {
@@ -40,7 +37,7 @@ describe("RedisRepository as ReminderRepository", () => {
 
     describe(".deleteReminder", () => {
         test("Resolves true if successful", async () => {
-            const addedReminder = await redisRepository.addReminder("Reminder To Delete", new Date(), "1");
+            const addedReminder = await redisRepository.addReminder("Reminder To Delete", "1", ["1"], false, new Date(Date.now() + 15 * 60 * 1000), undefined);
             //TODO fix this test
             console.log("Added Reminder Id: ", addedReminder.id);
             return expect(redisRepository.deleteReminder(addedReminder.id)).resolves.toBeTruthy();
@@ -53,10 +50,10 @@ describe("RedisRepository as ReminderRepository", () => {
 
     describe(".getRemindersByOwnerId", () => {
         test("Returns Reminders array if user owns some", async () => {
-            await redisRepository.addReminder("ReminderTitle01", new Date(), "3");
-            await redisRepository.addReminder("ReminderTitle02", new Date(), "3");
-            await redisRepository.addReminder("ReminderTitle03", new Date(), "3");
-            await redisRepository.addReminder("ReminderTitle04", new Date(), "3");
+            await redisRepository.addReminder("ReminderTitle01", "3", ["3"], false, new Date(Date.now() + 15 * 60 * 1000), undefined);
+            await redisRepository.addReminder("ReminderTitle02", "3", ["3"], false, new Date(Date.now() + 15 * 60 * 1000), undefined);
+            await redisRepository.addReminder("ReminderTitle03", "3", ["3"], false, new Date(Date.now() + 15 * 60 * 1000), undefined);
+            await redisRepository.addReminder("ReminderTitle04", "3", ["3"], false, new Date(Date.now() + 15 * 60 * 1000), undefined);
             return expect(redisRepository.getReminderIdsByOwnerId("3")).resolves.toHaveLength(4);
         });
 

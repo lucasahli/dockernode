@@ -10,6 +10,7 @@ import {BcryptHasher} from "../../security/BcryptHasher.js";
 import login from "../../../presentation/graphQL/resolvers/login.js";
 import {Error} from "sequelize";
 import reminder from "../../../presentation/graphQL/resolvers/reminder.js";
+import {LocationWithRadius} from "../../../core/components/reminderContext/domain/entities/index.js";
 
 export class MockupRepository implements LoginRepository, UserRepository, ReminderRepository {
     private passwordManager = new PasswordManager(new BcryptHasher());
@@ -21,20 +22,20 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
     ];
 
     private reminders: Reminder[] = [
-        new Reminder("1", "title01", new Date("2011-10-01T14:48:00.000Z"), "1"),
-        new Reminder("2", "title02", new Date("2011-10-02T14:48:00.000Z"), "1"),
-        new Reminder("3", "title03", new Date("2011-10-03T14:48:00.000Z"), "1"),
-        new Reminder("4", "title04", new Date("2011-10-04T14:48:00.000Z"), "2"),
-        new Reminder("5", "title05", new Date("2011-10-05T14:48:00.000Z"), "3"),
-        new Reminder("6", "title06", new Date("2011-10-06T14:48:00.000Z"), "3"),
-        new Reminder("7", "title07", new Date("2011-10-07T14:48:00.000Z"), "3"),
-        new Reminder("8", "title08", new Date("2011-10-08T14:48:00.000Z"), "3"),
+        new Reminder("1", "title01", "1", ["1"], false, new Date("2011-10-01T14:48:00.000Z")),
+        new Reminder("2", "title02", "1", ["1"], false, new Date("2011-10-02T14:48:00.000Z")),
+        new Reminder("3", "title03", "1", ["1"], false, new Date("2011-10-03T14:48:00.000Z")),
+        new Reminder("4", "title04", "2", ["2"], false, new Date("2011-10-04T14:48:00.000Z")),
+        new Reminder("5", "title05", "3", ["3"], false, new Date("2011-10-05T14:48:00.000Z")),
+        new Reminder("6", "title06", "3", ["3"], false, new Date("2011-10-06T14:48:00.000Z")),
+        new Reminder("7", "title07", "3", ["3"], false, new Date("2011-10-07T14:48:00.000Z")),
+        new Reminder("8", "title08", "3", ["3"], false, new Date("2011-10-08T14:48:00.000Z")),
     ];
 
     private users: User[] = [
-        new User("1", "1", UserRole.freemium, "Firstname01", "Lastname01"),
-        new User("2", "2", UserRole.freemium, "Firstname02", "Lastname02"),
-        new User("3", "3", UserRole.freemium, "Firstname03", "Lastname03"),
+        new User("1", "1", UserRole.freemium, "Firstname01" + " " + "Lastname01"),
+        new User("2", "2", UserRole.freemium, "Firstname02" + " " + "Lastname02"),
+        new User("3", "3", UserRole.freemium, "Firstname03" + " " + "Lastname03"),
     ];
 
     async printPWS() {
@@ -43,16 +44,28 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         }
     }
 
-    addLogin(email: string, password: string, associatedUserIds: string[]): Promise<Login> {
+    createLogin(email: string, password: string, associatedUserIds: string[]): Promise<Login> {
         return Promise.resolve(new Login((this.logins.length + 1).toString(), email, password, associatedUserIds));
     }
 
-    addReminder(title: string, date: Date, ownerId: string): Promise<Reminder> {
-        return Promise.resolve(new Reminder((this.reminders.length + 1).toString(), title, date, ownerId));
+    addReminder(title: string, ownerId: string, idsOfUsersToRemind: string[] = [ownerId], isCompleted: boolean = false, dateTimeToRemind?: Date, locationWithRadius?: LocationWithRadius): Promise<Reminder> {
+        return Promise.resolve(new Reminder((this.reminders.length + 1).toString(), title, ownerId, [ownerId], false, dateTimeToRemind));
     }
 
-    addUser(loginId: string, role: UserRole, firstname: string, lastname: string): Promise<User> {
-        return Promise.resolve(new User((this.users.length + 1).toString(), loginId, role, firstname, lastname));
+    addUser(loginId: string, role: UserRole, fullName: string): Promise<User> {
+        return Promise.resolve(new User((this.users.length + 1).toString(), loginId, role, fullName));
+    }
+
+    updateReminder(reminder: Reminder): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            const index = this.reminders.findIndex(oneReminder => oneReminder.id === reminder.id);
+            if (index !== -1) {
+                this.reminders[index] = reminder; // Update the existing reminder in place
+                resolve(true); // Resolve the promise indicating a successful update
+            } else {
+                reject('Reminder not found'); // Reject the promise if the reminder is not found
+            }
+        });
     }
 
     deleteLogin(id: string): Promise<boolean> {

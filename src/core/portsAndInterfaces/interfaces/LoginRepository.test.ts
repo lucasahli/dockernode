@@ -19,7 +19,7 @@ describe("RedisRepository as LoginRepository", () => {
   describe(".addLogin", () => {
     test("Returns Login if it could be added", async () => {
       expect.assertions(1);
-      const result = await redisRepository.addLogin(
+      const result = await redisRepository.createLogin(
         "test@mail.com",
         "passwordTest",
         []
@@ -32,7 +32,7 @@ describe("RedisRepository as LoginRepository", () => {
       // Make sure to add expect.assertions to verify that a certain number of assertions are called.
       // Otherwise, a fulfilled promise would not fail the test.
       return expect(
-        redisRepository.addLogin("test@mail.com", "passwordTest", [])
+        redisRepository.createLogin("test@mail.com", "passwordTest", [])
       ).rejects.toMatch("Login with that email already exists!");
     });
   });

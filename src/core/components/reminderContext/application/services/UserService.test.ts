@@ -25,21 +25,18 @@ describe("UserService", () => {
     describe(".createFreemiumUser", () => {
         test("Creates a freemium user when given a login, firstname and lastname --> given that the login is not associated with a user", async () => {
             const login = new Login("1", "mockup01@test.com", "password01Safe", []);
-            const firstname = "firstnameTest";
-            const lastname = "lastnameTest";
-            await expect(userService.createFreemiumUser(login, firstname, lastname)).resolves.toBeInstanceOf(User);
+            const fullName = "fullName Test";
+            await expect(userService.createFreemiumUser(login, fullName)).resolves.toBeInstanceOf(User);
         })
         test("Creates a freemium user when given a login, firstname and lastname --> given that the login is not associated with a freemium user", async () => {
             const login = new Login("1", "mockup01@test.com", "password01Safe", ["7"]);
-            const firstname = "firstnameTest";
-            const lastname = "lastnameTest";
-            await expect(userService.createFreemiumUser(login, firstname, lastname)).resolves.toBeInstanceOf(User);
+            const fullName = "fullName Test";
+            await expect(userService.createFreemiumUser(login, fullName)).resolves.toBeInstanceOf(User);
         })
         test("Rejects when given a login, firstname and lastname --> given that the login is already associated with a freemium user", async () => {
             const login = new Login("1", "mockup01@test.com", "password01Safe", ["1"]);
-            const firstname = "firstnameTest";
-            const lastname = "lastnameTest";
-            await expect(userService.createFreemiumUser(login, firstname, lastname)).rejects.toEqual("This login is already associated with a user with that role!!!");
+            const fullName = "fullName Test";
+            await expect(userService.createFreemiumUser(login, fullName)).rejects.toEqual("This login is already associated with a user with that role!!!");
         })
     })
 
@@ -74,7 +71,7 @@ describe("UserService", () => {
     describe(".checkCanSee", () => {
         const viewer = new Viewer(new MockHeaders(undefined));
         const login = new Login("3", "mockup03@test.com", "$2b$08$v0J1QjRiYvrmwoDTuKXK0.f06pFwmXXMM1D5cufuUROSAPzsigmH6", ["3"]);
-        const user = new User("3", login.id, UserRole.freemium, "Firstname01", "Lastname01");
+        const user = new User("3", login.id, UserRole.freemium, "fullName01");
         test("Returns true", () => {
             expect((userService as any).checkCanSee(viewer, user)).toBeTruthy();
         })
@@ -83,7 +80,7 @@ describe("UserService", () => {
     describe(".checkCanDelete", () => {
         const viewer = new Viewer(new MockHeaders(undefined));
         const login = new Login("3", "mockup03@test.com", "$2b$08$v0J1QjRiYvrmwoDTuKXK0.f06pFwmXXMM1D5cufuUROSAPzsigmH6", ["3"]);
-        const user = new User("3", login.id, UserRole.freemium, "Firstname01", "Lastname01");
+        const user = new User("3", login.id, UserRole.freemium, "fullName01");
         test("Returns true", () => {
             expect((userService as any).checkCanDelete(viewer, user)).toBeTruthy();
         })

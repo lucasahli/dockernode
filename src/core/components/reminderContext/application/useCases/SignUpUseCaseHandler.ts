@@ -7,7 +7,7 @@ export class SignUpUseCaseHandler implements SignUpUseCase {
     constructor(private accountService: AccountService) {
     }
 
-    execute(viewer: Viewer, email: string, password: string): Promise<Token | null> {
-        return this.accountService.signUp(viewer, email, password);
+    execute(viewer: Viewer, email: string, password: string, fullName: string): Promise<Token | null> {
+        return this.accountService.signUp(viewer, email, password, fullName);
     }
 }

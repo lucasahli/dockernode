@@ -20,9 +20,9 @@ export class UserService {
         return canSee ? user : null;
     }
 
-    async createFreemiumUser(login: Login, firstname: string, lastname: string): Promise<User> {
+    async createFreemiumUser(login: Login, fullName: string): Promise<User> {
         if (await this.checkCanCreateFreemiumUser(login)) {
-            return this.userRepository.addUser(login.id, UserRole.freemium, firstname, lastname);
+            return this.userRepository.addUser(login.id, UserRole.freemium, fullName);
         }
         return Promise.reject("This login is already associated with a user with that role!!!");
     }

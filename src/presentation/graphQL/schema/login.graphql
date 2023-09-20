@@ -10,7 +10,7 @@ type Login {
 }
 
 extend type Mutation {
-  signUp(email: String!, password: String!): Token
+  signUp(email: String!, password: String!, fullName: String!): Token
   signIn(email: String!, password: String!): Token
 #  TODO: deleteLogin(id: ID!): Boolean!
 }

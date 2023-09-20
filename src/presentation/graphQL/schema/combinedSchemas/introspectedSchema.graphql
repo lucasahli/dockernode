@@ -13,7 +13,7 @@ type Query {
 
 type Mutation {
   _empty: String
-  signUp(email: String!, password: String!): Token
+  signUp(email: String!, password: String!, fullName: String!): Token
   signIn(email: String!, password: String!): Token
   createReminder(title: String!, date: Date!): Reminder
   deleteReminder(id: ID!): Boolean!
@@ -43,8 +43,7 @@ type Reminder {
 
 type User {
   id: ID!
-  firstname: String
-  lastname: String
+  fullName: String
   role: String!
   reminders: [Reminder]
   login: Login!

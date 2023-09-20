@@ -6,15 +6,12 @@ export class User {
     id: string;
     associatedLoginId: string;
     role: UserRole;
-    firstname: string;
-    lastname: string;
-    // reminders: [Reminder]
+    fullName: string;
 
-    constructor(id: string, associatedLoginId: string, role: UserRole, firstname: string, lastname: string) {
+    constructor(id: string, associatedLoginId: string, role: UserRole, fullName: string) {
         this.id = id;
         this.associatedLoginId = associatedLoginId;
         this.role = role;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.fullName = fullName;
     }
 }
