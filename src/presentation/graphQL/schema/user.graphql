@@ -1,7 +1,6 @@
 type User {
   id: ID!
-  firstname: String
-  lastname: String
+  fullName: String
   role: String!
   reminders: [Reminder]
   login: Login!

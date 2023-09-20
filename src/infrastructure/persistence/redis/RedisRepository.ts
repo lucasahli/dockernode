@@ -47,15 +47,14 @@ export class RedisRepository
         const userData = await this.redis.hGetAll("user:" + id);
         // TODO: simplify user constructio via JSON
         if (id !== undefined
-            && userData.firstname !== undefined
-            && userData.lastname !== undefined
+            && userData.fullName !== undefined
             && userData.role !== undefined) {
           return new User(
                   id,
                   userData.associatedLoginId,
                   userData.role as UserRole,
-                  userData.firstname,
-                  userData.lastname);
+                  userData.fullName
+          );
         } else {
           console.log("No user data found in redis for id: ", id);
           return null;
@@ -241,8 +240,7 @@ export class RedisRepository
   async addUser(
       associatedLoginId: string,
       role: UserRole,
-      firstname: string,
-      lastname: string
+      fullName: string
   ): Promise<User> {
     const userIdsAssociatedWithSameLogin = await this.redis.sMembers("login:" + associatedLoginId + "associated_user_ids")
     for(const existingUserId of userIdsAssociatedWithSameLogin){
@@ -259,8 +257,7 @@ export class RedisRepository
       ...Object.entries({
         associatedLoginId: associatedLoginId,
         role: role,
-        firstname: firstname,
-        lastname: lastname,
+        fullName: fullName,
       }).flat(),
     ]);
     const numberOfElementsAddedToSet = await this.redis.sAdd(
@@ -271,7 +268,7 @@ export class RedisRepository
 
     if(numberOfNewAddedFields > 0 && numberOfElementsAddedToSet > 0){
       return Promise.resolve(
-          new User(userId.toString(), associatedLoginId, role, firstname, lastname)
+          new User(userId.toString(), associatedLoginId, role, fullName)
       );
     }
     else {

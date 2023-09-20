@@ -33,9 +33,9 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
     ];
 
     private users: User[] = [
-        new User("1", "1", UserRole.freemium, "Firstname01", "Lastname01"),
-        new User("2", "2", UserRole.freemium, "Firstname02", "Lastname02"),
-        new User("3", "3", UserRole.freemium, "Firstname03", "Lastname03"),
+        new User("1", "1", UserRole.freemium, "Firstname01" + " " + "Lastname01"),
+        new User("2", "2", UserRole.freemium, "Firstname02" + " " + "Lastname02"),
+        new User("3", "3", UserRole.freemium, "Firstname03" + " " + "Lastname03"),
     ];
 
     async printPWS() {
@@ -52,8 +52,20 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         return Promise.resolve(new Reminder((this.reminders.length + 1).toString(), title, ownerId, [ownerId], false, dateTimeToRemind));
     }
 
-    addUser(loginId: string, role: UserRole, firstname: string, lastname: string): Promise<User> {
-        return Promise.resolve(new User((this.users.length + 1).toString(), loginId, role, firstname, lastname));
+    addUser(loginId: string, role: UserRole, fullName: string): Promise<User> {
+        return Promise.resolve(new User((this.users.length + 1).toString(), loginId, role, fullName));
+    }
+
+    updateReminder(reminder: Reminder): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            const index = this.reminders.findIndex(oneReminder => oneReminder.id === reminder.id);
+            if (index !== -1) {
+                this.reminders[index] = reminder; // Update the existing reminder in place
+                resolve(true); // Resolve the promise indicating a successful update
+            } else {
+                reject('Reminder not found'); // Reject the promise if the reminder is not found
+            }
+        });
     }
 
     deleteLogin(id: string): Promise<boolean> {

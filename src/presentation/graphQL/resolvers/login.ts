@@ -22,7 +22,7 @@ export default {
   Mutation: {
     signUp: async (parent: any, args: any, context: GraphQlContext) => {
       const signUpUseCase: SignUpUseCase = new SignUpUseCaseHandler(context.accountService);
-      return signUpUseCase.execute(context.viewer, args.email, args.password);
+      return signUpUseCase.execute(context.viewer, args.email, args.password, args.fullName);
     },
     signIn: async (parent: any, args: any, context: GraphQlContext) => {
       const signInUseCase: SignInUseCase = new SignInUseCaseHandler(context.accountService);

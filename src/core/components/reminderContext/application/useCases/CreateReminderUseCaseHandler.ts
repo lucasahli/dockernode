@@ -9,7 +9,5 @@ export class CreateReminderUseCaseHandler implements CreateReminderUseCase {
 
     execute(viewer: Viewer, title: string, dateTimeToRemind: Date): Promise<Reminder | null> {
         return this.reminderService.createReminder(viewer, title, dateTimeToRemind);
-        // TODO: Start Subscription for this reminder
-        // TODO: Start Reminder Task
     }
 }

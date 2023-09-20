@@ -93,10 +93,15 @@ const executableSchema = makeExecutableSchema({
 // **************************************
 
 // Infrastructure:
+const resetRedisOnStartup = true;
 const redisRepository = new RedisRepository(
     `${process.env.REDIS_HOST}`,
     `${process.env.REDIS_PORT}`
 );
+if(resetRedisOnStartup){
+    redisRepository.redis.flushDb();
+}
+
 const hasher: Hasher = new BcryptHasher();
 const jobScheduler = new MyJobScheduler();
 const pushNotificationService = new MyPushNotificationService();
@@ -111,6 +116,34 @@ const reminderNotificationService = new ReminderNotificationService(reminderServ
 
 // Presentation
 const initializePeriodicReminderChecksUseCase: InitializePeriodicReminderChecksUseCase = new InitializePeriodicReminderChecksUseCaseHandler(jobScheduler, reminderNotificationService)
+
+// Startup Jobs
+if(resetRedisOnStartup){
+    redisRepository.redis.flushDb();
+    const rootViewer = Viewer.Root();
+    await accountService.signUp(rootViewer, "luca@gmail.com", "Hallo1234", "Luca Sahli");
+    await accountService.signUp(rootViewer, "demo@gmail.com", "Hallo1234", "Demo Account");
+    await accountService.signUp(rootViewer, "dummy@gmail.com", "Hallo1234", "Dummy Account");
+
+    await redisRepository.addReminder("Pay Bills!", "1", ["1"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Call Mom!", "1", ["1"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Clean bathroom!", "1", ["1"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Clean entry!", "1", ["1"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Buy towels", "1", ["1"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
+
+    await redisRepository.addReminder("Pay taxes!", "2", ["2"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Call Dad!", "2", ["2"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Clean kitchen!", "2", ["2"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Ask andy for his car", "2", ["2"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Buy bread", "2", ["2"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
+
+    await redisRepository.addReminder("Pay Salt bill!", "3", ["1", "2", "3"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Call Lisa!", "3", ["1", "2", "3"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Clean garage!", "3", ["1", "2", "3"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Ask Beni for his bike", "3", ["1", "2", "3"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.addReminder("Buy water", "3", ["1", "2", "3"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
+}
+
 console.log("Current Date and Time: ", new Date().toISOString());
 initializePeriodicReminderChecksUseCase.execute()
     .then(() => {

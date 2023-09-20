@@ -17,11 +17,11 @@ export class AccountService {
         this.userService = userService;
     }
 
-    async signUp(viewer: Viewer, email: string, password: string): Promise<Token | null> {
+    async signUp(viewer: Viewer, email: string, password: string, fullName: string): Promise<Token | null> {
         return this.loginService.createNewLogin(viewer, email, password)
             .then( (login) => {
                 if(login) {
-                    return this.userService.createFreemiumUser(login, "Luca", "Sahli")
+                    return this.userService.createFreemiumUser(login, fullName)
                         .then( (user: User) => {
                             const token = this.createToken(login, user, process.env.SECRET!, '30m');
                             let canSignUp = this.checkCanSignUp(viewer, email, password, token);

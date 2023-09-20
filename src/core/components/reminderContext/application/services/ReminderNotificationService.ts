@@ -19,8 +19,6 @@ export class ReminderNotificationService {
 
         for (const reminder of allReminders) {
             if (reminder instanceof Reminder){
-                console.log("Checking: ", reminder.title);
-
                 if(!reminder.isCompleted && reminder.checkShouldRemind(currentDateTime, undefined)){
                     // Trigger the reminder
                     console.log("should send notification for: ", reminder.title);
@@ -32,9 +30,7 @@ export class ReminderNotificationService {
 
     // Simulate sending a push notification (replace with actual implementation)
     private async sendTimeBasedPushNotification(reminder: Reminder): Promise<void> {
-        console.log("Getting Users to remind: ", reminder.idsOfUsersToRemind);
         for (const userId of reminder.idsOfUsersToRemind) {
-            console.log("User to remind: ", userId);
             const user = await this.userService.generate(Viewer.Root(), userId);
             if (user){
                 console.log(`Push notification sent for reminder: ${reminder.title}`);
