@@ -7,12 +7,16 @@ import {
     CreateReminderUseCase, DeleteReminderByIdUseCase,
     GetAllRemindersUseCase,
     GetReminderByIdUseCase, GetRemindersByOwnerIdUseCase,
-    GetUserByIdUseCase
+    GetUserByIdUseCase, GetUsersByIdsUseCase
 } from "../../../core/portsAndInterfaces/ports/index.js";
 import {
-    CreateReminderUseCaseHandler, DeleteReminderByIdUseCaseHandler,
+    CreateReminderUseCaseHandler,
+    DeleteReminderByIdUseCaseHandler,
     GetAllRemindersUseCaseHandler,
-    GetReminderByIdUseCaseHandler, GetRemindersByOwnerIdUseCaseHandler, GetUserByIdUseCaseHandler
+    GetReminderByIdUseCaseHandler,
+    GetRemindersByOwnerIdUseCaseHandler,
+    GetUserByIdUseCaseHandler,
+    GetUsersByIdsUseCaseHandler
 } from "../../../core/components/reminderContext/application/useCases/index.js";
 import {GraphQlContext} from "../../../main.js";
 
@@ -63,6 +67,10 @@ export default {
             const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService);
             return getUserByIdUseCase.execute(context.viewer, parent.ownerId);
             },
+        usersToRemind: async (parent: any, args: any, context: GraphQlContext) => {
+            const getUsersByIdsUseCase: GetUsersByIdsUseCase = new GetUsersByIdsUseCaseHandler(context.userService);
+            return getUsersByIdsUseCase.execute(context.viewer, parent.idsOfUsersToRemind);
+        },
     },
     Mutation: {
         createReminder: async (parent: any, args: any, context: GraphQlContext) => {

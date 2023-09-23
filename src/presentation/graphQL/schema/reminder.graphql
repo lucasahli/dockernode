@@ -1,8 +1,10 @@
 type Reminder {
     id: ID!
     title: String
-    dateTimeToRemind: DateTime
     owner: User
+    usersToRemind: [User]
+    isCompleted: Boolean
+    dateTimeToRemind: DateTime
 }
 
 extend type Query {
