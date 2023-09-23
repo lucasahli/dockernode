@@ -48,6 +48,16 @@ export default {
       }),
 
     Query: {
+        myReminders: async (parent: any, args: any, context: GraphQlContext) => {
+            if(context.viewer.userId){
+                const getRemindersByOwnerIdUseCase: GetRemindersByOwnerIdUseCase = new GetRemindersByOwnerIdUseCaseHandler(context.reminderService)
+                return getRemindersByOwnerIdUseCase.execute(context.viewer, context.viewer.userId);
+            }
+            else {
+                console.log("No Viewer with userId!!!");
+                return null;
+            }
+        },
         reminders: async (parent: any, args: any, context: GraphQlContext) => {
             const getAllRemindersUseCase: GetAllRemindersUseCase = new GetAllRemindersUseCaseHandler(context.reminderService)
             return getAllRemindersUseCase.execute(context.viewer);
