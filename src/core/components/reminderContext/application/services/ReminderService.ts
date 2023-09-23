@@ -114,8 +114,8 @@ export class ReminderService {
     }
   }
 
-  async getRemindersByOwnerId(viewer: Viewer, userId: string): Promise<(Reminder | Error | null)[]> {
-    const ids = await this.reminderRepository.getReminderIdsByOwnerId(userId);
+  async getRemindersByOwnerId(viewer: Viewer, ownerId: string): Promise<(Reminder | Error | null)[]> {
+    const ids = await this.reminderRepository.getReminderIdsByOwnerId(ownerId);
     if(ids !== null){
       return this.getMany(viewer, ids);
     }

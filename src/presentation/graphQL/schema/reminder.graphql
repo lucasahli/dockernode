@@ -7,6 +7,7 @@ type Reminder {
 
 extend type Query {
     reminders: [Reminder]
+    remindersByOwner(ownerId: ID!): [Reminder!]
     reminder(id: ID!): Reminder
 }
 

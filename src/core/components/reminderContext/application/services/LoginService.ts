@@ -30,6 +30,13 @@ export class LoginService {
                     if (existingLogin) {
                         return reject("Login with that email already exists!!!");
                     } else {
+                        /* Once our server receives the username and password we will want to store it. However,
+                        we will not want to store the password in plain text as if someone gains access to the
+                         database they will have access to all the passwords! */
+
+                        /* To mitigate this we will use two concepts, salt and hashing. On the server we will generate
+                         and store a random string to use as our salt and add it to the password pre-hashing.
+                         This means that two of the same passwords will not generate the same hash. */
                         return this.loginRepository.createLogin(email, await this.passwordManager.hashPassword(password), [])
                             .then(addedLogin => {
                                 return resolve(addedLogin);
