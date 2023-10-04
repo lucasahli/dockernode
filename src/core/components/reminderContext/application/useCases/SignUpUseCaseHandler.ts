@@ -1,13 +1,11 @@
-import {SignUpUseCase} from "../../../../portsAndInterfaces/ports/SignUpUseCase.js";
+import {SignUpUseCase, SignUpResult} from "../../../../portsAndInterfaces/ports/SignUpUseCase.js";
 import {AccountService} from "../services/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
-import {Token} from "../../domain/valueObjects/Token.js";
 
 export class SignUpUseCaseHandler implements SignUpUseCase {
-    constructor(private accountService: AccountService) {
-    }
+    constructor(private accountService: AccountService) {}
 
-    execute(viewer: Viewer, email: string, password: string, fullName: string): Promise<Token | null> {
+    async execute(viewer: Viewer, email: string, password: string, fullName: string): Promise<SignUpResult> {
         return this.accountService.signUp(viewer, email, password, fullName);
     }
 }

@@ -19,10 +19,24 @@ export default {
     },
   },
 
+  SignUpResult: {
+    __resolveType(obj, contextValue, info){
+      if(obj.token){
+        return 'SignUpSuccess';
+      }
+      if(obj.title){
+        return 'SignUpProblem';
+      }
+      return null; // GraphQLError is thrown
+    },
+  },
+
   Mutation: {
     signUp: async (parent: any, args: any, context: GraphQlContext) => {
       const signUpUseCase: SignUpUseCase = new SignUpUseCaseHandler(context.accountService);
-      return signUpUseCase.execute(context.viewer, args.email, args.password, args.fullName);
+      const res = await signUpUseCase.execute(context.viewer, args.email, args.password, args.fullName);
+      console.log("RES: ", res);
+      return res;
     },
     signIn: async (parent: any, args: any, context: GraphQlContext) => {
       const signInUseCase: SignInUseCase = new SignInUseCaseHandler(context.accountService);

@@ -6,8 +6,8 @@
   
 	"compilerOptions": {
 	  "lib": ["es2023"],
-	  "module": "Node16",
-	  "target": "es2022",
+	  "module": "ESNext",
+	  "target": "es2019",
   
 	  "strict": true,
 	  "esModuleInterop": true,

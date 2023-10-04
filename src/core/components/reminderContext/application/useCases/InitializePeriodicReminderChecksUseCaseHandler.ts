@@ -9,7 +9,9 @@ export class InitializePeriodicReminderChecksUseCaseHandler implements Initializ
         this.jobScheduler.startTimedJob(1000, () => {
             const currentDateTime = new Date();
             this.reminderNotificationService.checkDateTimeBasedRemindersForNotifications(currentDateTime)
-                .then(() => console.log("Checked Reminders at: ", currentDateTime.toISOString()))
+                .then(() => {
+                    // console.log("Checked Reminders at: ", currentDateTime.toISOString())
+                })
                 .catch(() => console.error("Failed to check Reminders!!!"));
         })
         return Promise.resolve(undefined);

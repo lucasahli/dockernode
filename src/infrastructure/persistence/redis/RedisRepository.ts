@@ -156,8 +156,8 @@ export class RedisRepository
     return new Promise<Login | null>(async (resolve, reject) => {
       const loginId = await this.redis.hGet("logins", email);
       if (!loginId) {
-        console.log("No login with that email in redis!!!");
-        return reject();
+        console.log(`No login with that email (${email}) in redis!!!`);
+        return resolve(null);
       }
 
       const loginData = await this.redis.hGetAll("login:" + loginId);

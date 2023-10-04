@@ -1,22 +1,22 @@
 import 'dotenv/config';
 import morgan from 'morgan'; // HTTP request logger.
 import helmet from "helmet"; // Helps secure your apps by setting various HTTP headers.
-import express, {Express, Request, Response} from 'express';
+import express, {Express} from 'express';
 import {Viewer} from "./core/sharedKernel/Viewer.js";
-import { createHandler } from 'graphql-http/lib/use/express';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { loadSchemaSync } from '@graphql-tools/load';
-import { loadFiles } from '@graphql-tools/load-files';
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
-import { mergeResolvers } from "@graphql-tools/merge";
-import { loadFilesSync } from "@graphql-tools/load-files";
-import path from 'path';
+import {createHandler} from 'graphql-http/lib/use/express';
+import {makeExecutableSchema} from '@graphql-tools/schema';
+import {loadSchemaSync} from '@graphql-tools/load';
+import {loadFiles} from '@graphql-tools/load-files';
+import {GraphQLFileLoader} from '@graphql-tools/graphql-file-loader';
+import {mergeResolvers} from "@graphql-tools/merge";
 import url from 'url';
 import cors from 'cors';
 import {RedisRepository} from "./infrastructure/persistence/redis/RedisRepository.js";
 import {
     AccountService,
-    LoginService, ReminderNotificationService, ReminderService,
+    LoginService,
+    ReminderNotificationService,
+    ReminderService,
     UserService
 } from "./core/components/reminderContext/application/services/index.js";
 import {PasswordManager} from "./core/components/reminderContext/domain/services/index.js";
@@ -27,7 +27,7 @@ import {MyPushNotificationService} from "./infrastructure/notifications/MyPushNo
 import {InitializePeriodicReminderChecksUseCase} from "./core/portsAndInterfaces/ports/index.js";
 import {
     InitializePeriodicReminderChecksUseCaseHandler
-} from "./core/components/reminderContext/application/useCases/index.js"; // Import the cors middleware
+} from "./core/components/reminderContext/application/useCases/index.js";
 
 
 // **************************************
@@ -57,7 +57,7 @@ const loggingMiddleware = (req: any, res: any, next: any) => {
 app.use(loggingMiddleware);
 
 app.use(cors({
-    origin: 'http://localhost:57264',
+    origin: 'http://localhost:56438',
 }));
 
 

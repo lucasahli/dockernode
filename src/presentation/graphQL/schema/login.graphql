@@ -9,8 +9,36 @@ type Login {
   users: [User]
 }
 
+union SignUpResult = SignUpSuccess | SignUpProblem
+
+type SignUpSuccess {
+  token: Token!
+}
+
+type SignUpProblem {
+  "translated message encompassing all invalid inputs."
+  title: String!
+  invalidInputs: [SignUpInvalidInput]
+}
+
+enum SignUpInvalidInputField {
+  EMAIL
+  PASSWORD
+  FULL_NAME
+}
+
+type SignUpInvalidInput {
+  field: SignUpInvalidInputField!
+  "translated message."
+  message: String!
+}
+
+
+
+
+
 extend type Mutation {
-  signUp(email: String!, password: String!, fullName: String!): Token
+  signUp(email: String!, password: String!, fullName: String!): SignUpResult
   signIn(email: String!, password: String!): Token
 #  TODO: deleteLogin(id: ID!): Boolean!
 }
