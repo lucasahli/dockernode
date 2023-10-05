@@ -16,6 +16,11 @@ import {
     SignUpProblem,
     SignUpResult
 } from "../../../../portsAndInterfaces/ports/SignUpUseCase.js";
+import {
+    SignInInvalidInputField,
+    SignInProblem,
+    SignInResult
+} from "../../../../portsAndInterfaces/ports/SignInUseCase.js";
 
 
 export class AccountService {
@@ -25,12 +30,9 @@ export class AccountService {
                 public passwordManager: PasswordManager) {}
 
     async signUp(viewer: Viewer, email: string, password: string, fullName: string): Promise<SignUpResult> {
-        // TODO: Write cleaner code here which returns Errors
         const canSignUp = this.checkCanSignUp(viewer, email, password, fullName);
         if(canSignUp){
-            console.log("BEFORE");
             const newLogin = await this.loginService.createNewLogin(viewer, email, password);
-            console.log("AFTER");
             if(newLogin instanceof SignUpProblem){
                 return newLogin as SignUpProblem;
             }
@@ -63,34 +65,6 @@ export class AccountService {
             });
         }
         return {title: "SignUp Problem", invalidInputs: invalidInputs};
-
-        // return this.loginService.createNewLogin(viewer, email, password)
-        //     .then( (login) => {
-        //         if(login) {
-        //             return this.userService.createFreemiumUser(login, fullName)
-        //                 .then( (user: User) => {
-        //                     const token = this.createToken(login, user, process.env.SECRET!, '30m');
-        //                     let canSignUp = this.checkCanSignUp(viewer, email, password, fullName);
-        //                     if(!canSignUp) {
-        //                         console.log("Can not SignUp!!!");
-        //                         throw new ;
-        //                     }
-        //                     return token;
-        //                 })
-        //                 .catch(() => {
-        //                     console.log("Failed to create freemium user!!!");
-        //                     return null;
-        //                 });
-        //         }
-        //         console.log("Could not create login!!!");
-        //         return null;
-        //     })
-        //     .catch((error) => {
-        //         console.log("Could not create new login --> Should return error: ", error);
-        //         return null;
-        //     });
-
-
     }
 
     private createToken(login: Login, user: User, secret: string, expiresIn: string): Token {
@@ -106,19 +80,27 @@ export class AccountService {
         return (isValidEmail && isValidPassword && isValidFullName);
     }
 
-    async signIn(viewer: Viewer, email: string, password: string): Promise<Token | Error> {
+    async signIn(viewer: Viewer, email: string, password: string): Promise<SignInResult> {
         const login = await this.loginService.getLoginByEmail(email);
-        if(login === null) throw new ValidationError("No user with that email exists");
+
+        if(login === null) {
+            return new SignInProblem("SignIn Problem", [{
+                field: SignInInvalidInputField.EMAIL,
+                message: "Email is not associated with a login"
+            }]);
+        }
+
         const canSignIn = await this.checkCanSignIn(viewer, email, password, login);
+        if(!canSignIn) return new SignInProblem("SignIn Problem", [{
+            field: SignInInvalidInputField.PASSWORD,
+            message: "Wrong Password"
+        }]);
+
         const possibleUser = await this.userService.generate(viewer, login.associatedUserIds[0] ? login.associatedUserIds[0] : "");
-        if(canSignIn){
-            const token = this.createToken(login, possibleUser as User, process.env.SECRET!, '30m');
-            console.log("Created Token: ", token);
-            return token;
-        }
-        else {
-            throw new ValidationError("Wrong password");
-        }
+        if(possibleUser === null) throw new DatabaseError("No user associated with login");
+        return {
+            token: this.createToken(login, possibleUser, process.env.SECRET!, '30m'),
+        };
     }
 
     checkCanSignIn(viewer: Viewer, email: string, password: string, login: Login): Promise<boolean> {

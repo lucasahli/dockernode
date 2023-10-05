@@ -20,7 +20,7 @@ export default {
   },
 
   SignUpResult: {
-    __resolveType(obj, contextValue, info){
+    __resolveType(obj: any, contextValue: any, info: any){
       if(obj.token){
         return 'SignUpSuccess';
       }
@@ -31,12 +31,22 @@ export default {
     },
   },
 
+  SignInResult: {
+    __resolveType(obj: any, contextValue: any, info: any){
+      if(obj.token){
+        return 'SignInSuccess';
+      }
+      if(obj.title){
+        return 'SignInProblem';
+      }
+      return null; // GraphQLError is thrown
+    },
+  },
+
   Mutation: {
     signUp: async (parent: any, args: any, context: GraphQlContext) => {
       const signUpUseCase: SignUpUseCase = new SignUpUseCaseHandler(context.accountService);
-      const res = await signUpUseCase.execute(context.viewer, args.email, args.password, args.fullName);
-      console.log("RES: ", res);
-      return res;
+      return signUpUseCase.execute(context.viewer, args.email, args.password, args.fullName);
     },
     signIn: async (parent: any, args: any, context: GraphQlContext) => {
       const signInUseCase: SignInUseCase = new SignInUseCaseHandler(context.accountService);
