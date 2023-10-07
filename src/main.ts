@@ -57,7 +57,7 @@ const loggingMiddleware = (req: any, res: any, next: any) => {
 app.use(loggingMiddleware);
 
 app.use(cors({
-    origin: 'http://localhost:56438',
+    origin: 'http://localhost:56003',
 }));
 
 

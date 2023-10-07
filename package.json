@@ -13,6 +13,11 @@
     "tests": "jest --config=jest.config.cjs",
     "testing": "node --trace-warnings --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.config.cjs --no-cache"
   },
+  "nodemonConfig": {
+    "execMap": {
+      "js": "node --trace-uncaught"
+    }
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

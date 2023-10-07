@@ -9,7 +9,7 @@ export type SignInSuccess = {
 
 export class SignInProblem {
     constructor(public title: string, public invalidInputs: SignInInvalidInput[]) {}
-};
+}
 
 export type SignInInvalidInput = {
     field: SignInInvalidInputField;

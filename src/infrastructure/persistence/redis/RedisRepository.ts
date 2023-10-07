@@ -152,27 +152,48 @@ export class RedisRepository
     return Promise.resolve([]);
   }
 
-  getLoginByEmail(email: string): Promise<Login | null> {
-    return new Promise<Login | null>(async (resolve, reject) => {
-      const loginId = await this.redis.hGet("logins", email);
-      if (!loginId) {
-        console.log(`No login with that email (${email}) in redis!!!`);
-        return resolve(null);
-      }
+  async getLoginByEmail(email: string): Promise<Login | null> {
+    const loginId = await this.redis.hGet("logins", email);
+    if (!loginId) {
+      console.log(`No login with that email (${email}) in redis!!!`);
+      return null;
+    }
 
-      const loginData = await this.redis.hGetAll("login:" + loginId);
-      const associatedUserIds = await this.redis.sMembers(
-          "login:" + loginId + "associated_user_ids"
+    const loginData = await this.redis.hGetAll("login:" + loginId);
+    const associatedUserIds = await this.redis.sMembers(
+        "login:" + loginId + "associated_user_ids"
+    );
+
+    if(loginData && associatedUserIds){
+      return new Login(
+          loginId,
+          loginData.email,
+          loginData.password,
+          associatedUserIds
       );
-      return resolve(
-          new Login(
-              loginId,
-              loginData.email,
-              loginData.password,
-              associatedUserIds
-          )
-      );
-    });
+    }
+    return null;
+
+    // return new Promise<Login | null>(async (resolve, reject) => {
+    //   const loginId = await this.redis.hGet("logins", email);
+    //   if (!loginId) {
+    //     console.log(`No login with that email (${email}) in redis!!!`);
+    //     return resolve(null);
+    //   }
+    //
+    //   const loginData = await this.redis.hGetAll("login:" + loginId);
+    //   const associatedUserIds = await this.redis.sMembers(
+    //       "login:" + loginId + "associated_user_ids"
+    //   );
+    //   return resolve(
+    //       new Login(
+    //           loginId,
+    //           loginData.email,
+    //           loginData.password,
+    //           associatedUserIds
+    //       )
+    //   );
+    // });
   }
 
   getLoginById(id: string): Promise<Login | null> {

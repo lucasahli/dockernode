@@ -1,6 +1,4 @@
 import {Viewer} from "../../../core/sharedKernel/Viewer.js";
-import {graphQlApiPresenter} from "../GraphQlApiPresenter.js";
-
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql';
 import {

@@ -58,8 +58,6 @@ type SignInInvalidInput {
 }
 
 
-
-
 extend type Mutation {
   signUp(email: String!, password: String!, fullName: String!): SignUpResult
   signIn(email: String!, password: String!): SignInResult
