@@ -17,6 +17,7 @@ import {
     GetUsersByIdsUseCaseHandler
 } from "../../../core/components/reminderContext/application/useCases/index.js";
 import {GraphQlContext} from "../../../main.js";
+import {GraphQLResolveInfo} from "graphql/type/index.js";
 
 
 export default {
@@ -44,6 +45,18 @@ export default {
           return null;
         },
       }),
+
+    CreateReminderResult: {
+        __resolveType(obj: any, context: any, info: GraphQLResolveInfo){
+            if(obj.createdReminder){
+                return 'CreateReminderSuccess';
+            }
+            if(obj.title){
+                return 'CreateReminderProblem';
+            }
+            return null; // GraphQLError is thrown
+        },
+    },
 
     Query: {
         myReminders: async (parent: any, args: any, context: GraphQlContext) => {
