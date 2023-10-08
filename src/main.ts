@@ -57,7 +57,7 @@ const loggingMiddleware = (req: any, res: any, next: any) => {
 app.use(loggingMiddleware);
 
 app.use(cors({
-    origin: 'http://localhost:61036',
+    origin: 'http://localhost:53600',
 }));
 
 
@@ -125,23 +125,23 @@ if(resetRedisOnStartup){
     await accountService.signUp(rootViewer, "demo@gmail.com", "Hallo1234", "Demo Account");
     await accountService.signUp(rootViewer, "dummy@gmail.com", "Hallo1234", "Dummy Account");
 
-    await redisRepository.addReminder("Pay Bills!", "1", ["1"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Call Mom!", "1", ["1"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Clean bathroom!", "1", ["1"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Clean entry!", "1", ["1"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Buy towels", "1", ["1"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Pay Bills!", "1", ["1"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Call Mom!", "1", ["1"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Clean bathroom!", "1", ["1"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Clean entry!", "1", ["1"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Buy towels", "1", ["1"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
 
-    await redisRepository.addReminder("Pay taxes!", "2", ["2"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Call Dad!", "2", ["2"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Clean kitchen!", "2", ["2"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Ask andy for his car", "2", ["2"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Buy bread", "2", ["2"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Pay taxes!", "2", ["2"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Call Dad!", "2", ["2"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Clean kitchen!", "2", ["2"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Ask andy for his car", "2", ["2"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Buy bread", "2", ["2"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
 
-    await redisRepository.addReminder("Pay Salt bill!", "3", ["1", "2", "3"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Call Lisa!", "3", ["1", "2", "3"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Clean garage!", "3", ["1", "2", "3"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Ask Beni for his bike", "3", ["1", "2", "3"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
-    await redisRepository.addReminder("Buy water", "3", ["1", "2", "3"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Pay Salt bill!", "3", ["1", "2", "3"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Call Lisa!", "3", ["1", "2", "3"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Clean garage!", "3", ["1", "2", "3"], false, new Date("2030-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Ask Beni for his bike", "3", ["1", "2", "3"], true, new Date("2020-03-01T11:15:00.000Z"), undefined);
+    await redisRepository.createReminder("Buy water", "3", ["1", "2", "3"], true, new Date("2020-05-01T09:15:00.000Z"), undefined);
 }
 
 console.log("Current Date and Time: ", new Date().toISOString());

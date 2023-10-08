@@ -5,6 +5,8 @@ type Token {
 # TODO: add currentUserId
 type Login {
   id: ID!
+  created: DateTime!
+  modified: DateTime!
   email: String!
   users: [User]
 }

@@ -4,7 +4,7 @@ import {LocationWithRadius} from "../../components/reminderContext/domain/entiti
 export interface ReminderRepository {
   getReminderById(id: string): Promise<Reminder | null>;
 
-  addReminder(title: string, ownerId: string, idsOfUsersToRemind: string[], isCompleted: boolean, dateTimeToRemind?: Date, locationWithRadius?: LocationWithRadius): Promise<Reminder>;
+  createReminder(title: string, ownerId: string, idsOfUsersToRemind: string[], isCompleted: boolean, dateTimeToRemind?: Date, locationWithRadius?: LocationWithRadius): Promise<Reminder>;
   deleteReminder(id: string): Promise<boolean>;
 
   getReminderIdsByOwnerId(ownerId: string): Promise<string[]>;

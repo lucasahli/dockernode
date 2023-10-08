@@ -58,7 +58,7 @@ export class ReminderService {
   ): Promise<CreateReminderResult> {
     const createReminderProblem = this.checkCanCreate(viewer, title, dateTimeToRemind);
     if(createReminderProblem instanceof CreateReminderProblem) return createReminderProblem;
-    const reminder = await this.reminderRepository.addReminder(title, viewer.userId!, [viewer.userId!], false, dateTimeToRemind);
+    const reminder = await this.reminderRepository.createReminder(title, viewer.userId!, [viewer.userId!], false, new Date(Date.now()), dateTimeToRemind);
     return {createdReminder: reminder};
   }
 

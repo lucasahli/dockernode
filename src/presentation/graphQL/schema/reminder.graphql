@@ -1,5 +1,7 @@
 type Reminder {
     id: ID!
+    created: DateTime!
+    modified: DateTime!
     title: String
     owner: User
     usersToRemind: [User]
