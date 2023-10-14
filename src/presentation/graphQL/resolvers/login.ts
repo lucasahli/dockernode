@@ -4,6 +4,7 @@ import {
   SignUpUseCaseHandler
 } from "../../../core/components/reminderContext/application/useCases/index.js";
 import {GetUsersByLoginUseCase, SignInUseCase, SignUpUseCase} from "../../../core/portsAndInterfaces/ports/index.js";
+import {GraphQLResolveInfo} from "graphql/type/index.js";
 
 /** When setting up a field whose value is a custom type,
  * we have to define a function that tells GraphQL how to get that custom type.
@@ -16,6 +17,30 @@ export default {
     users: async (parent: any, args: any, context: GraphQlContext) => {
       const getUsersByLoginUseCase: GetUsersByLoginUseCase = new GetUsersByLoginUseCaseHandler(context.accountService);
       return getUsersByLoginUseCase.execute(context.viewer, parent.id);
+    },
+  },
+
+  SignUpResult: {
+    __resolveType(obj: any, context: any, info: GraphQLResolveInfo){
+      if(obj.token){
+        return 'SignUpSuccess';
+      }
+      if(obj.title){
+        return 'SignUpProblem';
+      }
+      return null; // GraphQLError is thrown
+    },
+  },
+
+  SignInResult: {
+    __resolveType(obj: any, context: any, info: GraphQLResolveInfo){
+      if(obj.token){
+        return 'SignInSuccess';
+      }
+      if(obj.title){
+        return 'SignInProblem';
+      }
+      return null; // GraphQLError is thrown
     },
   },
 

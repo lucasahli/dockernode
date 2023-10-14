@@ -1,5 +1,7 @@
 type User {
   id: ID!
+  created: DateTime!
+  modified: DateTime!
   fullName: String
   role: String!
   reminders: [Reminder]
@@ -7,6 +9,7 @@ type User {
 }
 
 extend type Query {
+  me: User
   users: [User]
   user(id: ID!): User
 }

@@ -5,13 +5,64 @@ type Token {
 # TODO: add currentUserId
 type Login {
   id: ID!
+  created: DateTime!
+  modified: DateTime!
   email: String!
   users: [User]
 }
 
+union SignUpResult = SignUpSuccess | SignUpProblem
+
+type SignUpSuccess {
+  token: Token!
+}
+
+type SignUpProblem {
+  "translated message encompassing all invalid inputs."
+  title: String!
+  invalidInputs: [SignUpInvalidInput]
+}
+
+enum SignUpInvalidInputField {
+  EMAIL
+  PASSWORD
+  FULL_NAME
+}
+
+type SignUpInvalidInput {
+  field: SignUpInvalidInputField!
+  "translated message."
+  message: String!
+}
+
+
+union SignInResult = SignInSuccess | SignInProblem
+
+type SignInSuccess {
+  token: Token!
+}
+
+type SignInProblem {
+  "translated message encompassing all invalid inputs."
+  title: String!
+  invalidInputs: [SignInInvalidInput]
+}
+
+enum SignInInvalidInputField {
+  EMAIL
+  PASSWORD
+}
+
+type SignInInvalidInput {
+  field: SignInInvalidInputField!
+  "translated message."
+  message: String!
+}
+
+
 extend type Mutation {
-  signUp(email: String!, password: String!, fullName: String!): Token
-  signIn(email: String!, password: String!): Token
+  signUp(email: String!, password: String!, fullName: String!): SignUpResult
+  signIn(email: String!, password: String!): SignInResult
 #  TODO: deleteLogin(id: ID!): Boolean!
 }
 

@@ -1,16 +1,44 @@
 type Reminder {
     id: ID!
+    created: DateTime!
+    modified: DateTime!
     title: String
-    dateTimeToRemind: DateTime
     owner: User
+    usersToRemind: [User]
+    isCompleted: Boolean
+    dateTimeToRemind: DateTime
+}
+
+union CreateReminderResult = CreateReminderSuccess | CreateReminderProblem
+
+type CreateReminderSuccess {
+    createdReminder: Reminder!
+}
+
+type CreateReminderProblem {
+    title: String!
+    invalidInputs: [CreateReminderInvalidInput]
+}
+
+enum CreateReminderInvalidInputField {
+    TITLE
+    DATETIME
+}
+
+type CreateReminderInvalidInput {
+    field: CreateReminderInvalidInputField!
+    "translated message."
+    message: String!
 }
 
 extend type Query {
+    myReminders: [Reminder]
     reminders: [Reminder]
+    remindersByOwner(ownerId: ID!): [Reminder!]
     reminder(id: ID!): Reminder
 }
 
 extend type Mutation {
-    createReminder(title: String!, dateTimeToRemind: DateTime!): Reminder
+    createReminder(title: String!, dateTimeToRemind: DateTime!): CreateReminderResult
     deleteReminder(id: ID!): Boolean!
 }

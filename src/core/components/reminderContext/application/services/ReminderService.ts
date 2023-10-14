@@ -1,6 +1,13 @@
 import {Viewer} from "../../../../sharedKernel/Viewer.js";
 import {ReminderRepository} from "../../../../portsAndInterfaces/interfaces/ReminderRepository.js";
 import {Reminder} from "../../domain/entities/Reminder.js";
+import {
+  CreateReminderInvalidInput,
+  CreateReminderInvalidInputField,
+  CreateReminderProblem,
+  CreateReminderResult
+} from "../../../../portsAndInterfaces/ports/CreateReminderUseCase.js";
+import {SignUpInvalidInput, SignUpInvalidInputField} from "../../../../portsAndInterfaces/ports/SignUpUseCase.js";
 
 
 //
@@ -48,34 +55,36 @@ export class ReminderService {
     viewer: Viewer,
     title: string,
     dateTimeToRemind: Date
-  ): Promise<Reminder | null> {
-    const ownerId = viewer.userId;
-    if (ownerId === undefined){
-      return null;
-    }
-    const possibleReminder = await this.reminderRepository
-      .addReminder(title, ownerId, [ownerId], false, dateTimeToRemind)
-        .then((reminder) => {
-        return reminder;
-      })
-      .catch((error) => {
-        console.log(
-          "Could not add new reminder --> Should return error: ",
-          error
-        );
-        return null;
-      });
-    let canCreateReminder = this.checkCanCreate(viewer, possibleReminder);
-    if (!canCreateReminder) return null;
-    return possibleReminder;
+  ): Promise<CreateReminderResult> {
+    const createReminderProblem = this.checkCanCreate(viewer, title, dateTimeToRemind);
+    if(createReminderProblem instanceof CreateReminderProblem) return createReminderProblem;
+    const reminder = await this.reminderRepository.createReminder(title, viewer.userId!, [viewer.userId!], false, new Date(Date.now()), dateTimeToRemind);
+    return {createdReminder: reminder};
   }
 
-  checkCanCreate(viewer: Viewer, potentialReminder: Reminder | null): boolean {
-    console.log("CheckCanCreate: ", potentialReminder);
-    if (potentialReminder && potentialReminder.dateTimeToRemind){
-      return viewer.isLoggedIn() && potentialReminder.dateTimeToRemind?.getTime() > Date.now();
+  checkCanCreate(viewer: Viewer, reminderTitle: string, dateTimeToRemind: Date): CreateReminderProblem | undefined {
+    const ownerId = viewer.userId;
+    if (ownerId === undefined){
+      return new CreateReminderProblem("Not signed in: Sign in to create a reminder", []);
     }
-    return false;
+    const invalidInputs: CreateReminderInvalidInput[] = [];
+    if(!reminderTitle) invalidInputs.push({
+      field: CreateReminderInvalidInputField.TITLE,
+      message: "No reminder title was provided: A reminder needs a title",
+    });
+    if(!dateTimeToRemind) invalidInputs.push({
+      field: CreateReminderInvalidInputField.DATETIME,
+      message: "DateTime is missing: Set a date and time to be reminded",
+    });
+    if(dateTimeToRemind.getTime() < Date.now()) invalidInputs.push({
+      field: CreateReminderInvalidInputField.DATETIME,
+      message: "DateTime is in the past: Set a date and time in the future",
+    });
+
+    if(invalidInputs.length > 0){
+      return new CreateReminderProblem("Could not create reminder", invalidInputs);
+    }
+    return undefined;
   }
 
   async deleteReminder(viewer: Viewer, id: string): Promise<boolean> {
@@ -114,8 +123,8 @@ export class ReminderService {
     }
   }
 
-  async getRemindersByOwnerId(viewer: Viewer, userId: string): Promise<(Reminder | Error | null)[]> {
-    const ids = await this.reminderRepository.getReminderIdsByOwnerId(userId);
+  async getRemindersByOwnerId(viewer: Viewer, ownerId: string): Promise<(Reminder | Error | null)[]> {
+    const ids = await this.reminderRepository.getReminderIdsByOwnerId(ownerId);
     if(ids !== null){
       return this.getMany(viewer, ids);
     }

@@ -4,6 +4,8 @@ export class Reminder {
 
     constructor(
         public id: string,
+        public created: Date,
+        public modified: Date,
         public title: string,
         public ownerId: string,
         public idsOfUsersToRemind: string[],
@@ -16,11 +18,13 @@ export class Reminder {
     toJSON(): Record<string, any> {
         return {
             id: this.id,
+            created: this.created.toISOString(),
+            modified: this.modified.toISOString(),
             title: this.title,
-            dateTimeToRemind: this.dateTimeToRemind ? this.dateTimeToRemind.toISOString() : undefined,
             ownerId: this.ownerId,
             idsOfUsersToRemind: JSON.stringify(this.idsOfUsersToRemind),
             isCompleted: JSON.stringify(this.isCompleted),
+            dateTimeToRemind: this.dateTimeToRemind ? this.dateTimeToRemind.toISOString() : undefined,
             locationWithRadius: this.locationWithRadius ? this.locationWithRadius.toJSON() : undefined
         };
     }
@@ -29,6 +33,8 @@ export class Reminder {
     static fromJSON(data: Record<string, any>): Reminder {
         return new Reminder(
             data.id,
+            new Date(data.created),
+            new Date(data.modified),
             data.title,
             data.ownerId,
             JSON.parse(data.idsOfUsersToRemind),
@@ -42,6 +48,8 @@ export class Reminder {
         // Check if all required properties exist
         if(
             data.id &&
+            data.created &&
+            data.modified &&
             data.title &&
             data.ownerId &&
             data.idsOfUsersToRemind &&

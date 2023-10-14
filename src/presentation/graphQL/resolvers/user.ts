@@ -1,10 +1,11 @@
 import {
-    GetAllUsersUseCase, GetLoginByUserUseCase,
-    GetRemindersByOwnerUseCase,
+    GetAllUsersUseCase, GetLoginByUserUseCase, GetRemindersByOwnerIdUseCase,
     GetUserByIdUseCase
 } from "../../../core/portsAndInterfaces/ports/index.js";
 import {
-    GetAllUsersUseCaseHandler, GetLoginByUserUseCaseHandler, GetRemindersByOwnerUseCaseHandler,
+    GetAllUsersUseCaseHandler,
+    GetLoginByUserUseCaseHandler,
+    GetRemindersByOwnerIdUseCaseHandler,
     GetUserByIdUseCaseHandler
 } from "../../../core/components/reminderContext/application/useCases/index.js";
 import {GraphQlContext} from "../../../main.js";
@@ -17,6 +18,17 @@ import {GraphQlContext} from "../../../main.js";
 
 export default {
     Query: {
+        me: async (parent: any, args: any, context: GraphQlContext) => {
+            await context.viewer.prepareViewer();
+            if(context.viewer.userId){
+                const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService);
+                return getUserByIdUseCase.execute(context.viewer, context.viewer.userId);
+            }
+            else {
+                console.log("No Viewer with userId!!!");
+                return null;
+            }
+        },
         users: async (parent: any, args: any, context: GraphQlContext) => {
             const getAllUsersUseCase: GetAllUsersUseCase = new GetAllUsersUseCaseHandler(context.userService)
             return getAllUsersUseCase.execute(context.viewer);
@@ -28,10 +40,10 @@ export default {
     },
 
     User: {
-        // Reminders By User
+        // Reminders By Owner
         reminders: async (parent: any, args: any, context: GraphQlContext) => {
-            const getRemindersByOwnerUseCase: GetRemindersByOwnerUseCase = new GetRemindersByOwnerUseCaseHandler(context.reminderService);
-            return getRemindersByOwnerUseCase.execute(context.viewer, parent.id);
+            const getRemindersByOwnerIdUseCase: GetRemindersByOwnerIdUseCase = new GetRemindersByOwnerIdUseCaseHandler(context.reminderService);
+            return getRemindersByOwnerIdUseCase.execute(context.viewer, parent.id);
             },
         // Login of a User
         login: async (parent: any, args: any, context: GraphQlContext) => {

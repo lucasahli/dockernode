@@ -1,20 +1,23 @@
 import {Viewer} from "../../../core/sharedKernel/Viewer.js";
-import {graphQlApiPresenter} from "../GraphQlApiPresenter.js";
-
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql';
 import {
     CreateReminderUseCase, DeleteReminderByIdUseCase,
     GetAllRemindersUseCase,
-    GetReminderByIdUseCase,
-    GetUserByIdUseCase
+    GetReminderByIdUseCase, GetRemindersByOwnerIdUseCase,
+    GetUserByIdUseCase, GetUsersByIdsUseCase
 } from "../../../core/portsAndInterfaces/ports/index.js";
 import {
-    CreateReminderUseCaseHandler, DeleteReminderByIdUseCaseHandler,
+    CreateReminderUseCaseHandler,
+    DeleteReminderByIdUseCaseHandler,
     GetAllRemindersUseCaseHandler,
-    GetReminderByIdUseCaseHandler, GetUserByIdUseCaseHandler
+    GetReminderByIdUseCaseHandler,
+    GetRemindersByOwnerIdUseCaseHandler,
+    GetUserByIdUseCaseHandler,
+    GetUsersByIdsUseCaseHandler
 } from "../../../core/components/reminderContext/application/useCases/index.js";
 import {GraphQlContext} from "../../../main.js";
+import {GraphQLResolveInfo} from "graphql/type/index.js";
 
 
 export default {
@@ -43,11 +46,38 @@ export default {
         },
       }),
 
+    CreateReminderResult: {
+        __resolveType(obj: any, context: any, info: GraphQLResolveInfo){
+            if(obj.createdReminder){
+                return 'CreateReminderSuccess';
+            }
+            if(obj.title){
+                return 'CreateReminderProblem';
+            }
+            return null; // GraphQLError is thrown
+        },
+    },
+
     Query: {
+        myReminders: async (parent: any, args: any, context: GraphQlContext) => {
+            if(context.viewer.userId){
+                const getRemindersByOwnerIdUseCase: GetRemindersByOwnerIdUseCase = new GetRemindersByOwnerIdUseCaseHandler(context.reminderService)
+                return getRemindersByOwnerIdUseCase.execute(context.viewer, context.viewer.userId);
+            }
+            else {
+                console.log("No Viewer with userId!!!");
+                return null;
+            }
+        },
         reminders: async (parent: any, args: any, context: GraphQlContext) => {
             const getAllRemindersUseCase: GetAllRemindersUseCase = new GetAllRemindersUseCaseHandler(context.reminderService)
             return getAllRemindersUseCase.execute(context.viewer);
             },
+        remindersByOwner: async (parent: any, args: any, context: GraphQlContext) => {
+            const ownerId = args.ownerId;
+            const getRemindersByOwnerIdUseCase: GetRemindersByOwnerIdUseCase = new GetRemindersByOwnerIdUseCaseHandler(context.reminderService)
+            return getRemindersByOwnerIdUseCase.execute(context.viewer, ownerId);
+        },
         reminder: async (parent: any, args: any, context: GraphQlContext) => {
             const getReminderByIdUseCase: GetReminderByIdUseCase = new GetReminderByIdUseCaseHandler(context.reminderService);
             return getReminderByIdUseCase.execute(context.viewer, args.id);
@@ -58,6 +88,10 @@ export default {
             const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService);
             return getUserByIdUseCase.execute(context.viewer, parent.ownerId);
             },
+        usersToRemind: async (parent: any, args: any, context: GraphQlContext) => {
+            const getUsersByIdsUseCase: GetUsersByIdsUseCase = new GetUsersByIdsUseCaseHandler(context.userService);
+            return getUsersByIdsUseCase.execute(context.viewer, parent.idsOfUsersToRemind);
+        },
     },
     Mutation: {
         createReminder: async (parent: any, args: any, context: GraphQlContext) => {

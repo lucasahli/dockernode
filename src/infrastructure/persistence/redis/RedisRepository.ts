@@ -9,7 +9,10 @@ import { UserRole } from "../../../core/sharedKernel/UserRole.js";
 import DataLoader from "dataloader";
 import {LocationWithRadius} from "../../../core/components/reminderContext/domain/entities/index.js";
 import {ReminderService} from "../../../core/components/reminderContext/application/services/index.js";
+import user from "../../../presentation/graphQL/resolvers/user.js";
 
+
+// TODO: Move this to hasher or password service
 function generateRandomStringWithLength(length: number) {
   let result = "";
   const characters =
@@ -44,17 +47,13 @@ export class RedisRepository
     this.userLoader = new DataLoader<string, User | null>(async (userIds) => {
       // Fetch user data from Redis for the provided user IDs
       const userPromises = userIds.map(async (id) => {
-        const userData = await this.redis.hGetAll("user:" + id);
-        // TODO: simplify user constructio via JSON
-        if (id !== undefined
-            && userData.fullName !== undefined
-            && userData.role !== undefined) {
-          return new User(
-                  id,
-                  userData.associatedLoginId,
-                  userData.role as UserRole,
-                  userData.fullName
-          );
+        let userData = await this.redis.hGetAll("user:" + id);
+        userData = {
+          ...userData, // Copy existing key-value pairs
+          id: id, // Append the new key-value pair
+        }
+        if (User.isValidUserData(userData)) {
+          return User.fromJSON(userData);
         } else {
           console.log("No user data found in redis for id: ", id);
           return null;
@@ -82,26 +81,6 @@ export class RedisRepository
       return Promise.all(reminderPromises);
     });
 
-    // @ts-ignore
-    // const redisLoader = new DataLoader<string, User>(
-    //     (keys: string[]) => {
-    //         return new Promise<(User | Error)[]>((resolve, reject) => {
-    //             this.redis.mGet(keys)
-    //                 .then(results => {
-    //                     resolve(results.map((result, index) => {
-    //                             if (result) {
-    //                                 const userData = JSON.parse(result);
-    //                                 return new User(userData.id, null, userData.role as UserRole, userData.firstname, userData.lastname);
-    //                             }
-    //                             else {
-    //                                 return new Error(`No key: ${keys[index]}`);
-    //                             }
-    //                     }));
-    //                 })
-    //                 .catch(reason => reject(reason));
-    //
-    //         })
-    //     });
   }
 
   async connect() {
@@ -114,7 +93,7 @@ export class RedisRepository
   async createLogin(
     email: string,
     password: string,
-    associatedUserIds: string[]
+    associatedUserIds: string[],
   ): Promise<Login> {
     // Check if Login already exists
     if (await this.redis.hGet("logins", email)) {
@@ -122,6 +101,7 @@ export class RedisRepository
     }
     // Generate Login-ID
     const loginId = await this.redis.incr("next_login_id");
+    const created = new Date(Date.now());
     // Generate Authentication Secret
     const authsecret = generateRandomStringWithLength(16);
     // Store the login data
@@ -131,6 +111,8 @@ export class RedisRepository
         email: email,
         password: password,
         auth: authsecret,
+        created: created.toISOString(),
+        modified: created.toISOString()
       }).flat(),
     ]);
     // Store the Authentication Secret
@@ -144,7 +126,7 @@ export class RedisRepository
     }
     // Return the Login Object
     return Promise.resolve(
-      new Login(loginId.toString(), email, password, associatedUserIds)
+      new Login(loginId.toString(), created, created, email, password, associatedUserIds)
     );
   }
 
@@ -152,27 +134,29 @@ export class RedisRepository
     return Promise.resolve([]);
   }
 
-  getLoginByEmail(email: string): Promise<Login | null> {
-    return new Promise<Login | null>(async (resolve, reject) => {
-      const loginId = await this.redis.hGet("logins", email);
-      if (!loginId) {
-        console.log("No login with that email in redis!!!");
-        return reject();
-      }
+  async getLoginByEmail(email: string): Promise<Login | null> {
+    const loginId = await this.redis.hGet("logins", email);
+    if (!loginId) {
+      console.log(`No login with that email (${email}) in redis!!!`);
+      return null;
+    }
 
-      const loginData = await this.redis.hGetAll("login:" + loginId);
-      const associatedUserIds = await this.redis.sMembers(
-          "login:" + loginId + "associated_user_ids"
+    const loginData = await this.redis.hGetAll("login:" + loginId);
+    const associatedUserIds = await this.redis.sMembers(
+        "login:" + loginId + "associated_user_ids"
+    );
+
+    if(loginData && associatedUserIds){
+      return new Login(
+          loginId,
+          new Date(loginData.created),
+          new Date(loginData.modified),
+          loginData.email,
+          loginData.password,
+          associatedUserIds
       );
-      return resolve(
-          new Login(
-              loginId,
-              loginData.email,
-              loginData.password,
-              associatedUserIds
-          )
-      );
-    });
+    }
+    return null;
   }
 
   getLoginById(id: string): Promise<Login | null> {
@@ -200,7 +184,7 @@ export class RedisRepository
               return resolve(null);
             }
             else {
-              return resolve(new Login(id, results[0].email, results[0].password, results[1]));
+              return resolve(new Login(id, new Date(results[0].created), new Date(results[0].modified), results[0].email, results[0].password, results[1]));
             }
           })
           .catch((reason) => {
@@ -237,7 +221,7 @@ export class RedisRepository
   //
   // User CRUD
   //
-  async addUser(
+  async createUser(
       associatedLoginId: string,
       role: UserRole,
       fullName: string
@@ -252,9 +236,11 @@ export class RedisRepository
     }
     // Add new user
     const userId = await this.redis.incr("next_user_id");
-
+    const created = new Date(Date.now());
     const numberOfNewAddedFields = await this.redis.hSet("user:" + userId.toString(), [
       ...Object.entries({
+        created: created.toISOString(),
+        modified: created.toISOString(),
         associatedLoginId: associatedLoginId,
         role: role,
         fullName: fullName,
@@ -268,7 +254,7 @@ export class RedisRepository
 
     if(numberOfNewAddedFields > 0 && numberOfElementsAddedToSet > 0){
       return Promise.resolve(
-          new User(userId.toString(), associatedLoginId, role, fullName)
+          new User(userId.toString(), created, created, associatedLoginId, role, fullName)
       );
     }
     else {
@@ -311,7 +297,7 @@ export class RedisRepository
   //
   // Reminder CRUD
   //
-  async addReminder(
+  async createReminder(
     title: string,
     ownerId: string,
     idsOfUsersToRemind: string[],
@@ -321,7 +307,7 @@ export class RedisRepository
   ): Promise<Reminder> {
     // Create a new Reminder-ID
     const reminderId = await this.redis.incr("next_reminder_id");
-
+    const created = new Date(Date.now());
     if(dateTimeToRemind && locationWithRadius){
       // TODO: Handle Reminders with both: dateTimeToRemind && locationWithRadius
     }
@@ -331,6 +317,8 @@ export class RedisRepository
     else if(dateTimeToRemind){
       await this.redis.hSet("reminder:" + reminderId.toString(), [
         ...Object.entries({
+          created: created.toISOString(),
+          modified: created.toISOString(),
           title: title,
           ownerId: ownerId,
           idsOfUsersToRemind: JSON.stringify(idsOfUsersToRemind),
@@ -359,7 +347,7 @@ export class RedisRepository
     await this.redis.sAdd('reminders', reminderId.toString());
     // Return the created reminder
     return Promise.resolve(
-      new Reminder(reminderId.toString(), title, ownerId, idsOfUsersToRemind, isCompleted, dateTimeToRemind, )
+      new Reminder(reminderId.toString(), new Date(Date.now()), new Date(Date.now()), title, ownerId, idsOfUsersToRemind, isCompleted, dateTimeToRemind, undefined)
     );
   }
 

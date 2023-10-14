@@ -7,7 +7,7 @@ export interface UserRepository {
     getUserById(id: string): Promise<User | null>
 
     getManyUsersByIds(ids: string[]): Promise<(User | Error | null)[]>
-    addUser(associatedLoginId: string, role: UserRole, fullName: string): Promise<User>
+    createUser(associatedLoginId: string, role: UserRole, fullName: string): Promise<User>
     deleteUser(id: string): Promise<boolean>
 }
 

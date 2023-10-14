@@ -48,11 +48,11 @@ export class MockupRepository implements LoginRepository, UserRepository, Remind
         return Promise.resolve(new Login((this.logins.length + 1).toString(), email, password, associatedUserIds));
     }
 
-    addReminder(title: string, ownerId: string, idsOfUsersToRemind: string[] = [ownerId], isCompleted: boolean = false, dateTimeToRemind?: Date, locationWithRadius?: LocationWithRadius): Promise<Reminder> {
+    createReminder(title: string, ownerId: string, idsOfUsersToRemind: string[] = [ownerId], isCompleted: boolean = false, dateTimeToRemind?: Date, locationWithRadius?: LocationWithRadius): Promise<Reminder> {
         return Promise.resolve(new Reminder((this.reminders.length + 1).toString(), title, ownerId, [ownerId], false, dateTimeToRemind));
     }
 
-    addUser(loginId: string, role: UserRole, fullName: string): Promise<User> {
+    createUser(loginId: string, role: UserRole, fullName: string): Promise<User> {
         return Promise.resolve(new User((this.users.length + 1).toString(), loginId, role, fullName));
     }
 
