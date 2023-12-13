@@ -1,4 +1,4 @@
-export class Token {
+export class AccessToken {
     public token: string;
 
     constructor(token: string) {

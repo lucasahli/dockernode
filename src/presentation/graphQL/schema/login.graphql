@@ -1,5 +1,16 @@
-type Token {
+type AccessToken {
   token: String!
+}
+
+type RefreshToken {
+  id: String!
+  created: DateTime
+  modified: DateTime
+  token: String!
+  expiration: DateTime
+  revoked: Boolean
+  associatedLoginId: String
+  associatedDeviceId: String
 }
 
 # TODO: add currentUserId
@@ -14,7 +25,9 @@ type Login {
 union SignUpResult = SignUpSuccess | SignUpProblem
 
 type SignUpSuccess {
-  token: Token!
+  sessionId: String!
+  accessToken: AccessToken!
+  refreshToken: RefreshToken!
 }
 
 type SignUpProblem {
@@ -39,7 +52,9 @@ type SignUpInvalidInput {
 union SignInResult = SignInSuccess | SignInProblem
 
 type SignInSuccess {
-  token: Token!
+  sessionId: String!
+  accessToken: AccessToken!
+  refreshToken: RefreshToken!
 }
 
 type SignInProblem {

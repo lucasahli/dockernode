@@ -1,26 +1,31 @@
 import {IncomingHttpHeaders} from "http";
 import {User} from "../components/reminderContext/domain/entities/User.js";
 import {UserRole} from "./UserRole.js";
-import {Token} from "../components/reminderContext/domain/valueObjects/Token.js";
 
 import jwt from "jsonwebtoken";
+import {Device, Session} from "../components/userSessionContext/domain/entities/index.js";
+import {DeviceInfo, DeviceType, SessionStatus} from "../components/userSessionContext/domain/valueObjects/index.js";
 
 export class Viewer {
     private isRootViewer: boolean = false;
-    user: User | null;
+    user?: User;
     jwtSecret: string;
-    headers: IncomingHttpHeaders | undefined;
-    cookies: any;
+    headers?: IncomingHttpHeaders;
+    cookies?: any;
+    device?: Device;
 
-    loginId: string | undefined;
-    loginEmail: string | undefined;
-    userId: string | undefined;
-    userRole: UserRole | undefined;
+    loginId?: string;
+    loginEmail?: string;
+    userId?: string;
+    userRole?: UserRole;
 
     constructor(headers?: IncomingHttpHeaders, secret?: string, isRootViewer?: boolean) {
         this.headers = headers ?? undefined;
+        if(headers){
+            console.log(headers);
+        }
         this.jwtSecret = secret ?? "SomeWrongSecret";
-        this.user = null;
+        this.user = undefined;
         this.isRootViewer = isRootViewer ?? false;
     }
 
@@ -66,6 +71,14 @@ export class Viewer {
         if(this.isRootViewer){
             return;
         }
+        // Get SessionID from Headers if available
+        // --> get Session from DB
+        // else
+        // --> create Session
+
+        // --> create Device
+        // this.device = this.createDeviceInfoFromHeaders();
+        //
         const payloadFromToken = this.getPayloadFromToken();
         if (payloadFromToken) {
             console.log("PAYLOAD: ", payloadFromToken);
@@ -136,6 +149,24 @@ export class Viewer {
         } catch (error) {
             return false;
         }
+    }
+
+    createDeviceInfoFromHeaders(): DeviceInfo | undefined {
+        if(this.isRootViewer){
+            return new DeviceInfo("userAgentString", "userAgentString", DeviceType.unknown, "RootViewerDevice", "RootOS");
+        }
+        if (!this.headers){
+            return undefined;
+        }
+        if(this.headers["user-agent"]){
+            return new DeviceInfo(this.headers["user-agent"], this.headers["user-agent"], DeviceType.unknown, "Device Name", "Device Operating System");
+        }
+        return undefined;
+    }
+
+    createSession(): Session | undefined {
+        const dateTimeNow = new Date(Date.now());
+        return new Session("0", dateTimeNow, dateTimeNow, dateTimeNow, SessionStatus.active);
     }
 
 }

@@ -7,9 +7,17 @@ import { Reminder } from "../../../core/components/reminderContext/domain/entiti
 import { User } from "../../../core/components/reminderContext/domain/entities/User.js";
 import { UserRole } from "../../../core/sharedKernel/UserRole.js";
 import DataLoader from "dataloader";
-import {LocationWithRadius} from "../../../core/components/reminderContext/domain/entities/index.js";
-import {ReminderService} from "../../../core/components/reminderContext/application/services/index.js";
-import user from "../../../presentation/graphQL/resolvers/user.js";
+import {
+  LocationWithRadius,
+} from "../../../core/components/reminderContext/domain/entities/index.js";
+import {
+  Device,
+  RefreshToken,
+  Session
+} from "../../../core/components/userSessionContext/domain/entities/index.js"
+import {DeviceRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
+import {DeviceType, SessionStatus} from "../../../core/components/userSessionContext/domain/valueObjects/index.js";
+import {RefreshTokenRepository, SessionRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
 
 
 // TODO: Move this to hasher or password service
@@ -26,11 +34,14 @@ function generateRandomStringWithLength(length: number) {
 
 // implements LoginRepository, UserRepository, ReminderRepository
 export class RedisRepository
-  implements LoginRepository, UserRepository, ReminderRepository
+  implements LoginRepository, UserRepository, ReminderRepository, DeviceRepository, SessionRepository, RefreshTokenRepository
 {
   redis: RedisClientType;
   userLoader: DataLoader<string, User | null>
   reminderLoader: DataLoader<string, Reminder | null>
+  deviceLoader: DataLoader<string, Device | null>
+  sessionLoader: DataLoader<string, Session | null>
+  refreshTokenLoader: DataLoader<string, RefreshToken | null>
 
   constructor(redisHost: string | null, redisPort: string | null) {
     const redisUrl =
@@ -81,19 +92,73 @@ export class RedisRepository
       return Promise.all(reminderPromises);
     });
 
+    this.deviceLoader = new DataLoader<string, Device | null>(async (ids) => {
+      // Fetch data from Redis for the provided IDs
+      const promises = ids.map(async (id) => {
+        let data = await this.redis.hGetAll("device:" + id);
+        data = {
+          ...data, // Copy existing key-value pairs
+          id: id, // Append the new key-value pair
+        }
+        if (Device.isValidDeviceData(data)) {
+          return Device.fromJSON(data);
+        } else {
+          console.log("No device data found in redis for id: ", id);
+          return null;
+        }
+      });
+      return Promise.all(promises);
+    });
+
+    this.sessionLoader = new DataLoader<string, Session | null>(async (ids) => {
+      // Fetch data from Redis for the provided IDs
+      const promises = ids.map(async (id) => {
+        let data = await this.redis.hGetAll("session:" + id);
+        data = {
+          ...data, // Copy existing key-value pairs
+          id: id, // Append the new key-value pair
+        }
+        if (Session.isValidSessionData(data)) {
+          return Session.fromJSON(data);
+        } else {
+          console.log("No device data found in redis for id: ", id);
+          return null;
+        }
+      });
+      return Promise.all(promises);
+    });
+
+    this.refreshTokenLoader = new DataLoader<string, RefreshToken | null>(async (ids) => {
+      // Fetch data from Redis for the provided IDs
+      const promises = ids.map(async (id) => {
+        let data = await this.redis.hGetAll("refresh_token:" + id);
+        data = {
+          ...data, // Copy existing key-value pairs
+          id: id, // Append the new key-value pair
+        }
+        if (RefreshToken.isValidRefreshTokenData(data)) {
+          return RefreshToken.fromJSON(data);
+        } else {
+          console.log("No refreshToken data found in redis for id: ", id);
+          return null;
+        }
+      });
+      return Promise.all(promises);
+    });
+
   }
 
   async connect() {
     await this.redis.connect();
   }
 
-  //
-  // Login CRUD
-  //
+  //region Login
   async createLogin(
     email: string,
     password: string,
     associatedUserIds: string[],
+    associatedDeviceIds: string[],
+    associatedSessionIds: string[],
   ): Promise<Login> {
     // Check if Login already exists
     if (await this.redis.hGet("logins", email)) {
@@ -121,12 +186,24 @@ export class RedisRepository
     if (associatedUserIds.length > 0) {
       await this.redis.sAdd(
         "login:" + loginId.toString() + "associated_user_ids",
-        associatedUserIds
+          associatedUserIds
+      );
+    }
+    if (associatedDeviceIds.length > 0) {
+      await this.redis.sAdd(
+          "login:" + loginId.toString() + "associated_device_ids",
+          associatedDeviceIds
+      );
+    }
+    if (associatedSessionIds.length > 0) {
+      await this.redis.sAdd(
+          "login:" + loginId.toString() + "associated_session_ids",
+          associatedSessionIds
       );
     }
     // Return the Login Object
     return Promise.resolve(
-      new Login(loginId.toString(), created, created, email, password, associatedUserIds)
+      new Login(loginId.toString(), created, created, email, password, associatedUserIds, associatedDeviceIds, associatedSessionIds)
     );
   }
 
@@ -142,9 +219,9 @@ export class RedisRepository
     }
 
     const loginData = await this.redis.hGetAll("login:" + loginId);
-    const associatedUserIds = await this.redis.sMembers(
-        "login:" + loginId + "associated_user_ids"
-    );
+    const associatedUserIds = await this.redis.sMembers("login:" + loginId + "associated_user_ids");
+    const associatedDeviceIds = await this.redis.sMembers("login:" + loginId + "associated_device_ids");
+    const associatedSessionIds = await this.redis.sMembers("login:" + loginId + "associated_session_ids");
 
     if(loginData && associatedUserIds){
       return new Login(
@@ -153,7 +230,9 @@ export class RedisRepository
           new Date(loginData.modified),
           loginData.email,
           loginData.password,
-          associatedUserIds
+          associatedUserIds,
+          associatedDeviceIds,
+          associatedSessionIds
       );
     }
     return null;
@@ -178,13 +257,15 @@ export class RedisRepository
       return await Promise.all([
         this.redis.hGetAll("login:" + id),
         this.redis.sMembers("login:" + id + "associated_user_ids"),
+        this.redis.sMembers("login:" + id + "associated_device_ids"),
+        this.redis.sMembers("login:" + id + "associated_session_ids"),
       ])
           .then((results) => {
             if(id === undefined || results[0].email === undefined || results[0].password === undefined){
               return resolve(null);
             }
             else {
-              return resolve(new Login(id, new Date(results[0].created), new Date(results[0].modified), results[0].email, results[0].password, results[1]));
+              return resolve(new Login(id, new Date(results[0].created), new Date(results[0].modified), results[0].email, results[0].password, results[1], results[2], results[3]));
             }
           })
           .catch((reason) => {
@@ -218,9 +299,235 @@ export class RedisRepository
     return Promise.resolve(nbrOfDeletedFields > 0);
   }
 
-  //
-  // User CRUD
-  //
+  //endregion
+
+  //region Device
+  async createDevice(deviceIdentifier: string, userAgentString: string, deviceType: DeviceType, deviceName: string, deviceOperatingSystem: string, lastUsed: Date, associatedSessionIds: string[]): Promise<Device> {
+    const deviceId = await this.redis.incr("next_device_id");
+    const created = new Date(Date.now());
+    await this.redis.sAdd("devices", deviceId.toString());
+    await this.redis.hSet("device:" + deviceId.toString(), [
+      ...Object.entries({
+        created: created.toISOString(),
+        modified: created.toISOString(),
+        deviceIdentifier: deviceIdentifier,
+        userAgentString: userAgentString,
+        deviceType: deviceType,
+        deviceName: deviceName,
+        deviceOperatingSystem: deviceOperatingSystem,
+        lastUsed: lastUsed.toISOString()
+      }).flat(),
+    ]);
+    // Add sessions to associate with this device
+    if (associatedSessionIds.length > 0){
+      await this.redis.sAdd(
+          "device:" + deviceId.toString() + "associated_session_ids",
+          associatedSessionIds
+      );
+    }
+    return Promise.resolve(new Device(deviceId.toString(), created, created, deviceIdentifier, userAgentString, deviceType, deviceName, deviceOperatingSystem, created, associatedSessionIds));
+  }
+
+  async deleteDevice(id: string): Promise<boolean> {
+    const deviceData = await this.redis.hGetAll("device:" + id);
+    if (!deviceData) {
+      return Promise.reject("No device found with id: " + id);
+    }
+    // Delete Stuff...
+    await this.redis.sRem("devices", id);
+    await this.redis.del("device:" + id + "associated_session_ids");
+    const nbrOfDeletedFields = await this.redis.del("device:" + id);
+    return Promise.resolve(nbrOfDeletedFields > 0);
+  }
+
+  async getAllDeviceIds(): Promise<string[] | null> {
+    const setExists = await this.redis.exists('devices');
+    if (setExists === 0) {
+      // The Set does not exist
+      return null;
+    }
+    return await this.redis.sMembers('devices');
+  }
+
+  getDeviceById(id: string): Promise<Device | null> {
+    return this.deviceLoader.load(id);
+  }
+
+  getManyDevicesByIds(ids: string[]): Promise<(Device | Error | null)[]> {
+    return this.deviceLoader.loadMany(ids);
+  }
+
+  async updateDevice(updatedDevice: Device): Promise<boolean> {
+    const currentDevice = await this.getDeviceById(updatedDevice.id);
+
+    if (!currentDevice) {
+      return false;
+    }
+    if (JSON.stringify(currentDevice.associatedSessionIds) !== JSON.stringify(updatedDevice.associatedSessionIds)) {
+      // Remove old association
+      await this.redis.sRem(
+          "device:" + currentDevice.id + "associated_session_ids",
+          currentDevice.associatedSessionIds
+      );
+      // Add new association
+      await this.redis.sAdd(
+          "device:" + currentDevice.id + "associated_session_ids",
+          updatedDevice.associatedSessionIds
+      );
+    }
+    const args = ['HMSET', `device:${currentDevice.id}`, ...Object.entries(updatedDevice.toJSON()).filter(([key]) => key !== 'id').flat()];
+    return this.redis.sendCommand(args)
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+  }
+  //endregion
+
+  //region Session
+  async createSession(startTime: Date, sessionStatus: SessionStatus, endTime?: Date, associatedDeviceId?: string, associatedLoginId?: string, associatedRefreshTokenId?: string, ): Promise<Session> {
+    const sessionId = await this.redis.incr("next_session_id");
+    const created = new Date(Date.now());
+    await this.redis.sAdd("sessions", sessionId.toString());
+    await this.redis.hSet("session:" + sessionId.toString(), [
+      ...Object.entries({
+        created: created.toISOString(),
+        modified: created.toISOString(),
+        startTime: startTime.toISOString(),
+        sessionStatus: sessionStatus
+      }).flat(),
+    ]);
+    if(endTime) {
+      await this.redis.hSet("session:" + sessionId.toString(), "endTime", endTime.toISOString());
+    }
+    if(associatedDeviceId) {
+      await this.redis.hSet("session:" + sessionId.toString(), "associatedDeviceId", associatedDeviceId);
+    }
+    if(associatedLoginId) {
+      await this.redis.hSet("session:" + sessionId.toString(), "associatedLoginId", associatedLoginId);
+    }
+    if(associatedRefreshTokenId) {
+      await this.redis.hSet("session:" + sessionId.toString(), "associatedRefreshTokenId", associatedRefreshTokenId);
+    }
+    return Promise.resolve(new Session(sessionId.toString(), created, created, startTime, sessionStatus, endTime ? endTime : undefined, associatedDeviceId ? associatedDeviceId : undefined,associatedLoginId ? associatedLoginId : undefined, associatedRefreshTokenId ? associatedRefreshTokenId : undefined));
+  }
+
+  async deleteSession(id: string): Promise<boolean> {
+    const sessionData = await this.redis.hGetAll("session:" + id);
+    if (!sessionData) {
+      return Promise.reject("No session found with id: " + id);
+    }
+    // Delete Stuff...
+    await this.redis.sRem("sessions", id);
+    const nbrOfDeletedFields = await this.redis.del("session:" + id);
+    return Promise.resolve(nbrOfDeletedFields > 0);
+  }
+
+  async getAllSessionIds(): Promise<string[] | null> {
+    const setExists = await this.redis.exists('sessions');
+    if (setExists === 0) {
+      // The Set does not exist
+      return null;
+    }
+    return await this.redis.sMembers('sessions');
+  }
+
+  async getManySessionsByIds(ids: string[]): Promise<(Session | Error | null)[]> {
+    return this.sessionLoader.loadMany(ids);
+  }
+
+  async getSessionById(id: string): Promise<Session | null> {
+    return this.sessionLoader.load(id);
+  }
+
+  async updateSession(updatedSession: Session): Promise<boolean> {
+    const currentSession = await this.getDeviceById(updatedSession.id);
+
+    if (!currentSession) {
+      return false;
+    }
+
+    const args = ['HMSET', `session:${currentSession.id}`, ...Object.entries(updatedSession.toJSON()).filter(([key]) => key !== 'id').flat()];
+
+    return this.redis.sendCommand(args)
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+  }
+  //endregion
+
+  //region RefreshToken
+  async createRefreshToken(token: string, expiration: Date, revoked: boolean, associatedLoginId: string, associatedDeviceId: string): Promise<RefreshToken> {
+    const refreshTokenId = await this.redis.incr("next_refresh_token_id");
+    const created = new Date(Date.now());
+    await this.redis.sAdd("refresh_tokens", refreshTokenId.toString());
+    await this.redis.hSet("refresh_token:" + refreshTokenId.toString(), [
+      ...Object.entries({
+        created: created.toISOString(),
+        modified: created.toISOString(),
+        token: token,
+        expiration: expiration.toISOString(),
+        revoked: JSON.stringify(revoked),
+        associatedLoginId: associatedLoginId,
+        associatedDeviceId: associatedDeviceId
+      }).flat(),
+    ]);
+    return Promise.resolve(new RefreshToken(refreshTokenId.toString(), created, created, token, expiration, revoked, associatedLoginId, associatedDeviceId));
+  }
+
+  async deleteRefreshToken(id: string): Promise<boolean> {
+    const refreshTokenData = await this.redis.hGetAll("refresh_token:" + id);
+    if (!refreshTokenData) {
+      return Promise.reject("No refreshToken found with id: " + id);
+    }
+    // Delete Stuff...
+    await this.redis.sRem("refresh_tokens", id);
+    const nbrOfDeletedFields = await this.redis.del("refresh_token:" + id);
+    return Promise.resolve(nbrOfDeletedFields > 0);
+  }
+
+  async getAllRefreshTokenIds(): Promise<string[] | null> {
+    const setExists = await this.redis.exists('refresh_tokens');
+    if (setExists === 0) {
+      // The Set does not exist
+      return null;
+    }
+    return await this.redis.sMembers('refresh_tokens');
+  }
+
+  async getManyRefreshTokensByIds(ids: string[]): Promise<(RefreshToken | Error | null)[]> {
+    return this.refreshTokenLoader.loadMany(ids);
+  }
+
+  async getRefreshTokenById(id: string): Promise<RefreshToken | null> {
+    return this.refreshTokenLoader.load(id);
+  }
+
+  async updateRefreshToken(updatedRefreshToken: RefreshToken): Promise<boolean> {
+    const currentRefreshToken = await this.getRefreshTokenById(updatedRefreshToken.id);
+
+    if (!currentRefreshToken) {
+      return false;
+    }
+
+    const args = ['HMSET', `refresh_token:${currentRefreshToken.id}`, ...Object.entries(updatedRefreshToken.toJSON()).filter(([key]) => key !== 'id').flat()];
+
+    return this.redis.sendCommand(args)
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+  }
+  //endregion
+
+  //region User
   async createUser(
       associatedLoginId: string,
       role: UserRole,
@@ -294,9 +601,9 @@ export class RedisRepository
     return Promise.resolve(nbrOfDeletedFields > 0);
   }
 
-  //
-  // Reminder CRUD
-  //
+  //endregion
+
+  //region Reminder
   async createReminder(
     title: string,
     ownerId: string,
@@ -339,7 +646,7 @@ export class RedisRepository
     // Add users to remind association
     for (const userToRemindId of idsOfUsersToRemind){
       await this.redis.sAdd(
-          "user:" + userToRemindId + "reminderSubscriptions",
+          "user:" + userToRemindId + "reminder_subscriptions",
           reminderId.toString()
       );
     }
@@ -384,17 +691,18 @@ export class RedisRepository
       );
     }
 
+
     if(JSON.stringify(oldReminder.idsOfUsersToRemind) !== JSON.stringify(reminder.idsOfUsersToRemind)){
       // Update users to remind association
       for (const userToRemindId of oldReminder.idsOfUsersToRemind){
         await this.redis.sRem(
-            "user:" + userToRemindId + "reminderSubscriptions",
+            "user:" + userToRemindId + "reminder_subscriptions",
             reminder.id
         );
       }
       for (const userToRemindId of reminder.idsOfUsersToRemind){
         await this.redis.sAdd(
-            "user:" + userToRemindId + "reminderSubscriptions",
+            "user:" + userToRemindId + "reminder_subscriptions",
             reminder.id
         );
       }
@@ -429,7 +737,7 @@ export class RedisRepository
       // Delete users to remind associations
       for (const userToRemindId of reminderToDelete.idsOfUsersToRemind){
         await this.redis.sRem(
-            "user:" + userToRemindId + "reminderSubscriptions",
+            "user:" + userToRemindId + "reminder_subscriptions",
             id.toString()
         );
       }
@@ -446,5 +754,7 @@ export class RedisRepository
     }
 
   }
+
+  //endregion
 
 }

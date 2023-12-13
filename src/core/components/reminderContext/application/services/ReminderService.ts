@@ -7,7 +7,6 @@ import {
   CreateReminderProblem,
   CreateReminderResult
 } from "../../../../portsAndInterfaces/ports/CreateReminderUseCase.js";
-import {SignUpInvalidInput, SignUpInvalidInputField} from "../../../../portsAndInterfaces/ports/SignUpUseCase.js";
 
 
 //

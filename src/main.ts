@@ -28,6 +28,11 @@ import {InitializePeriodicReminderChecksUseCase} from "./core/portsAndInterfaces
 import {
     InitializePeriodicReminderChecksUseCaseHandler
 } from "./core/components/reminderContext/application/useCases/index.js";
+import {
+    DeviceService,
+    RefreshTokenService,
+    SessionService
+} from "./core/components/userSessionContext/application/services/index.js";
 
 
 // **************************************
@@ -50,6 +55,12 @@ app.use(morgan('dev'));
 // **************************************
 //       Express middlewares
 // **************************************
+// When to Store:
+//
+// Session data and device information can be stored at key points in your application's logic. For example:
+//  - For session data, you can store login and logout events or track activity during a session.
+//  - For device information, you can store device registration when a user adds a new device and update the last
+//    used time during access.
 const loggingMiddleware = (req: any, res: any, next: any) => {
     console.log('ip:', req.ip);
     next();
@@ -110,9 +121,12 @@ const pushNotificationService = new MyPushNotificationService();
 const passwordManager = new PasswordManager(hasher);
 const userService = new UserService(redisRepository);
 const loginService = new LoginService(redisRepository, passwordManager);
-const accountService = new AccountService(loginService, userService, passwordManager);
+const deviceService = new DeviceService(redisRepository);
+const sessionService = new SessionService(redisRepository);
+const refreshTokenService = new RefreshTokenService(redisRepository);
+const accountService = new AccountService(loginService, userService, passwordManager, deviceService, sessionService, refreshTokenService);
 const reminderService = new ReminderService(redisRepository);
-const reminderNotificationService = new ReminderNotificationService(reminderService, userService, pushNotificationService)
+const reminderNotificationService = new ReminderNotificationService(reminderService, userService, pushNotificationService);
 
 // Presentation
 const initializePeriodicReminderChecksUseCase: InitializePeriodicReminderChecksUseCase = new InitializePeriodicReminderChecksUseCaseHandler(jobScheduler, reminderNotificationService)
@@ -160,6 +174,8 @@ export interface GraphQlContext {
     loginService: LoginService;
     accountService: AccountService;
     reminderService: ReminderService;
+    deviceService: DeviceService;
+    sessionService: SessionService;
     // Add other properties as needed
 }
 
@@ -169,6 +185,8 @@ const graphqlContext = {
     loginService: loginService,
     accountService: accountService,
     reminderService: reminderService,
+    deviceService: deviceService,
+    sessionService: sessionService
 };
 
 

@@ -41,7 +41,7 @@ export class LoginService {
         /* To mitigate this we will use two concepts, salt and hashing. On the server we will generate
          and store a random string to use as our salt and add it to the password pre-hashing.
          This means that two of the same passwords will not generate the same hash. */
-        return this.loginRepository.createLogin(email, await this.passwordManager.hashPassword(password), []);
+        return this.loginRepository.createLogin(email, await this.passwordManager.hashPassword(password), [], [], []);
     }
 
     // TODO: Probably add viewer to parameters

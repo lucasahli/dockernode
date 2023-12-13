@@ -1,7 +1,7 @@
 import {SignInUseCase} from "../../../../portsAndInterfaces/ports/index.js";
 import {AccountService} from "../services/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
-import {Token} from "../../domain/valueObjects/Token.js";
+import {AccessToken} from "../../domain/valueObjects/AccessToken.js";
 import {SignInResult} from "../../../../portsAndInterfaces/ports/SignInUseCase.js";
 
 export class SignInUseCaseHandler implements SignInUseCase {

@@ -10,7 +10,7 @@ import {MockupRepository} from "../../../../../infrastructure/persistence/mockup
 import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
 
 import jwt from 'jsonwebtoken';
-import {Token} from "../../domain/valueObjects/Token.js";
+import {AccessToken} from "../../domain/valueObjects/AccessToken";
 
 describe("AccountService", () => {
     const mockRepo = new MockupRepository();
@@ -50,7 +50,7 @@ describe("AccountService", () => {
     describe(".checkCanSignUp", () => {
         test("Can signUp if a token was created", () => {
             const unknownViewer = new Viewer(new MockHeaders(undefined));
-            const token = new Token("someToken");
+            const token = new AccessToken("someToken");
             expect((accountService as any).checkCanSignUp(unknownViewer, "unused.email@test.com", "somePassword", token)).toBeTruthy();
         })
 

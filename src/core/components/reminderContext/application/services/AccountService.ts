@@ -5,11 +5,10 @@ import {Login} from "../../domain/entities/Login.js";
 import {User} from "../../domain/entities/User.js";
 import {PasswordManager} from "../../domain/services/index.js";
 import jwt from 'jsonwebtoken';
-import {Token} from "../../domain/valueObjects/Token.js";
-import {ValidationError} from "../../../../sharedKernel/index.js";
+import {AccessToken} from "../../domain/valueObjects/index.js";
 import {Email, FullName} from "../../domain/valueObjects/index.js";
 import {Password} from "../../domain/valueObjects/Password.js";
-import {DatabaseError} from "../../../../sharedKernel/errors/DatabaseError.js";
+import {DatabaseError} from "../../../../sharedKernel/index.js";
 import {
     SignUpInvalidInput,
     SignUpInvalidInputField,
@@ -21,13 +20,19 @@ import {
     SignInProblem,
     SignInResult
 } from "../../../../portsAndInterfaces/ports/SignInUseCase.js";
+import {DeviceService, SessionService} from "../../../userSessionContext/application/services/index.js";
+import {SessionStatus} from "../../../userSessionContext/domain/valueObjects/index.js";
+import {RefreshTokenService} from "../../../userSessionContext/application/services/index.js";
 
 
 export class AccountService {
 
     constructor(public loginService: LoginService,
                 public userService: UserService,
-                public passwordManager: PasswordManager) {}
+                public passwordManager: PasswordManager,
+                public deviceService: DeviceService,
+                public sessionService: SessionService,
+                public refreshTokenService: RefreshTokenService) {}
 
     async signUp(viewer: Viewer, email: string, password: string, fullName: string): Promise<SignUpResult> {
         const canSignUp = this.checkCanSignUp(viewer, email, password, fullName);
@@ -43,7 +48,51 @@ export class AccountService {
             if(newUser === null){
                 throw new DatabaseError("Could not create new FreemiumUser");
             }
-            return {token: this.createToken(newLogin, newUser, process.env.SECRET!, '30m')};
+            const deviceInfo = viewer.createDeviceInfoFromHeaders();
+            if(deviceInfo === undefined) {
+                throw new DatabaseError("Could not create new Device Info");
+            }
+            const newDevice = await this.deviceService.createDevice(
+                viewer,
+                deviceInfo.deviceIdentifier,
+                deviceInfo.userAgentString,
+                deviceInfo.deviceType,
+                deviceInfo.deviceName,
+                deviceInfo.deviceOperatingSystem,
+                new Date(Date.now()),
+                []
+            );
+            if(!newDevice){
+                throw new DatabaseError("Could not create new Device");
+            }
+            const refreshToken = await this.refreshTokenService.createRefreshToken(
+                viewer,
+                this.createRefreshTokenString(),
+                new Date(),
+                false,
+                newLogin.id,
+                newDevice.id
+                );
+            if(!refreshToken){
+                throw new DatabaseError("Could not create new RefreshToken")
+            }
+            const newSession = await this.sessionService.createSession(
+                viewer,
+                new Date(Date.now()),
+                SessionStatus.active,
+                undefined,
+                newDevice.id,
+                newLogin.id,
+                refreshToken.id
+            );
+            if(!newSession){
+                throw new DatabaseError("Could not create new Session");
+            }
+            return {
+                sessionId: newSession.id,
+                accessToken: this.createAccessToken(newLogin, newUser, process.env.SECRET!, '30m'),
+                refreshToken: refreshToken
+            };
         }
         const invalidInputs: SignUpInvalidInput[] = [];
         if(!Email.isValid(email)){
@@ -67,10 +116,10 @@ export class AccountService {
         return {title: "SignUp Problem", invalidInputs: invalidInputs};
     }
 
-    private createToken(login: Login, user: User, secret: string, expiresIn: string): Token {
+    private createAccessToken(login: Login, user: User, secret: string, expiresIn: string): AccessToken {
         const { id, email } = login;
         const { role } = user;
-        return new Token(jwt.sign({loginId: id, loginEmail: email, userId: user.id, userRole: role}, secret, {expiresIn}));
+        return new AccessToken(jwt.sign({loginId: id, loginEmail: email, userId: user.id, userRole: role}, secret, {expiresIn}));
     }
 
     private checkCanSignUp(viewer: Viewer, email: string, password: string, fullName: string): boolean {
@@ -81,6 +130,7 @@ export class AccountService {
     }
 
     async signIn(viewer: Viewer, email: string, password: string): Promise<SignInResult> {
+        // TODO: Check this function very carefully
         const login = await this.loginService.getLoginByEmail(email);
 
         if(login === null) {
@@ -98,8 +148,50 @@ export class AccountService {
 
         const possibleUser = await this.userService.generate(viewer, login.associatedUserIds[0] ? login.associatedUserIds[0] : "");
         if(possibleUser === null) throw new DatabaseError("No user associated with login");
+        const deviceInfo = viewer.createDeviceInfoFromHeaders();
+        if(deviceInfo === undefined) {
+            throw new DatabaseError("Could not create new Device Info");
+        }
+        const newDevice = await this.deviceService.createDevice(
+            viewer,
+            deviceInfo.deviceIdentifier,
+            deviceInfo.userAgentString,
+            deviceInfo.deviceType,
+            deviceInfo.deviceName,
+            deviceInfo.deviceOperatingSystem,
+            new Date(Date.now()),
+            []
+        );
+        if(!newDevice){
+            throw new DatabaseError("Could not create new Device");
+        }
+        const refreshToken = await this.refreshTokenService.createRefreshToken(
+            viewer,
+            this.createRefreshTokenString(),
+            new Date(),
+            false,
+            login.id,
+            newDevice.id
+        );
+        if(!refreshToken){
+            throw new DatabaseError("Could not create new RefreshToken")
+        }
+        const newSession = await this.sessionService.createSession(
+            viewer,
+            new Date(Date.now()),
+            SessionStatus.active,
+            undefined,
+            newDevice.id,
+            login.id,
+            refreshToken.id
+        );
+        if(!newSession){
+            throw new DatabaseError("Could not create new Session");
+        }
         return {
-            token: this.createToken(login, possibleUser, process.env.SECRET!, '30m'),
+            sessionId: newSession.id,
+            accessToken: this.createAccessToken(login, possibleUser, process.env.SECRET!, '30m'),
+            refreshToken: refreshToken
         };
     }
 
@@ -121,5 +213,9 @@ export class AccountService {
     async getUsersByLogin(viewer: Viewer, loginId: string): Promise<(User | Error | null)[] | null> {
         const login = await this.loginService.generate(viewer, loginId);
         return login ? this.userService.getMany(viewer, login.associatedUserIds) : null;
+    }
+
+    private createRefreshTokenString() {
+        return jwt.sign({tokenPayload: "TokenPayload"}, process.env.SECRET!, {expiresIn: '90d'});
     }
 }

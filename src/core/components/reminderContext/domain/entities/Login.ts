@@ -7,7 +7,10 @@ export class Login {
         public modified: Date,
         public email: string,
         public password: string,
-        public associatedUserIds: string[]) {}
+        public associatedUserIds: string[],
+        public associatedDeviceIds: string[],
+        public associatedSessionIds: string[]
+    ) {}
 
     // Method to get a JSON representation of the reminder
     toJSON(): Record<string, any> {
@@ -17,7 +20,9 @@ export class Login {
             modified: this.modified.toISOString(),
             email: this.email,
             password: this.password,
-            associatedUserIds: JSON.stringify(this.associatedUserIds)
+            associatedUserIds: JSON.stringify(this.associatedUserIds),
+            associatedDeviceIds: JSON.stringify(this.associatedDeviceIds),
+            associatedSessionIds: JSON.stringify(this.associatedSessionIds)
         };
     }
 
@@ -29,7 +34,9 @@ export class Login {
             new Date(data.modified),
             data.email,
             data.password,
-            JSON.parse(data.associatedUserIds)
+            JSON.parse(data.associatedUserIds),
+            JSON.parse(data.associatedDeviceIds),
+            JSON.parse(data.associatedSessionIds)
         );
     }
 
@@ -41,7 +48,9 @@ export class Login {
             data.modified &&
             data.email &&
             data.password &&
-            data.associatedUserIds
+            data.associatedUserIds &&
+            data.associatedDeviceIds &&
+            data.associatedSessionIds
         ){
             // Optional properties are checked here, you can add checks if needed
             return true;

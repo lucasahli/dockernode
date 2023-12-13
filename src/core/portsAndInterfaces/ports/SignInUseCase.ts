@@ -1,11 +1,14 @@
 import {ValidationError, Viewer} from "../../sharedKernel/index.js";
-import {Token} from "../../components/reminderContext/domain/valueObjects/Token.js";
+import {AccessToken} from "../../components/reminderContext/domain/valueObjects/index.js";
+import {RefreshToken} from "../../components/userSessionContext/domain/entities/index.js";
 
-export type SignInResult = SignInSuccess | SignInProblem;
+export type SignInResult = SignInSuccess | SignInProblem
 
 export type SignInSuccess = {
-    token: Token;
-};
+    sessionId: string;
+    accessToken: AccessToken;
+    refreshToken: RefreshToken;
+}
 
 export class SignInProblem {
     constructor(public title: string, public invalidInputs: SignInInvalidInput[]) {}
@@ -14,7 +17,7 @@ export class SignInProblem {
 export type SignInInvalidInput = {
     field: SignInInvalidInputField;
     message: string;
-};
+}
 
 export enum SignInInvalidInputField {
     EMAIL = "EMAIL",
