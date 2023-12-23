@@ -72,4 +72,8 @@ export class DeviceService {
         const canUpdate = this.checkCanUpdate(viewer, device);
         return canUpdate ? this.deviceRepository.updateDevice(device) : false;
     }
+
+    async getDeviceByDeviceIdentifier(deviceIdentifier: string): Promise<Device | null> {
+        return this.deviceRepository.getDeviceByDeviceIdentifier(deviceIdentifier);
+    }
 }

@@ -22,12 +22,11 @@ describe("RedisRepository as UserRepository", () => {
   describe(".addUser", () => {
     test("Returns User if it could be added", async () => {
       expect.assertions(1);
-      const existingLogin = await redisRepository.createLogin("usertest@mail.com", "passwordTest", []);
+      const existingLogin = await redisRepository.createLogin("usertest@mail.com", "passwordTest", [], [], []);
       const result = await redisRepository.createUser(
           existingLogin.id,
           UserRole.freemium,
-          "Manfred",
-          "Sahli"
+          "Manfred Sahli"
       );
       expect(result).toBeInstanceOf(User);
     });

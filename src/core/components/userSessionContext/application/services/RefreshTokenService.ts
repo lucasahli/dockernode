@@ -31,6 +31,7 @@ export class RefreshTokenService {
         associatedDeviceId: string
     ): Promise<RefreshToken> {
         const canCreate = this.checkCanCreate(viewer);
+
         const refreshToken = await this.refreshTokenRepository.createRefreshToken(
             tokenString,
             expiration,

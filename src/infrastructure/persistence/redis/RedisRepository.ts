@@ -303,9 +303,14 @@ export class RedisRepository
 
   //region Device
   async createDevice(deviceIdentifier: string, userAgentString: string, deviceType: DeviceType, deviceName: string, deviceOperatingSystem: string, lastUsed: Date, associatedSessionIds: string[]): Promise<Device> {
+    // Check if Device with that deviceIdentifier already exists
+    if (await this.redis.hGet("devices", deviceIdentifier)) {
+      return Promise.reject("Device with that deviceIdentifier (" + deviceIdentifier + ") already exists!");
+    }
     const deviceId = await this.redis.incr("next_device_id");
     const created = new Date(Date.now());
     await this.redis.sAdd("devices", deviceId.toString());
+    await this.redis.hSet("devices", deviceIdentifier, deviceId);
     await this.redis.hSet("device:" + deviceId.toString(), [
       ...Object.entries({
         created: created.toISOString(),
@@ -383,6 +388,15 @@ export class RedisRepository
         .catch(() => {
           return false;
         });
+  }
+
+  async getDeviceByDeviceIdentifier(deviceIdentifier: string): Promise<Device | null> {
+    const deviceId = await this.redis.hGet("devices", deviceIdentifier);
+    if (!deviceId) {
+      console.log(`No Device with that deviceIdentifier (${deviceIdentifier}) in redis!!!`);
+      return null;
+    }
+    return this.getDeviceById(deviceId);
   }
   //endregion
 

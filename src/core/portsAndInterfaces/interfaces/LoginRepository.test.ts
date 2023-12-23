@@ -22,7 +22,9 @@ describe("RedisRepository as LoginRepository", () => {
       const result = await redisRepository.createLogin(
         "test@mail.com",
         "passwordTest",
-        []
+        [],
+          [],
+          []
       );
       expect(result).toBeInstanceOf(Login);
     });
@@ -32,7 +34,7 @@ describe("RedisRepository as LoginRepository", () => {
       // Make sure to add expect.assertions to verify that a certain number of assertions are called.
       // Otherwise, a fulfilled promise would not fail the test.
       return expect(
-        redisRepository.createLogin("test@mail.com", "passwordTest", [])
+        redisRepository.createLogin("test@mail.com", "passwordTest", [], [], [])
       ).rejects.toMatch("Login with that email already exists!");
     });
   });

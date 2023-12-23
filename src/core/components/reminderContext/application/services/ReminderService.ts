@@ -61,7 +61,7 @@ export class ReminderService {
     return {createdReminder: reminder};
   }
 
-  checkCanCreate(viewer: Viewer, reminderTitle: string, dateTimeToRemind: Date): CreateReminderProblem | undefined {
+  checkCanCreate(viewer: Viewer, reminderTitle: string, dateTimeToRemind: Date): CreateReminderProblem | boolean {
     const ownerId = viewer.userId;
     if (ownerId === undefined){
       return new CreateReminderProblem("Not signed in: Sign in to create a reminder", []);
@@ -83,7 +83,7 @@ export class ReminderService {
     if(invalidInputs.length > 0){
       return new CreateReminderProblem("Could not create reminder", invalidInputs);
     }
-    return undefined;
+    return true;
   }
 
   async deleteReminder(viewer: Viewer, id: string): Promise<boolean> {
@@ -110,7 +110,13 @@ export class ReminderService {
       const isLoggedIn = viewer.isLoggedIn();
       if(isLoggedIn){
         const userId: string = viewer.userId ?? "";
-        return (userId === reminder.ownerId);
+        if(viewer.userId){
+          return (userId === reminder.ownerId);
+        }
+        else {
+          console.log("Can not delete because the viewer has no user!!!");
+          return false;
+        }
       }
       else {
         return false;

@@ -23,6 +23,7 @@ import {
 import {DeviceService, SessionService} from "../../../userSessionContext/application/services/index.js";
 import {SessionStatus} from "../../../userSessionContext/domain/valueObjects/index.js";
 import {RefreshTokenService} from "../../../userSessionContext/application/services/index.js";
+import {Device} from "../../../userSessionContext/domain/entities/index.js";
 
 
 export class AccountService {
@@ -52,6 +53,7 @@ export class AccountService {
             if(deviceInfo === undefined) {
                 throw new DatabaseError("Could not create new Device Info");
             }
+            const currentDateTime = new Date(Date.now());
             const newDevice = await this.deviceService.createDevice(
                 viewer,
                 deviceInfo.deviceIdentifier,
@@ -59,16 +61,18 @@ export class AccountService {
                 deviceInfo.deviceType,
                 deviceInfo.deviceName,
                 deviceInfo.deviceOperatingSystem,
-                new Date(Date.now()),
+                currentDateTime,
                 []
             );
             if(!newDevice){
                 throw new DatabaseError("Could not create new Device");
             }
+            const expirationDateTime = new Date(currentDateTime);
+            expirationDateTime.setDate(currentDateTime.getDate() + 90);
             const refreshToken = await this.refreshTokenService.createRefreshToken(
                 viewer,
                 this.createRefreshTokenString(),
-                new Date(),
+                expirationDateTime,
                 false,
                 newLogin.id,
                 newDevice.id
@@ -152,26 +156,37 @@ export class AccountService {
         if(deviceInfo === undefined) {
             throw new DatabaseError("Could not create new Device Info");
         }
-        const newDevice = await this.deviceService.createDevice(
-            viewer,
-            deviceInfo.deviceIdentifier,
-            deviceInfo.userAgentString,
-            deviceInfo.deviceType,
-            deviceInfo.deviceName,
-            deviceInfo.deviceOperatingSystem,
-            new Date(Date.now()),
-            []
-        );
-        if(!newDevice){
-            throw new DatabaseError("Could not create new Device");
+        let device: Device;
+        const knownDevice = await this.deviceService.getDeviceByDeviceIdentifier(deviceInfo.deviceIdentifier);
+        const currentDateTime = new Date(Date.now());
+        if(!knownDevice){
+            const newDevice = await this.deviceService.createDevice(
+                viewer,
+                deviceInfo.deviceIdentifier,
+                deviceInfo.userAgentString,
+                deviceInfo.deviceType,
+                deviceInfo.deviceName,
+                deviceInfo.deviceOperatingSystem,
+                currentDateTime,
+                []
+            );
+            if(!newDevice){
+                throw new DatabaseError("Could not create new Device");
+            }
+            device = newDevice;
         }
+        else {
+            device = knownDevice;
+        }
+        const expirationDateTime = new Date(currentDateTime);
+        expirationDateTime.setDate(currentDateTime.getDate() + 90);
         const refreshToken = await this.refreshTokenService.createRefreshToken(
             viewer,
             this.createRefreshTokenString(),
             new Date(),
             false,
             login.id,
-            newDevice.id
+            device.id
         );
         if(!refreshToken){
             throw new DatabaseError("Could not create new RefreshToken")
@@ -181,7 +196,7 @@ export class AccountService {
             new Date(Date.now()),
             SessionStatus.active,
             undefined,
-            newDevice.id,
+            device.id,
             login.id,
             refreshToken.id
         );
