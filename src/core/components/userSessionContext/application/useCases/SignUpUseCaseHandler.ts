@@ -1,6 +1,6 @@
 import {SignUpUseCase, SignUpResult} from "../../../../portsAndInterfaces/ports/SignUpUseCase.js";
-import {AccountService} from "../services/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
+import {AccountService} from "../services/index.js";
 
 export class SignUpUseCaseHandler implements SignUpUseCase {
     constructor(private accountService: AccountService) {}

@@ -1,6 +1,6 @@
 import {ValidationError, Viewer} from "../../sharedKernel/index.js";
-import {AccessToken} from "../../components/reminderContext/domain/valueObjects/index.js";
 import {RefreshToken} from "../../components/userSessionContext/domain/entities/index.js";
+import {AccessToken} from "../../components/userSessionContext/domain/valueObjects/index.js";
 
 export type SignInResult = SignInSuccess | SignInProblem
 

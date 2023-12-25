@@ -13,13 +13,15 @@ import url from 'url';
 import cors from 'cors';
 import {RedisRepository} from "./infrastructure/persistence/redis/RedisRepository.js";
 import {
+    ReminderNotificationService,
+    ReminderService
+} from "./core/components/reminderContext/application/services/index.js";
+import {
     AccountService,
     LoginService,
-    ReminderNotificationService,
-    ReminderService,
     UserService
-} from "./core/components/reminderContext/application/services/index.js";
-import {PasswordManager} from "./core/components/reminderContext/domain/services/index.js";
+} from "./core/components/userSessionContext/application/services/index.js";
+import {PasswordManager} from "./core/components/userSessionContext/domain/services/index.js";
 import {BcryptHasher} from "./infrastructure/security/BcryptHasher.js";
 import {Hasher} from "./core/portsAndInterfaces/interfaces/Hasher.js";
 import {MyJobScheduler} from "./infrastructure/scheduledJobs/MyJobScheduler.js";
@@ -133,11 +135,29 @@ const initializePeriodicReminderChecksUseCase: InitializePeriodicReminderChecksU
 
 // Startup Jobs
 if(resetRedisOnStartup){
-    redisRepository.redis.flushDb();
+    await redisRepository.redis.flushDb();
     const rootViewer = Viewer.Root();
-    await accountService.signUp(rootViewer, "luca@gmail.com", "Hallo1234", "Luca Sahli");
-    await accountService.signUp(rootViewer, "demo@gmail.com", "Hallo1234", "Demo Account");
-    await accountService.signUp(rootViewer, "dummy@gmail.com", "Hallo1234", "Dummy Account");
+    try {
+        await accountService.signUp(rootViewer, "luca@gmail.com", "Hallo1234", "Luca Sahli");
+    }
+    catch (e) {
+        console.log("CATCHED ERROR: ", e);
+    }
+    try {
+        await accountService.signUp(rootViewer, "demo@gmail.com", "Hallo1234", "Demo Account");
+    }
+    catch (e) {
+        console.log("CATCHED ERROR: ", e);
+    }
+    try {
+        await accountService.signUp(rootViewer, "dummy@gmail.com", "Hallo1234", "Dummy Account");
+    }
+    catch (e) {
+        console.log("CATCHED ERROR: ", e);
+    }
+
+
+
 
     await redisRepository.createReminder("Pay Bills!", "1", ["1"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
     await redisRepository.createReminder("Call Mom!", "1", ["1"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);

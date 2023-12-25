@@ -1,11 +1,8 @@
-import {LoginRepository} from "../../../../portsAndInterfaces/interfaces/LoginRepository.js"
-import {Login} from "../../domain/entities/Login.js";
 import 'dotenv/config';
+import {LoginRepository} from "../../../../portsAndInterfaces/interfaces/LoginRepository.js"
+import {Login} from "../../domain/entities/index.js";
 import {Viewer} from "../../../../sharedKernel/Viewer.js";
-import {PasswordManager} from "../../domain/services/PasswordManager.js";
-import {UserRepository} from "../../../../portsAndInterfaces/interfaces/UserRepository.js";
-import {rejects} from "assert";
-import {ValidationError} from "../../../../sharedKernel/index.js";
+import {PasswordManager} from "../../domain/services/index.js";
 import {SignUpInvalidInputField, SignUpProblem} from "../../../../portsAndInterfaces/ports/SignUpUseCase.js";
 
 export class LoginService {

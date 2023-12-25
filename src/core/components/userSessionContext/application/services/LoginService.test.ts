@@ -1,10 +1,10 @@
 import {jest} from "@jest/globals";
-import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {PasswordManager} from "../../domain/services/index.js";
-import {LoginService} from "../../application/services/index.js";
-import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
-import {MockHeaders, Viewer} from "../../../../sharedKernel/index.js";
-import {Login} from "../../domain/entities/index.js";
+import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository";
+import {PasswordManager} from "../../domain/services";
+import {LoginService} from "../../../reminderContext/application/services";
+import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher";
+import {MockHeaders, Viewer} from "../../../../sharedKernel";
+import {Login} from "../../../reminderContext/domain/entities";
 import {SignUpProblem} from "../../../../portsAndInterfaces/ports/SignUpUseCase";
 
 

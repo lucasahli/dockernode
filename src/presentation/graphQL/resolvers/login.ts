@@ -1,9 +1,5 @@
 import {GraphQlContext} from "../../../main.js";
 import {
-  GetUsersByLoginUseCaseHandler, SignInUseCaseHandler,
-  SignUpUseCaseHandler
-} from "../../../core/components/reminderContext/application/useCases/index.js";
-import {
   CreateSessionUseCase,
   GetUsersByLoginUseCase,
   SignInUseCase,
@@ -12,7 +8,7 @@ import {
 import {GraphQLResolveInfo} from "graphql/type/index.js";
 import {
   CreateDeviceUseCaseHandler,
-  CreateSessionUseCaseHandler
+  CreateSessionUseCaseHandler, GetUsersByLoginUseCaseHandler, SignInUseCaseHandler, SignUpUseCaseHandler
 } from "../../../core/components/userSessionContext/application/useCases/index.js";
 import {CreateDeviceUseCase} from "../../../core/portsAndInterfaces/ports/CreateDeviceUseCase.js";
 

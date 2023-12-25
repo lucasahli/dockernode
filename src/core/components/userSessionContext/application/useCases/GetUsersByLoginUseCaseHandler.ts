@@ -1,6 +1,6 @@
 import {GetUsersByLoginUseCase} from "../../../../portsAndInterfaces/ports/GetUsersByLoginUseCase.js";
-import {AccountService} from "../services/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
+import {AccountService} from "../services/index.js";
 import {User} from "../../domain/entities/index.js";
 
 export class GetUsersByLoginUseCaseHandler implements GetUsersByLoginUseCase {

@@ -1,6 +1,6 @@
 import {jest} from "@jest/globals";
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {PasswordManager} from "../../domain/services/index.js";
+import {PasswordManager} from "../../../userSessionContext/domain/services";
 import {AccountService, LoginService, ReminderService, UserService} from "../../application/services/index.js";
 import {MockHeaders, Viewer} from "../../../../sharedKernel/index.js";
 import {Reminder} from "../../domain/entities/index.js";

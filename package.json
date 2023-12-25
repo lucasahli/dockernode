@@ -9,7 +9,7 @@
     "start": "node dist/main.js",
     "dev": "concurrently \"pnpm run watch-compile\" \"pnpm run watch-dev\"",
     "watch-compile": "swc ./src -w -d dist",
-    "watch-dev": "nodemon -L --inspect=0.0.0.0 --watch \"dist/**/*\" -e js ./dist/main.js",
+    "watch-dev": "nodemon -L --inspect=0.0.0.0:9229 --watch \"dist/**/*\" -e js ./dist/main.js",
     "tests": "jest --config=jest.config.cjs",
     "testing": "node --trace-warnings --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.config.cjs --no-cache"
   },

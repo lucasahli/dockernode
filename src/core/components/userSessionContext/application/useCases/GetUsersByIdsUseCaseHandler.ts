@@ -1,7 +1,7 @@
-import {UserService} from "../services/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
-import {User} from "../../domain/entities/index.js";
 import {GetUsersByIdsUseCase} from "../../../../portsAndInterfaces/ports/GetUsersByIdsUseCase.js";
+import {UserService} from "../services/index.js";
+import {User} from "../../domain/entities/index.js";
 
 export class GetUsersByIdsUseCaseHandler implements GetUsersByIdsUseCase {
     constructor(private userService: UserService) {

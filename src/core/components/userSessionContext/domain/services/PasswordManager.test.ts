@@ -1,6 +1,6 @@
 import {jest} from "@jest/globals";
-import {PasswordManager} from "./index.js";
-import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
+import {PasswordManager} from "./index";
+import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher";
 
 
 describe("PasswordManager", () => {

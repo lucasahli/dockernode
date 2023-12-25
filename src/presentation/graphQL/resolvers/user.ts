@@ -2,13 +2,12 @@ import {
     GetAllUsersUseCase, GetLoginByUserUseCase, GetRemindersByOwnerIdUseCase,
     GetUserByIdUseCase
 } from "../../../core/portsAndInterfaces/ports/index.js";
-import {
-    GetAllUsersUseCaseHandler,
-    GetLoginByUserUseCaseHandler,
-    GetRemindersByOwnerIdUseCaseHandler,
-    GetUserByIdUseCaseHandler
-} from "../../../core/components/reminderContext/application/useCases/index.js";
+import {GetRemindersByOwnerIdUseCaseHandler} from "../../../core/components/reminderContext/application/useCases/index.js";
 import {GraphQlContext} from "../../../main.js";
+import {
+    GetAllUsersUseCaseHandler, GetLoginByUserUseCaseHandler,
+    GetUserByIdUseCaseHandler
+} from "../../../core/components/userSessionContext/application/useCases/index.js";
 
 /** When setting up a field whose value is a custom type,
  * we have to define a function that tells GraphQL how to get that custom type.

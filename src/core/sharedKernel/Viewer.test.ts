@@ -5,7 +5,7 @@ import {
     LoginService,
     UserService
 } from "../components/reminderContext/application/services/index.js";
-import {PasswordManager} from "../components/reminderContext/domain/services/index.js";
+import {PasswordManager} from "../components/userSessionContext/domain/services";
 import {BcryptHasher} from "../../infrastructure/security/BcryptHasher.js";
 import {MockupRepository} from "../../infrastructure/persistence/mockup/MockupRepository.js";
 import {

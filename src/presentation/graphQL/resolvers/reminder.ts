@@ -12,12 +12,14 @@ import {
     DeleteReminderByIdUseCaseHandler,
     GetAllRemindersUseCaseHandler,
     GetReminderByIdUseCaseHandler,
-    GetRemindersByOwnerIdUseCaseHandler,
-    GetUserByIdUseCaseHandler,
-    GetUsersByIdsUseCaseHandler
+    GetRemindersByOwnerIdUseCaseHandler
 } from "../../../core/components/reminderContext/application/useCases/index.js";
 import {GraphQlContext} from "../../../main.js";
 import {GraphQLResolveInfo} from "graphql/type/index.js";
+import {
+    GetUserByIdUseCaseHandler,
+    GetUsersByIdsUseCaseHandler
+} from "../../../core/components/userSessionContext/application/useCases/index.js";
 
 
 export default {

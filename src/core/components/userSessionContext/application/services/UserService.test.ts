@@ -1,8 +1,8 @@
 import {jest} from "@jest/globals";
-import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {UserService} from "../../application/services/index.js";
-import {MockHeaders, Viewer, UserRole} from "../../../../sharedKernel/index.js";
-import {User, Login} from "../../domain/entities/index.js";
+import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository";
+import {UserService} from "../../../reminderContext/application/services";
+import {MockHeaders, Viewer, UserRole} from "../../../../sharedKernel";
+import {User, Login} from "../../../reminderContext/domain/entities";
 
 describe("UserService", () => {
     const mockRepo = new MockupRepository();
@@ -72,7 +72,7 @@ describe("UserService", () => {
     describe(".checkCanSee", () => {
         const viewer = new Viewer(new MockHeaders(undefined, "SomeUserAgentString"));
         const login = new Login("3", new Date(Date.now()), new Date(Date.now()), "mockup03@test.com", "$2b$08$v0J1QjRiYvrmwoDTuKXK0.f06pFwmXXMM1D5cufuUROSAPzsigmH6", ["3"], ["1"], ["1"]);
-        const user = new User("3", login.id, UserRole.freemium, "fullName01");
+        const user = new User("3", new Date(Date.now()), new Date(Date.now()), login.id, UserRole.freemium, "fullName01");
         test("Returns true", () => {
             expect((userService as any).checkCanSee(viewer, user)).toBeTruthy();
         })
@@ -81,7 +81,7 @@ describe("UserService", () => {
     describe(".checkCanDelete", () => {
         const viewer = new Viewer(new MockHeaders(undefined, "SomeUserAgentString"));
         const login = new Login("3", new Date(Date.now()), new Date(Date.now()), "mockup03@test.com", "$2b$08$v0J1QjRiYvrmwoDTuKXK0.f06pFwmXXMM1D5cufuUROSAPzsigmH6", ["3"], ["1"], ["1"]);
-        const user = new User("3", login.id, UserRole.freemium, "fullName01");
+        const user = new User("3", new Date(Date.now()), new Date(Date.now()), login.id, UserRole.freemium, "fullName01");
         test("Returns true", () => {
             expect((userService as any).checkCanDelete(viewer, user)).toBeTruthy();
         })

@@ -1,3 +1,7 @@
 export {DeviceType} from "./DeviceType.js"
 export {SessionStatus} from "./SessionStatus.js"
 export {DeviceInfo} from "./DeviceInfo.js"
+export {AccessToken} from "./AccessToken.js"
+export {Email} from "./Email.js"
+export {Password} from "./Password.js"
+export {FullName} from "./FullName.js"

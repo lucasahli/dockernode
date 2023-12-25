@@ -1,14 +1,9 @@
-import {LoginService} from "./LoginService.js";
-import {UserService} from "./UserService.js";
-import {Viewer} from "../../../../sharedKernel/Viewer.js";
-import {Login} from "../../domain/entities/Login.js";
-import {User} from "../../domain/entities/User.js";
-import {PasswordManager} from "../../domain/services/index.js";
 import jwt from 'jsonwebtoken';
-import {AccessToken} from "../../domain/valueObjects/index.js";
-import {Email, FullName} from "../../domain/valueObjects/index.js";
-import {Password} from "../../domain/valueObjects/Password.js";
-import {DatabaseError} from "../../../../sharedKernel/index.js";
+import {Login, User, Device} from "../../domain/entities/index.js";
+import {Email, FullName, AccessToken, SessionStatus, Password} from "../../domain/valueObjects/index.js";
+import {PasswordManager} from "../../domain/services/index.js";
+import {LoginService, UserService, DeviceService, SessionService, RefreshTokenService} from "./index.js";
+import {Viewer, DatabaseError} from "../../../../sharedKernel/index.js";
 import {
     SignUpInvalidInput,
     SignUpInvalidInputField,
@@ -20,10 +15,6 @@ import {
     SignInProblem,
     SignInResult
 } from "../../../../portsAndInterfaces/ports/SignInUseCase.js";
-import {DeviceService, SessionService} from "../../../userSessionContext/application/services/index.js";
-import {SessionStatus} from "../../../userSessionContext/domain/valueObjects/index.js";
-import {RefreshTokenService} from "../../../userSessionContext/application/services/index.js";
-import {Device} from "../../../userSessionContext/domain/entities/index.js";
 
 
 export class AccountService {

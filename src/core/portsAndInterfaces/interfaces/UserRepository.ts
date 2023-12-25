@@ -1,4 +1,4 @@
-import {User} from "../../components/reminderContext/domain/entities/User.js";
+import {User} from "../../components/userSessionContext/domain/entities/User.js";
 import {UserRole} from "../../sharedKernel/UserRole.js";
 
 export interface UserRepository {

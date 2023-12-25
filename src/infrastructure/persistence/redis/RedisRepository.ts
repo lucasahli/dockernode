@@ -1,23 +1,11 @@
 import { createClient, RedisClientType } from "redis";
-import { LoginRepository } from "../../../core/portsAndInterfaces/interfaces/LoginRepository.js";
-import { UserRepository } from "../../../core/portsAndInterfaces/interfaces/UserRepository.js";
-import { ReminderRepository } from "../../../core/portsAndInterfaces/interfaces/ReminderRepository.js";
-import { Login } from "../../../core/components/reminderContext/domain/entities/Login.js";
-import { Reminder } from "../../../core/components/reminderContext/domain/entities/Reminder.js";
-import { User } from "../../../core/components/reminderContext/domain/entities/User.js";
-import { UserRole } from "../../../core/sharedKernel/UserRole.js";
 import DataLoader from "dataloader";
-import {
-  LocationWithRadius,
-} from "../../../core/components/reminderContext/domain/entities/index.js";
-import {
-  Device,
-  RefreshToken,
-  Session
-} from "../../../core/components/userSessionContext/domain/entities/index.js"
-import {DeviceRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
+
+import { Login, User, Device, Session, RefreshToken } from "../../../core/components/userSessionContext/domain/entities/index.js";
+import { Reminder, LocationWithRadius } from "../../../core/components/reminderContext/domain/entities/index.js";
+import { UserRole } from "../../../core/sharedKernel/UserRole.js";
 import {DeviceType, SessionStatus} from "../../../core/components/userSessionContext/domain/valueObjects/index.js";
-import {RefreshTokenRepository, SessionRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
+import {LoginRepository, UserRepository, ReminderRepository, RefreshTokenRepository, SessionRepository, DeviceRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
 
 
 // TODO: Move this to hasher or password service

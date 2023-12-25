@@ -1,5 +1,5 @@
 import {IncomingHttpHeaders} from "http";
-import {User} from "../components/reminderContext/domain/entities/User.js";
+import {User} from "../components/userSessionContext/domain/entities/User.js";
 import {UserRole} from "./UserRole.js";
 
 import jwt from "jsonwebtoken";

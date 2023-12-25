@@ -1,4 +1,6 @@
-import {ReminderService, UserService} from "./index.js";
+import {ReminderService} from "./index.js";
+// TODO: Change Dependencies --> no context interference!
+import {UserService} from "../../../userSessionContext/application/services/index.js"
 import {LocationWithRadius, Reminder} from "../../domain/entities/index.js";
 import {PushNotificationService} from "../../../../portsAndInterfaces/interfaces/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";

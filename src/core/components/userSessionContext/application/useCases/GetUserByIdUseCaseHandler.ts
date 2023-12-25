@@ -1,6 +1,6 @@
 import {GetUserByIdUseCase} from "../../../../portsAndInterfaces/ports/GetUserByIdUseCase.js";
-import {UserService} from "../services/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
+import {UserService} from "../services/index.js";
 import {User} from "../../domain/entities/index.js";
 
 export class GetUserByIdUseCaseHandler implements GetUserByIdUseCase {

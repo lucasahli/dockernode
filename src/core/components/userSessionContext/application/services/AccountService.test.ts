@@ -1,18 +1,18 @@
 import {jest} from "@jest/globals";
 import {describe, expect, test} from '@jest/globals';
 
-import {PasswordManager} from "../../domain/services/index.js";
-import {AccountService, LoginService, UserService} from "../../application/services/index.js";
-import {MockHeaders, UserRole, Viewer} from "../../../../sharedKernel/index.js";
-import {Login, User} from "../../domain/entities/index.js";
+import {PasswordManager} from "../../domain/services";
+import {AccountService, LoginService, UserService} from "../../../reminderContext/application/services";
+import {MockHeaders, UserRole, Viewer} from "../../../../sharedKernel";
+import {Login, User} from "../../../reminderContext/domain/entities";
 
-import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
+import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository";
+import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher";
 
 import jwt from 'jsonwebtoken';
 import {AccessToken} from "../../domain/valueObjects/AccessToken";
 import {SignUpProblem, SignUpSuccess} from "../../../../portsAndInterfaces/ports/SignUpUseCase";
-import {DeviceService, RefreshTokenService, SessionService} from "../../../userSessionContext/application/services";
+import {DeviceService, RefreshTokenService, SessionService} from "./index";
 import {SignInProblem, SignInSuccess} from "../../../../portsAndInterfaces/ports/SignInUseCase";
 
 describe("AccountService", () => {
@@ -73,14 +73,16 @@ describe("AccountService", () => {
         test("Can sign in with existing email and correct password", async () => {
             expect.assertions(1);
             const unknownViewer = new Viewer(new MockHeaders(undefined, "SomeUserAgentString"));
-            const signInResult: SignInSuccess = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
-            return expect(signInResult.accessToken.token).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
+            const signInResult: SignInSuccess | SignInProblem = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
+            if (!(signInResult instanceof SignInProblem)){
+                return expect(signInResult?.accessToken.token).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // // Match a JWT
+            }
         })
 
         test("Can not sign in without correct password", async () => {
             expect.assertions(1);
             const unknownViewer = new Viewer(new MockHeaders(undefined, "SomeUserAgentString"));
-            const signInResult: SignInProblem = await accountService.signIn(unknownViewer, "mockup01@test.com", "wrongPassword");
+            const signInResult: SignInSuccess | SignInProblem = await accountService.signIn(unknownViewer, "mockup01@test.com", "wrongPassword");
             return expect(signInResult).toEqual({"invalidInputs": [{"field": "PASSWORD", "message": "Wrong Password"}], "title": "SignIn Problem"});
         })
 

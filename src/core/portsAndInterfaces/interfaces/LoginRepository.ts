@@ -1,4 +1,4 @@
-import {Login} from "../../components/reminderContext/domain/entities/Login.js"
+import {Login} from "../../components/userSessionContext/domain/entities/Login.js"
 
 export interface LoginRepository {
      getLoginById(id: string): Promise<Login | null>
