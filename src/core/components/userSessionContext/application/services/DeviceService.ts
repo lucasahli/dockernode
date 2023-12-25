@@ -73,7 +73,11 @@ export class DeviceService {
         return canUpdate ? this.deviceRepository.updateDevice(device) : false;
     }
 
-    async getDeviceByDeviceIdentifier(deviceIdentifier: string): Promise<Device | null> {
-        return this.deviceRepository.getDeviceByDeviceIdentifier(deviceIdentifier);
+    async getDeviceByDeviceIdentifier(viewer: Viewer, deviceIdentifier: string): Promise<Device | null> {
+        const deviceId = await this.deviceRepository.getDeviceIdByDeviceIdentifier(deviceIdentifier);
+        if(deviceId){
+            return this.generate(viewer, deviceId);
+        }
+        return null;
     }
 }

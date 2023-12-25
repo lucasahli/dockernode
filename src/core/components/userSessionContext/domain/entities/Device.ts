@@ -43,7 +43,7 @@ export class Device {
             data.deviceName,
             data.deviceOperatingSystem,
             new Date(data.lastUsed),
-            JSON.parse(data.associatedSessionIds),
+            data.associatedSessionIds ? JSON.parse(data.associatedSessionIds) : [],
         );
     }
 
@@ -58,8 +58,7 @@ export class Device {
             data.deviceType &&
             data.deviceName &&
             data.deviceOperatingSystem &&
-            data.lastUsed &&
-            data.associatedSessionIds
+            data.lastUsed
         ){
             // Optional properties are checked here, you can add checks if needed
             return true;

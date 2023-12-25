@@ -91,7 +91,8 @@ export class RedisRepository
         if (Device.isValidDeviceData(data)) {
           return Device.fromJSON(data);
         } else {
-          console.log("No device data found in redis for id: ", id);
+          console.log("No valid device data found in redis for id: ", id);
+          console.log("device data found in redis: ", data);
           return null;
         }
       });
@@ -109,7 +110,7 @@ export class RedisRepository
         if (Session.isValidSessionData(data)) {
           return Session.fromJSON(data);
         } else {
-          console.log("No device data found in redis for id: ", id);
+          console.log("No session data found in redis for id: ", id);
           return null;
         }
       });
@@ -157,6 +158,8 @@ export class RedisRepository
     const created = new Date(Date.now());
     // Generate Authentication Secret
     const authsecret = generateRandomStringWithLength(16);
+    // Store the Authentication Secret
+    await this.redis.hSet("auths", authsecret, loginId);
     // Store the login data
     await this.redis.hSet("logins", email, loginId);
     await this.redis.hSet("login:" + loginId.toString(), [
@@ -168,8 +171,7 @@ export class RedisRepository
         modified: created.toISOString()
       }).flat(),
     ]);
-    // Store the Authentication Secret
-    await this.redis.hSet("auths", authsecret, loginId);
+
     // If available, store the associated User-ID's
     if (associatedUserIds.length > 0) {
       await this.redis.sAdd(
@@ -202,7 +204,7 @@ export class RedisRepository
   async getLoginByEmail(email: string): Promise<Login | null> {
     const loginId = await this.redis.hGet("logins", email);
     if (!loginId) {
-      console.log(`No login with that email (${email}) in redis!!!`);
+      // console.log(`No login with that email (${email}) in redis!!!`);
       return null;
     }
 
@@ -292,13 +294,14 @@ export class RedisRepository
   //region Device
   async createDevice(deviceIdentifier: string, userAgentString: string, deviceType: DeviceType, deviceName: string, deviceOperatingSystem: string, lastUsed: Date, associatedSessionIds: string[]): Promise<Device> {
     // Check if Device with that deviceIdentifier already exists
-    if (await this.redis.hGet("devices", deviceIdentifier)) {
-      return Promise.reject("Device with that deviceIdentifier (" + deviceIdentifier + ") already exists!");
+    const keyType = await this.redis.type("deviceIdentifiers");
+    if (keyType === 'hash' && await this.redis.hGet("deviceIdentifiers", deviceIdentifier)) {
+      return Promise.reject("Can not create: Device with that deviceIdentifier (" + deviceIdentifier + ") already exists!");
     }
     const deviceId = await this.redis.incr("next_device_id");
     const created = new Date(Date.now());
     await this.redis.sAdd("devices", deviceId.toString());
-    await this.redis.hSet("devices", deviceIdentifier, deviceId);
+    await this.redis.hSet("deviceIdentifiers", deviceIdentifier, deviceId);
     await this.redis.hSet("device:" + deviceId.toString(), [
       ...Object.entries({
         created: created.toISOString(),
@@ -378,13 +381,13 @@ export class RedisRepository
         });
   }
 
-  async getDeviceByDeviceIdentifier(deviceIdentifier: string): Promise<Device | null> {
-    const deviceId = await this.redis.hGet("devices", deviceIdentifier);
+  async getDeviceIdByDeviceIdentifier(deviceIdentifier: string): Promise<string | null> {
+    const deviceId = await this.redis.hGet("deviceIdentifiers", deviceIdentifier);
     if (!deviceId) {
-      console.log(`No Device with that deviceIdentifier (${deviceIdentifier}) in redis!!!`);
+      // console.log(`No Device with that deviceIdentifier (${deviceIdentifier}) in redis!!!`);
       return null;
     }
-    return this.getDeviceById(deviceId);
+    return deviceId;
   }
   //endregion
 

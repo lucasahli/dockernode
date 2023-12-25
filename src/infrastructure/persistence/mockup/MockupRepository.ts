@@ -254,8 +254,8 @@ export class MockupRepository implements
         return Promise.resolve(this.sessions.map(entity => entity.id));
     }
 
-    getDeviceByDeviceIdentifier(deviceIdentifier: string): Promise<Device | null> {
-        return Promise.resolve(this.devices.find(item => item.deviceIdentifier === deviceIdentifier) || null);
+    getDeviceIdByDeviceIdentifier(deviceIdentifier: string): Promise<string | null> {
+        return Promise.resolve(this.devices.find(item => item.deviceIdentifier === deviceIdentifier)!.id || null);
     }
 
     getDeviceById(id: string): Promise<Device | null> {
