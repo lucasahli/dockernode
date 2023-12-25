@@ -1,8 +1,8 @@
 import {jest} from "@jest/globals";
-import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository";
-import {UserService} from "../../../reminderContext/application/services";
-import {MockHeaders, Viewer, UserRole} from "../../../../sharedKernel";
-import {User, Login} from "../../../reminderContext/domain/entities";
+import {MockupRepository} from "../../../../../../src/infrastructure/persistence/mockup/MockupRepository.js";
+import {UserService} from "../../../../../../src/core/components/userSessionContext/application/services/index.js";
+import {MockHeaders, Viewer, UserRole} from "../../../../../../src/core/sharedKernel/index.js";
+import {User, Login} from "../../../../../../src/core/components/userSessionContext/domain/entities/index.js";
 
 describe("UserService", () => {
     const mockRepo = new MockupRepository();

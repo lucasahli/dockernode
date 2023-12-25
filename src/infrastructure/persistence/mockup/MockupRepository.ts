@@ -255,7 +255,11 @@ export class MockupRepository implements
     }
 
     getDeviceIdByDeviceIdentifier(deviceIdentifier: string): Promise<string | null> {
-        return Promise.resolve(this.devices.find(item => item.deviceIdentifier === deviceIdentifier)!.id || null);
+        const foundDevice = this.devices.find(item => item.deviceIdentifier === deviceIdentifier);
+        if(foundDevice){
+            return Promise.resolve(foundDevice.id)
+        }
+        return Promise.resolve(null);
     }
 
     getDeviceById(id: string): Promise<Device | null> {

@@ -3,8 +3,8 @@ Redis ReminderRepository
 */
 import {jest} from "@jest/globals";
 import {expect} from "@jest/globals";
-import {RedisRepository} from "../../../infrastructure/persistence/redis/RedisRepository.js";
-import {Reminder} from "../../components/reminderContext/domain/entities/index.js";
+import {RedisRepository} from "../../../../src/infrastructure/persistence/redis/RedisRepository.js";
+import {Reminder} from "../../../../src/core/components/reminderContext/domain/entities/index.js";
 
 describe("RedisRepository as ReminderRepository", () => {
     // RUN DOCKER REDIS to connect to Redis single use database!

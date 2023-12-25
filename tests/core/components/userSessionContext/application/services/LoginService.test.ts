@@ -1,11 +1,11 @@
 import {jest} from "@jest/globals";
-import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository";
-import {PasswordManager} from "../../domain/services";
-import {LoginService} from "../../../reminderContext/application/services";
-import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher";
-import {MockHeaders, Viewer} from "../../../../sharedKernel";
-import {Login} from "../../../reminderContext/domain/entities";
-import {SignUpProblem} from "../../../../portsAndInterfaces/ports/SignUpUseCase";
+import {MockupRepository} from "../../../../../../src/infrastructure/persistence/mockup/MockupRepository.js";
+import {PasswordManager} from "../../../../../../src/core/components/userSessionContext/domain/services/index.js";
+import {LoginService} from "../../../../../../src/core/components/userSessionContext/application/services/index.js";
+import {BcryptHasher} from "../../../../../../src/infrastructure/security/BcryptHasher.js";
+import {MockHeaders, Viewer} from "../../../../../../src/core/sharedKernel/index.js";
+import {Login} from "../../../../../../src/core/components/userSessionContext/domain/entities/index.js";
+import {SignUpProblem} from "../../../../../../src/core/portsAndInterfaces/ports/SignUpUseCase.js";
 
 
 describe("LoginService", () => {

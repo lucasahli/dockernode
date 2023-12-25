@@ -2,8 +2,8 @@
 Redis LoginRepository
 */
 import {jest} from "@jest/globals";
-import {RedisRepository} from "../../../infrastructure/persistence/redis/RedisRepository.js";
-import {Login} from "../../components/reminderContext/domain/entities/index.js";
+import {RedisRepository} from "../../../../src/infrastructure/persistence/redis/RedisRepository.js";
+import {Login} from "../../../../src/core/components/userSessionContext/domain/entities/index.js";
 
 describe("RedisRepository as LoginRepository", () => {
   // RUN DOCKER COMPOSE DEV to connect to Redis single use database!

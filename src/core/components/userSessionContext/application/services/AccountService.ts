@@ -178,12 +178,12 @@ export class AccountService {
         else {
             device = knownDevice;
         }
-        const expirationDateTime = new Date(currentDateTime);
+        const expirationDateTime = new Date();
         expirationDateTime.setDate(currentDateTime.getDate() + 90);
         const refreshToken = await this.refreshTokenService.createRefreshToken(
             viewer,
             this.createRefreshTokenString(),
-            new Date(),
+            new Date(expirationDateTime),
             false,
             login.id,
             device.id

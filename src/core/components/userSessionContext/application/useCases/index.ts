@@ -1,5 +1,3 @@
-export {CreateSessionUseCaseHandler} from './CreateSessionUseCaseHandler.js'
-export {CreateDeviceUseCaseHandler} from './CreateDeviceUseCaseHandler.js'
 export {GetAllUsersUseCaseHandler} from './GetAllUsersUseCaseHandler.js'
 export {GetLoginByUserUseCaseHandler} from './GetLoginByUserUseCaseHandler.js'
 export {GetUserByIdUseCaseHandler} from './GetUserByIdUseCaseHandler.js'

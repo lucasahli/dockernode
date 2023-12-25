@@ -1,19 +1,19 @@
 import {jest} from "@jest/globals";
 import {describe, expect, test} from '@jest/globals';
 
-import {PasswordManager} from "../../domain/services";
-import {AccountService, LoginService, UserService} from "../../../reminderContext/application/services";
-import {MockHeaders, UserRole, Viewer} from "../../../../sharedKernel";
-import {Login, User} from "../../../reminderContext/domain/entities";
+import {PasswordManager} from "../../../../../../src/core/components/userSessionContext/domain/services/index.js";
+import {AccountService, LoginService, UserService} from "../../../../../../src/core/components/userSessionContext/application/services/index.js";
+import {MockHeaders, UserRole, Viewer} from "../../../../../../src/core/sharedKernel/index.js";
+import {Login, User} from "../../../../../../src/core/components/userSessionContext/domain/entities/index.js";
 
-import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository";
-import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher";
+import {MockupRepository} from "../../../../../../src/infrastructure/persistence/mockup/MockupRepository.js";
+import {BcryptHasher} from "../../../../../../src/infrastructure/security/BcryptHasher.js";
 
 import jwt from 'jsonwebtoken';
-import {AccessToken} from "../../domain/valueObjects/AccessToken";
-import {SignUpProblem, SignUpSuccess} from "../../../../portsAndInterfaces/ports/SignUpUseCase";
-import {DeviceService, RefreshTokenService, SessionService} from "./index";
-import {SignInProblem, SignInSuccess} from "../../../../portsAndInterfaces/ports/SignInUseCase";
+import {AccessToken} from "../../../../../../src/core/components/userSessionContext/domain/valueObjects/index.js";
+import {SignUpProblem, SignUpSuccess} from "../../../../../../src/core/portsAndInterfaces/ports/SignUpUseCase.js";
+import {DeviceService, RefreshTokenService, SessionService} from "../../../../../../src/core/components/userSessionContext/application/services/index.js";
+import {SignInProblem, SignInSuccess} from "../../../../../../src/core/portsAndInterfaces/ports/SignInUseCase.js";
 
 describe("AccountService", () => {
     const mockRepo = new MockupRepository();

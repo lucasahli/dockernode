@@ -22,7 +22,7 @@ export class Viewer {
     constructor(headers?: IncomingHttpHeaders, secret?: string, isRootViewer?: boolean) {
         this.headers = headers ?? undefined;
         if(headers){
-            console.log(headers);
+            // console.log(headers);
         }
         this.jwtSecret = secret ?? "SomeWrongSecret";
         this.user = undefined;

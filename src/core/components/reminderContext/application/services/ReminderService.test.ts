@@ -1,13 +1,18 @@
 import {jest} from "@jest/globals";
 import {MockupRepository} from "../../../../../infrastructure/persistence/mockup/MockupRepository.js";
-import {PasswordManager} from "../../../userSessionContext/domain/services";
-import {AccountService, LoginService, ReminderService, UserService} from "../../application/services/index.js";
+import {PasswordManager} from "../../../userSessionContext/domain/services/index.js";
+import { ReminderService} from "../../application/services/index.js";
 import {MockHeaders, Viewer} from "../../../../sharedKernel/index.js";
 import {Reminder} from "../../domain/entities/index.js";
 import {BcryptHasher} from "../../../../../infrastructure/security/BcryptHasher.js";
 import {SignInProblem, SignInResult, SignInSuccess} from "../../../../portsAndInterfaces/ports/SignInUseCase.js";
 import {CreateReminderProblem} from "../../../../portsAndInterfaces/ports/CreateReminderUseCase.js";
-import {DeviceService, RefreshTokenService, SessionService} from "../../../userSessionContext/application/services/index.js";
+import {
+    AccountService,
+    DeviceService, LoginService,
+    RefreshTokenService,
+    SessionService, UserService
+} from "../../../userSessionContext/application/services/index.js";
 
 describe("ReminderService", () => {
     const mockRepo = new MockupRepository();

@@ -3,9 +3,9 @@ Redis UserRepository
 */
 import {jest} from "@jest/globals";
 import {expect} from "@jest/globals";
-import {RedisRepository} from "../../../infrastructure/persistence/redis/RedisRepository.js";
-import {UserRole} from "../../sharedKernel/index.js";
-import {User} from "../../components/reminderContext/domain/entities/index.js";
+import {RedisRepository} from "../../../../src/infrastructure/persistence/redis/RedisRepository.js";
+import {UserRole} from "../../../../src/core/sharedKernel/index.js";
+import {User} from "../../../../src/core/components/userSessionContext/domain/entities/index.js";
 
 describe("RedisRepository as UserRepository", () => {
   // RUN DOCKER REDIS to connect to Redis single use database!
@@ -41,8 +41,7 @@ describe("RedisRepository as UserRepository", () => {
           redisRepository.createUser(
               existingLoginId,
               UserRole.freemium,
-              "Manfred",
-              "Sahli"
+              "Manfred Sahli"
           )).rejects.toMatch("This Login is already associated with a user of role " + UserRole.freemium.toString());
     });
   });
