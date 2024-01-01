@@ -74,10 +74,22 @@ type SignInInvalidInput {
   message: String!
 }
 
+union RefreshAccessResult = RefreshAccessSuccess | RefreshAccessProblem
+
+type RefreshAccessSuccess {
+  sessionId: String!
+  accessToken: AccessToken!
+  refreshToken: RefreshToken!
+}
+
+type RefreshAccessProblem {
+  message: String
+}
 
 extend type Mutation {
   signUp(email: String!, password: String!, fullName: String!): SignUpResult
   signIn(email: String!, password: String!): SignInResult
+  refreshAccess(refreshToken: String!): RefreshAccessResult
 #  TODO: deleteLogin(id: ID!): Boolean!
 }
 

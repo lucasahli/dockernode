@@ -471,6 +471,7 @@ export class RedisRepository
     const refreshTokenId = await this.redis.incr("next_refresh_token_id");
     const created = new Date(Date.now());
     await this.redis.sAdd("refresh_tokens", refreshTokenId.toString());
+    await this.redis.hSet("refresh_token_strings", token, refreshTokenId);
     await this.redis.hSet("refresh_token:" + refreshTokenId.toString(), [
       ...Object.entries({
         created: created.toISOString(),
@@ -482,6 +483,7 @@ export class RedisRepository
         associatedDeviceId: associatedDeviceId
       }).flat(),
     ]);
+
     return Promise.resolve(new RefreshToken(refreshTokenId.toString(), created, created, token, expiration, revoked, associatedLoginId, associatedDeviceId));
   }
 
@@ -492,6 +494,7 @@ export class RedisRepository
     }
     // Delete Stuff...
     await this.redis.sRem("refresh_tokens", id);
+    await this.redis.hDel("refresh_token_strings", refreshTokenData.token);
     const nbrOfDeletedFields = await this.redis.del("refresh_token:" + id);
     return Promise.resolve(nbrOfDeletedFields > 0);
   }
@@ -529,6 +532,14 @@ export class RedisRepository
         .catch(() => {
           return false;
         });
+  }
+
+  async getRefreshTokenIdByTokenString(tokenString: string): Promise<string | null> {
+    const refreshTokenId = await this.redis.hGet("refresh_token_strings", tokenString);
+    if (!refreshTokenId) {
+      return null;
+    }
+    return refreshTokenId;
   }
   //endregion
 

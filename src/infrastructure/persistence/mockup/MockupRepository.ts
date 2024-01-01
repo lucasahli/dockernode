@@ -24,6 +24,11 @@ export class MockupRepository implements
     DeviceRepository,
     SessionRepository,
     RefreshTokenRepository {
+
+    getRefreshTokenIdByTokenString(tokenString: string): Promise<string | null> {
+        // @ts-ignore
+        throw new Error("Method not implemented.");
+    }
     private passwordManager = new PasswordManager(new BcryptHasher());
 
     private logins: Login[] = [

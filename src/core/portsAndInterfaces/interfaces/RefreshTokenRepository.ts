@@ -15,5 +15,6 @@ export interface RefreshTokenRepository {
 
     getAllRefreshTokenIds(): Promise<string[] | null>
     getManyRefreshTokensByIds(ids: string[]): Promise<(RefreshToken | Error | null)[]>
+    getRefreshTokenIdByTokenString(tokenString: string): Promise<string | null>
 
 }

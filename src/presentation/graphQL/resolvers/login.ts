@@ -8,6 +8,10 @@ import {GraphQLResolveInfo} from "graphql/type/index.js";
 import {
   GetUsersByLoginUseCaseHandler, SignInUseCaseHandler, SignUpUseCaseHandler
 } from "../../../core/components/userSessionContext/application/useCases/index.js";
+import {RefreshAccessUseCase} from "../../../core/portsAndInterfaces/ports/RefreshAccessUseCase.js";
+import {
+  RefreshAccessUseCaseHandler
+} from "../../../core/components/userSessionContext/application/useCases/RefreshAccessUseCaseHandler.js";
 
 /** When setting up a field whose value is a custom type,
  * we have to define a function that tells GraphQL how to get that custom type.
@@ -47,6 +51,18 @@ export default {
     },
   },
 
+  RefreshAccessResult: {
+    __resolveType(obj: any, context: any, info: GraphQLResolveInfo){
+      if(obj.accessToken){
+        return 'RefreshAccessSuccess';
+      }
+      else {
+        return 'RefreshAccessProblem';
+      }
+      return null; // GraphQLError is thrown
+    },
+  },
+
   Mutation: {
     signUp: async (parent: any, args: any, context: GraphQlContext) => {
       const signUpUseCase: SignUpUseCase = new SignUpUseCaseHandler(context.accountService);
@@ -55,6 +71,10 @@ export default {
     signIn: async (parent: any, args: any, context: GraphQlContext) => {
       const signInUseCase: SignInUseCase = new SignInUseCaseHandler(context.accountService);
       return signInUseCase.execute(context.viewer, args.email, args.password);
+    },
+    refreshAccess: async (parent: any, args: any, context: GraphQlContext) => {
+      const refreshAccessUseCase: RefreshAccessUseCase = new RefreshAccessUseCaseHandler(context.accountService);
+      return refreshAccessUseCase.execute(context.viewer, args.refreshToken);
     },
   },
 };

@@ -1,3 +1,5 @@
+import jwt, {JwtPayload} from 'jsonwebtoken';
+
 export class RefreshToken {
     constructor(
         public id: string,
@@ -54,6 +56,27 @@ export class RefreshToken {
             return true;
         }
         return false;
+    }
+
+    isTokenValid(): boolean {
+        const now = new Date();
+        return !this.revoked && this.expiration > now;
+    }
+
+    getPayload(): Record<string, any> | null {
+        try {
+            // Assuming the token is a JWT, decode its payload
+            const payload = jwt.decode(this.token, {json: true});
+            return payload;
+        } catch (error) {
+            // Handle the error if the token is not a valid JWT
+            console.error('Failed to decode JWT:', error);
+            return null;
+        }
+    }
+
+    revoke() {
+        this.revoked = true;
     }
 
 }

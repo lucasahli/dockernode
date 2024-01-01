@@ -51,7 +51,7 @@ describe("AccountService", () => {
         test("creates a new token string when given a login with id and email and a user with a role", () => {
             const login = new Login("1", new Date(Date.now()), new Date(Date.now()),"mockup01@test.com", "superSecretPassword01", ["1"], [], []);
             const user = new User("1", new Date(Date.now()), new Date(Date.now()), login.id, UserRole.freemium, "Firstname01 Lastname01")
-            expect((accountService as any).createAccessToken(login, user, process.env.SECRET!, '30m').token).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // Match a JWT
+            expect((accountService as any).createAccessToken(login, user, process.env.SECRET!, '1m').token).toMatch(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+\/=]*)/); // Match a JWT
         })
     })
 

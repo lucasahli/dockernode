@@ -69,4 +69,12 @@ export class RefreshTokenService {
         const canUpdate = this.checkCanUpdate(viewer, refreshToken);
         return canUpdate ? this.refreshTokenRepository.updateRefreshToken(refreshToken) : false;
     }
+
+    async getRefreshTokenByTokenString(viewer: Viewer, tokenString: string): Promise<RefreshToken | null> {
+        const refreshTokenId = await this.refreshTokenRepository.getRefreshTokenIdByTokenString(tokenString);
+        if(!refreshTokenId){
+            return null;
+        }
+        return this.generate(viewer, refreshTokenId);
+    }
 }
