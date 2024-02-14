@@ -1,4 +1,4 @@
-import {Viewer} from "../../../../sharedKernel/index.js";
+import {DatabaseError, Viewer} from "../../../../sharedKernel/index.js";
 import {DeviceRepository} from "../../../../portsAndInterfaces/interfaces/index.js";
 import {Device} from "../../domain/entities/index.js";
 import {DeviceType} from "../../domain/valueObjects/index.js";
@@ -76,6 +76,44 @@ export class DeviceService {
     async getDeviceByDeviceIdentifier(viewer: Viewer, deviceIdentifier: string): Promise<Device | null> {
         const deviceId = await this.deviceRepository.getDeviceIdByDeviceIdentifier(deviceIdentifier);
         if(deviceId){
+            return this.generate(viewer, deviceId);
+        }
+        return null;
+    }
+
+    async getOrCreateDeviceFromViewer(viewer: Viewer): Promise<Device> {
+        const deviceInfo = viewer.createDeviceInfoFromHeaders();
+        if(deviceInfo === undefined) {
+            throw new DatabaseError("Could not create new Device Info");
+        }
+        let device: Device;
+        const knownDevice = await this.getDeviceByDeviceIdentifier(viewer, deviceInfo.deviceIdentifier);
+        const currentDateTime = new Date(Date.now());
+        if(!knownDevice){
+            const newDevice = await this.createDevice(
+                viewer,
+                deviceInfo.deviceIdentifier,
+                deviceInfo.userAgentString,
+                deviceInfo.deviceType,
+                deviceInfo.deviceName,
+                deviceInfo.deviceOperatingSystem,
+                currentDateTime,
+                []
+            );
+            if(!newDevice){
+                throw new DatabaseError("Could not create new Device");
+            }
+            device = newDevice;
+        }
+        else {
+            device = knownDevice;
+        }
+        return device;
+    }
+
+    async getDeviceBySessionId(viewer: Viewer, sessionId: string) {
+        const deviceId = await this.deviceRepository.getDeviceIdBySessionId(sessionId);
+        if (deviceId) {
             return this.generate(viewer, deviceId);
         }
         return null;

@@ -18,11 +18,15 @@ export class Viewer {
     loginEmail?: string;
     userId?: string;
     userRole?: UserRole;
+    sessionId?: string;
 
     constructor(headers?: IncomingHttpHeaders, secret?: string, isRootViewer?: boolean) {
         this.headers = headers ?? undefined;
         if(headers){
-            console.log("HEADERS: ", headers);
+            // console.log("HEADERS: ", headers);
+            if(headers['sessionid']){
+                this.sessionId = headers['sessionid'] as string;
+            }
         }
         this.jwtSecret = secret ?? "SomeWrongSecret";
         this.user = undefined;
@@ -46,12 +50,13 @@ export class Viewer {
             const isBearer = this.isBearerToken(bearerToken);
             if (isBearer) {
                 if (this.isValidJWT(bearerToken?.replace('Bearer ', ''), this.jwtSecret)){
-                    console.log('Is valid JWT');
                     return jwt.verify(bearerToken?.replace('Bearer ', ''), this.jwtSecret);
                 }
                 console.log("is BAERER but NOT VALID token: ", bearerToken);
             }
-            console.log("is DEFINED but not Bearer token: ", bearerToken);
+            else {
+                console.log("is DEFINED but not Bearer token: ", bearerToken);
+            }
         }
         return null;
     }
@@ -81,7 +86,6 @@ export class Viewer {
         //
         const payloadFromToken = this.getPayloadFromToken();
         if (payloadFromToken) {
-            console.log("PAYLOAD: ", payloadFromToken);
             this.loginId = payloadFromToken.loginId;
             this.loginEmail = payloadFromToken.loginEmail;
             this.userId = payloadFromToken.userId;
@@ -164,9 +168,19 @@ export class Viewer {
         return undefined;
     }
 
-    createSession(): Session | undefined {
-        const dateTimeNow = new Date(Date.now());
-        return new Session("0", dateTimeNow, dateTimeNow, dateTimeNow, SessionStatus.active);
+    // createSession(): Session | undefined {
+    //     const dateTimeNow = new Date(Date.now());
+    //     return new Session("0", dateTimeNow, dateTimeNow, dateTimeNow, SessionStatus.active, dateTimeNow, []);
+    // }
+
+    getSessionId(): string | undefined {
+        if (!this.headers){
+            return undefined;
+        }
+        if(this.headers["sessionid"]){
+            return this.headers["sessionid"] as string;
+        }
+        return undefined;
     }
 
 }

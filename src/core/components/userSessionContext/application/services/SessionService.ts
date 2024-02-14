@@ -2,6 +2,7 @@ import {Viewer} from "../../../../sharedKernel/index.js";
 import {SessionRepository} from "../../../../portsAndInterfaces/interfaces/index.js";
 import {Session} from "../../domain/entities/index.js";
 import {SessionStatus} from "../../domain/valueObjects/index.js";
+import sessionActivity from "../../../../../presentation/graphQL/resolvers/sessionActivity.js";
 
 
 export class SessionService {
@@ -27,13 +28,15 @@ export class SessionService {
         viewer: Viewer,
         startTime: Date,
         sessionStatus: SessionStatus,
+        associatedSessionActivityIds: string[],
         endTime?: Date,
         associatedDeviceId?: string | undefined,
         associatedLoginId?: string | undefined,
         associatedRefreshTokenId?: string | undefined
     ): Promise<Session> {
         const canCreate = this.checkCanCreate(viewer);
-        const session = await this.sessionRepository.createSession(startTime, sessionStatus, endTime, associatedDeviceId, associatedLoginId, associatedRefreshTokenId);
+        const session = await this.sessionRepository.createSession(startTime, sessionStatus, associatedSessionActivityIds, endTime, associatedDeviceId, associatedLoginId, associatedRefreshTokenId);
+        console.log(`Session (id: ${session.id}) created...`);
         return session;
     }
 
@@ -57,11 +60,69 @@ export class SessionService {
         if(viewer.isRootUser()){
             return true;
         }
-        return viewer.isLoggedIn() && session.associatedLoginId === viewer.loginId;
+        return (viewer.getSessionId() == session.id) || (viewer.isLoggedIn() && session.associatedLoginId === viewer.loginId);
     }
 
     async updateSession(viewer: Viewer, session: Session): Promise<boolean> {
         const canUpdate = this.checkCanUpdate(viewer, session);
         return canUpdate ? this.sessionRepository.updateSession(session) : false;
     }
+
+    async getOrCreateSession(viewer: Viewer, deviceId: string, loginId: string, refreshTokenId: string): Promise<Session> {
+        const sessionId = viewer.getSessionId();
+        if(sessionId){
+            const session = await this.generate(viewer, sessionId);
+            if(session){
+                if(!session.isExpired()){
+                    return session;
+                }
+            }
+        }
+        const newSession = await this.createSession(
+            viewer,
+            new Date(Date.now()),
+            SessionStatus.active,
+            [],
+            undefined,
+            deviceId,
+            loginId,
+            refreshTokenId
+        );
+        return newSession;
+    }
+
+    async updateSessionActivity(viewer: Viewer, sessionActivityId: string): Promise<boolean> {
+        const sessionId = viewer.getSessionId();
+        if(sessionId){
+            const session = await this.generate(viewer, sessionId);
+            if(session){
+                if(!session.isExpired()){
+                    session.addSessionActivity(sessionActivityId);
+                    return await this.updateSession(viewer, session);
+                }
+                console.log("Session is expired!!!");
+            }
+            else {
+                console.log(`Could not generate Session with id: ${sessionId}`);
+            }
+        }
+        return false;
+    }
+
+    async getSessionsByDeviceId(viewer: Viewer, deviceId: string): Promise<(Session | Error | null)[]> {
+        const ids = await this.sessionRepository.getSessionIdsByDeviceId(deviceId);
+        if(ids !== null){
+            return this.getMany(viewer, ids);
+        }
+        return [];
+    }
+
+    async getSessionBySessionActivityId(viewer: Viewer, sessionActivityId: string): Promise<Session | null> {
+        const sessionId = await this.sessionRepository.getSessionIdBySessionActivityId(sessionActivityId);
+        if(sessionId !== null){
+            return this.generate(viewer, sessionId);
+        }
+        return null;
+    }
+
 }

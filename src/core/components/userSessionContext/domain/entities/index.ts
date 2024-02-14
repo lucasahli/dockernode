@@ -1,5 +1,6 @@
 export {Device} from "./Device.js"
 export {Session} from "./Session.js"
+export {SessionActivity} from "./SessionActivity.js"
 export {RefreshToken} from "./RefreshToken.js"
 export {Login} from "./Login.js"
 export {User} from "./User.js"

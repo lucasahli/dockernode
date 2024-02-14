@@ -22,7 +22,7 @@ import {
 export default {
   Login: {
     users: async (parent: any, args: any, context: GraphQlContext) => {
-      const getUsersByLoginUseCase: GetUsersByLoginUseCase = new GetUsersByLoginUseCaseHandler(context.accountService);
+      const getUsersByLoginUseCase: GetUsersByLoginUseCase = new GetUsersByLoginUseCaseHandler(context.accountService, context.sessionService, context.sessionActivityService);
       return getUsersByLoginUseCase.execute(context.viewer, parent.id);
     },
   },
@@ -73,7 +73,7 @@ export default {
       return signInUseCase.execute(context.viewer, args.email, args.password);
     },
     refreshAccess: async (parent: any, args: any, context: GraphQlContext) => {
-      const refreshAccessUseCase: RefreshAccessUseCase = new RefreshAccessUseCaseHandler(context.accountService);
+      const refreshAccessUseCase: RefreshAccessUseCase = new RefreshAccessUseCaseHandler(context.accountService, context.sessionService, context.sessionActivityService);
       return refreshAccessUseCase.execute(context.viewer, args.refreshToken);
     },
   },

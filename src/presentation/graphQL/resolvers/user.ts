@@ -20,7 +20,7 @@ export default {
         me: async (parent: any, args: any, context: GraphQlContext) => {
             await context.viewer.prepareViewer();
             if(context.viewer.userId){
-                const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService);
+                const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService, context.sessionService, context.sessionActivityService);
                 return getUserByIdUseCase.execute(context.viewer, context.viewer.userId);
             }
             else {
@@ -29,11 +29,11 @@ export default {
             }
         },
         users: async (parent: any, args: any, context: GraphQlContext) => {
-            const getAllUsersUseCase: GetAllUsersUseCase = new GetAllUsersUseCaseHandler(context.userService)
+            const getAllUsersUseCase: GetAllUsersUseCase = new GetAllUsersUseCaseHandler(context.userService, context.sessionService, context.sessionActivityService)
             return getAllUsersUseCase.execute(context.viewer);
             },
         user: async (parent: any, args: any, context: GraphQlContext) => {
-            const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService);
+            const getUserByIdUseCase: GetUserByIdUseCase = new GetUserByIdUseCaseHandler(context.userService, context.sessionService, context.sessionActivityService);
             return getUserByIdUseCase.execute(context.viewer, args.id);
             },
     },
@@ -41,12 +41,12 @@ export default {
     User: {
         // Reminders By Owner
         reminders: async (parent: any, args: any, context: GraphQlContext) => {
-            const getRemindersByOwnerIdUseCase: GetRemindersByOwnerIdUseCase = new GetRemindersByOwnerIdUseCaseHandler(context.reminderService);
+            const getRemindersByOwnerIdUseCase: GetRemindersByOwnerIdUseCase = new GetRemindersByOwnerIdUseCaseHandler(context.reminderService, context.sessionService, context.sessionActivityService);
             return getRemindersByOwnerIdUseCase.execute(context.viewer, parent.id);
             },
         // Login of a User
         login: async (parent: any, args: any, context: GraphQlContext) => {
-            const getLoginByUserUseCase: GetLoginByUserUseCase = new GetLoginByUserUseCaseHandler(context.accountService);
+            const getLoginByUserUseCase: GetLoginByUserUseCase = new GetLoginByUserUseCaseHandler(context.accountService, context.sessionService, context.sessionActivityService);
             return getLoginByUserUseCase.execute(context.viewer, parent.id);
             },
     },

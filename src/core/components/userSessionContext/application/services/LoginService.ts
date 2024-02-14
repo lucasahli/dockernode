@@ -68,4 +68,12 @@ export class LoginService {
     private checkCanDelete(viewer: Viewer, login: Login): boolean {
         return true;
     }
+
+    async getLoginBySessionId(viewer: Viewer, sessionId: string): Promise<Login | null> {
+        const loginId = await this.loginRepository.getLoginIdBySessionId(sessionId);
+        if (loginId) {
+            return this.generate(viewer, loginId);
+        }
+        return null;
+    }
 }

@@ -1,12 +1,21 @@
-import {RefreshAccessResult, RefreshAccessUseCase} from "../../../../portsAndInterfaces/ports/RefreshAccessUseCase.js";
+import {
+    RefreshAccessResult,
+    RefreshAccessSuccess,
+    RefreshAccessUseCase
+} from "../../../../portsAndInterfaces/ports/RefreshAccessUseCase.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
-import {AccountService} from "../services/index.js";
+import {AccountService, SessionActivityService, SessionService} from "../services/index.js";
+import {SessionUpdater} from "../../../../sharedKernel/SessionUpdater.js";
 
 
-export class RefreshAccessUseCaseHandler implements RefreshAccessUseCase {
-    constructor(private accountService: AccountService) {}
+export class RefreshAccessUseCaseHandler extends SessionUpdater implements RefreshAccessUseCase {
+    constructor(private accountService: AccountService, sessionService: SessionService, sessionActivityService: SessionActivityService) {
+        super(sessionService, sessionActivityService);
+    }
 
     async execute(viewer: Viewer, refreshToken: string): Promise<RefreshAccessResult> {
-        return this.accountService.refreshAccess(viewer, refreshToken);
+        const result = await this.accountService.refreshAccess(viewer, refreshToken);
+        this.updateUserSession(viewer, "Refresh access", (result as RefreshAccessSuccess)?.sessionId);
+        return result;
     }
 }

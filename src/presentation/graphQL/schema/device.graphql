@@ -1,0 +1,30 @@
+type Device {
+    id: ID!
+    created: DateTime!
+    modified: DateTime!
+    deviceIdentifier: String
+    userAgentString: String
+    deviceType: DeviceType
+    deviceName: String
+    deviceOperatingSystem: String
+    lastUsed: DateTime
+    associatedSessions: [Session]
+}
+
+enum DeviceType {
+    SMARTPHONE
+    TABLET
+    LABTOP
+    DESKTOP
+    UNKNOWN
+}
+
+extend type Query {
+    devices: [Device]
+    device(id: ID!): Device
+}
+
+extend type Mutation {
+    updatePushNotificationToken(pushNotificationToken: String!): Boolean!
+}
+

@@ -1,12 +1,19 @@
 import { createClient, RedisClientType } from "redis";
 import DataLoader from "dataloader";
 
-import { Login, User, Device, Session, RefreshToken } from "../../../core/components/userSessionContext/domain/entities/index.js";
+import { Login, User, Device, Session, RefreshToken, SessionActivity } from "../../../core/components/userSessionContext/domain/entities/index.js";
 import { Reminder, LocationWithRadius } from "../../../core/components/reminderContext/domain/entities/index.js";
 import { UserRole } from "../../../core/sharedKernel/UserRole.js";
 import {DeviceType, SessionStatus} from "../../../core/components/userSessionContext/domain/valueObjects/index.js";
-import {LoginRepository, UserRepository, ReminderRepository, RefreshTokenRepository, SessionRepository, DeviceRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
-
+import {
+  LoginRepository,
+  UserRepository,
+  ReminderRepository,
+  RefreshTokenRepository,
+  SessionRepository,
+  DeviceRepository,
+  SessionActivityRepository
+} from "../../../core/portsAndInterfaces/interfaces/index.js";
 
 // TODO: Move this to hasher or password service
 function generateRandomStringWithLength(length: number) {
@@ -22,13 +29,21 @@ function generateRandomStringWithLength(length: number) {
 
 // implements LoginRepository, UserRepository, ReminderRepository
 export class RedisRepository
-  implements LoginRepository, UserRepository, ReminderRepository, DeviceRepository, SessionRepository, RefreshTokenRepository
+  implements
+      LoginRepository,
+      UserRepository,
+      ReminderRepository,
+      DeviceRepository,
+      SessionRepository,
+      RefreshTokenRepository,
+      SessionActivityRepository
 {
   redis: RedisClientType;
   userLoader: DataLoader<string, User | null>
   reminderLoader: DataLoader<string, Reminder | null>
   deviceLoader: DataLoader<string, Device | null>
   sessionLoader: DataLoader<string, Session | null>
+  sessionActivityLoader: DataLoader<string, SessionActivity | null>
   refreshTokenLoader: DataLoader<string, RefreshToken | null>
 
   constructor(redisHost: string | null, redisPort: string | null) {
@@ -115,6 +130,25 @@ export class RedisRepository
         }
       });
       return Promise.all(promises);
+    });
+
+    this.sessionActivityLoader = new DataLoader<string, SessionActivity | null>(async (ids) => {
+      // Fetch data from Redis for the provided IDs
+      const fetchPromises = ids.map(async (id) => {
+        let data = await this.redis.hGetAll("session_activity:" + id);
+        data = {
+          ...data, // Copy existing key-value pairs
+          id: id, // Append the new key-value pair
+        }
+        if (SessionActivity.isValidSessionData(data)) {
+          return SessionActivity.fromJSON(data);
+        } else {
+          console.log("No sessionActivity data found in redis for id: ", id);
+          return null;
+        }
+      });
+
+      return Promise.all(fetchPromises);
     });
 
     this.refreshTokenLoader = new DataLoader<string, RefreshToken | null>(async (ids) => {
@@ -226,6 +260,15 @@ export class RedisRepository
       );
     }
     return null;
+  }
+
+  async getLoginIdBySessionId(sessionId: string): Promise<string | null> {
+    const loginId = await this.redis.hGet("session:" + sessionId, "associatedLoginId");
+    if (!loginId) {
+      // console.log(`No Login with that sessionId (${sessionId}) in redis!!!`);
+      return null;
+    }
+    return loginId;
   }
 
   getLoginById(id: string): Promise<Login | null> {
@@ -389,10 +432,20 @@ export class RedisRepository
     }
     return deviceId;
   }
+
+  async getDeviceIdBySessionId(sessionId: string): Promise<string | null> {
+
+    const deviceId = await this.redis.hGet("session:" + sessionId, "associatedDeviceId");
+    if (!deviceId) {
+      // console.log(`No Device with that sessionId (${sessionId}) in redis!!!`);
+      return null;
+    }
+    return deviceId;
+  }
   //endregion
 
   //region Session
-  async createSession(startTime: Date, sessionStatus: SessionStatus, endTime?: Date, associatedDeviceId?: string, associatedLoginId?: string, associatedRefreshTokenId?: string, ): Promise<Session> {
+  async createSession(startTime: Date, sessionStatus: SessionStatus, associatedSessionActivities: string[], endTime?: Date, associatedDeviceId?: string, associatedLoginId?: string, associatedRefreshTokenId?: string, ): Promise<Session> {
     const sessionId = await this.redis.incr("next_session_id");
     const created = new Date(Date.now());
     await this.redis.sAdd("sessions", sessionId.toString());
@@ -401,7 +454,9 @@ export class RedisRepository
         created: created.toISOString(),
         modified: created.toISOString(),
         startTime: startTime.toISOString(),
-        sessionStatus: sessionStatus
+        sessionStatus: sessionStatus,
+        associatedSessionActivities: JSON.stringify(associatedSessionActivities),
+        lastActivity: created.toISOString()
       }).flat(),
     ]);
     if(endTime) {
@@ -416,7 +471,7 @@ export class RedisRepository
     if(associatedRefreshTokenId) {
       await this.redis.hSet("session:" + sessionId.toString(), "associatedRefreshTokenId", associatedRefreshTokenId);
     }
-    return Promise.resolve(new Session(sessionId.toString(), created, created, startTime, sessionStatus, endTime ? endTime : undefined, associatedDeviceId ? associatedDeviceId : undefined,associatedLoginId ? associatedLoginId : undefined, associatedRefreshTokenId ? associatedRefreshTokenId : undefined));
+    return Promise.resolve(new Session(sessionId.toString(), created, created, startTime, sessionStatus, created, associatedSessionActivities, endTime ? endTime : undefined, associatedDeviceId ? associatedDeviceId : undefined,associatedLoginId ? associatedLoginId : undefined, associatedRefreshTokenId ? associatedRefreshTokenId : undefined));
   }
 
   async deleteSession(id: string): Promise<boolean> {
@@ -443,26 +498,53 @@ export class RedisRepository
     return this.sessionLoader.loadMany(ids);
   }
 
+  async getSessionIdsByDeviceId(deviceId: string): Promise<string[]> {
+    return this.redis.sMembers(
+        "device:" + deviceId + "associated_session_ids"
+    );
+  }
+
+  async getSessionIdBySessionActivityId(sessionActivityId: string): Promise<string | null> {
+    let data = await this.redis.hGetAll("session_activity:" + sessionActivityId);
+    if (data.associatedSessionId !== null) {
+      return data.associatedSessionId;
+    }
+    return null;
+  }
+
   async getSessionById(id: string): Promise<Session | null> {
     return this.sessionLoader.load(id);
   }
 
   async updateSession(updatedSession: Session): Promise<boolean> {
-    const currentSession = await this.getDeviceById(updatedSession.id);
+    // Invalidate the DataLoader cache for this session ID if necessary
+    this.sessionLoader.clear(updatedSession.id);
+    const currentSessionInRedis = await this.getSessionById(updatedSession.id);
 
-    if (!currentSession) {
+    if (!currentSessionInRedis) {
+      console.log("Session to update is not in redis!!!");
       return false;
     }
+    if(!updatedSession.equals(currentSessionInRedis)){
+      // updatedSession.printDifferences(currentSessionInRedis);
+      const updatedSessionJson = updatedSession.toJSON();
+      const entries = Object.entries(updatedSessionJson)
+          .filter(([key, value]) => key !== 'id' && value !== undefined) // Exclude 'id' and undefined values
+          .flatMap(([key, value]) => [key, value]); // Keep only defined values
 
-    const args = ['HMSET', `session:${currentSession.id}`, ...Object.entries(updatedSession.toJSON()).filter(([key]) => key !== 'id').flat()];
-
-    return this.redis.sendCommand(args)
-        .then(() => {
-          return true;
-        })
-        .catch(() => {
-          return false;
-        });
+      const args = ['HSET', `session:${currentSessionInRedis.id}`, ...entries];
+      return await this.redis.sendCommand(args)
+          .then(() => {
+            // console.log("Session updated...---------------");
+            return true;
+          })
+          .catch((error) => {
+            return false;
+          });
+    }
+    else {
+      return false;
+    }
   }
   //endregion
 
@@ -771,6 +853,73 @@ export class RedisRepository
 
   }
 
+  //endregion
+
+  //region SessionActivity
+  async createSessionActivity(description: string, associatedSessionId: string): Promise<SessionActivity> {
+    // Add new user
+    const sessionActivityId = await this.redis.incr("next_session_activity_id");
+    const created = new Date();
+    const numberOfNewAddedFields = await this.redis.hSet("session_activity:" + sessionActivityId.toString(), [
+      ...Object.entries({
+        created: created.toISOString(),
+        modified: created.toISOString(),
+        description: description,
+        associatedSessionId: associatedSessionId
+      }).flat(),
+    ]);
+    const numberOfElementsAddedToSet = await this.redis.sAdd(
+        "session:" + associatedSessionId + "associated_session_activity_ids",
+        sessionActivityId.toString()
+    );
+    await this.redis.sAdd('session_activities', sessionActivityId.toString());
+
+    if (numberOfNewAddedFields > 0 && numberOfElementsAddedToSet > 0) {
+      return Promise.resolve(
+          new SessionActivity(sessionActivityId.toString(), created, created, description, associatedSessionId)
+      );
+    } else {
+      return Promise.reject("SessionActivity was not added");
+    }
+  }
+
+  async deleteSessionActivity(id: string): Promise<boolean> {
+    const sessionActivityData = await this.redis.hGetAll("session_activity:" + id);
+    if (!Object.keys(sessionActivityData).length) {
+      return Promise.reject("No sessionActivity found with id: " + id);
+    }
+    await this.redis.sRem(
+        "session:" + sessionActivityData.associatedSessionId + "associated_session_activity_ids",
+        id
+    );
+    const allFields = await this.redis.hKeys("session_activity:" + id);
+    const nbrOfDeletedFields = await this.redis.hDel("session_activity:" + id, allFields);
+    await this.redis.sRem('session_activities', id);
+    return Promise.resolve(nbrOfDeletedFields > 0);
+  }
+
+  async getAllSessionActivityIds(): Promise<string[] | null> {
+    const setExists = await this.redis.exists('session_activities');
+    if (setExists === 0) {
+      // The Set does not exist
+      return null;
+    }
+    return await this.redis.sMembers('session_activities');
+  }
+
+  getManySessionActivitiesByIds(ids: string[]): Promise<(SessionActivity | Error | null)[]> {
+    return this.sessionActivityLoader.loadMany(ids);
+  }
+
+  getSessionActivityIdsBySessionId(sessionId: string): Promise<string[]> {
+    return this.redis.sMembers(
+        "session:" + sessionId + "associated_session_activity_ids"
+    );
+  }
+
+  getSessionActivityById(id: string): Promise<SessionActivity | null> {
+    return this.sessionActivityLoader.load(id);
+  }
   //endregion
 
 }

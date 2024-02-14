@@ -97,6 +97,7 @@ export class AccountService {
                 viewer,
                 new Date(Date.now()),
                 SessionStatus.active,
+                [],
                 undefined,
                 device.id,
                 newLogin.id,
@@ -163,7 +164,7 @@ export class AccountService {
 
         const user = await this.userService.generate(viewer, login.associatedUserIds[0] ? login.associatedUserIds[0] : "");
         if(user === null) throw new DatabaseError("No user associated with login");
-        const device = await this.getOrCreateDeviceFromViewer(viewer);
+        const device = await this.deviceService.getOrCreateDeviceFromViewer(viewer);
         const expirationDateTime = new Date();
         expirationDateTime.setDate(new Date(Date.now()).getDate() + 90);
         const payload = {
@@ -187,6 +188,7 @@ export class AccountService {
             viewer,
             new Date(Date.now()),
             SessionStatus.active,
+            [],
             undefined,
             device.id,
             login.id,
@@ -255,8 +257,8 @@ export class AccountService {
             userRole: oldPayload.userRole
         };
         refreshToken.revoke();
-        await this.refreshTokenService.updateRefreshToken(viewer, refreshToken);
-        const device = await this.getOrCreateDeviceFromViewer(viewer);
+        await this.refreshTokenService.updateRefreshToken(Viewer.Root(), refreshToken);
+        const device = await this.deviceService.getOrCreateDeviceFromViewer(viewer);
         const expirationDateTime = new Date();
         expirationDateTime.setDate(new Date(Date.now()).getDate() + 90);
         const newRefreshToken = await this.refreshTokenService.createRefreshToken(
@@ -267,50 +269,7 @@ export class AccountService {
             oldPayload.loginId,
             device.id
         );
-        const session = await this.getOrCreateSession(viewer, device.id, oldPayload.loginId, newRefreshToken.id);
+        const session = await this.sessionService.getOrCreateSession(viewer, device.id, oldPayload.loginId, newRefreshToken.id);
         return new RefreshAccessSuccess(this.createAccessToken(tokenPayload), newRefreshToken, session.id);
-    }
-
-    private async getOrCreateDeviceFromViewer(viewer: Viewer): Promise<Device> {
-        const deviceInfo = viewer.createDeviceInfoFromHeaders();
-        if(deviceInfo === undefined) {
-            throw new DatabaseError("Could not create new Device Info");
-        }
-        let device: Device;
-        const knownDevice = await this.deviceService.getDeviceByDeviceIdentifier(viewer, deviceInfo.deviceIdentifier);
-        const currentDateTime = new Date(Date.now());
-        if(!knownDevice){
-            const newDevice = await this.deviceService.createDevice(
-                viewer,
-                deviceInfo.deviceIdentifier,
-                deviceInfo.userAgentString,
-                deviceInfo.deviceType,
-                deviceInfo.deviceName,
-                deviceInfo.deviceOperatingSystem,
-                currentDateTime,
-                []
-            );
-            if(!newDevice){
-                throw new DatabaseError("Could not create new Device");
-            }
-            device = newDevice;
-        }
-        else {
-            device = knownDevice;
-        }
-        return device;
-    }
-
-    private async getOrCreateSession(viewer: Viewer, deviceId: string, loginId: string, refreshTokenId: string): Promise<Session> {
-        const newSession = await this.sessionService.createSession(
-            viewer,
-            new Date(Date.now()),
-            SessionStatus.active,
-            undefined,
-            deviceId,
-            loginId,
-            refreshTokenId
-        );
-        return newSession;
     }
 }

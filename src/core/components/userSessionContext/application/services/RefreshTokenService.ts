@@ -59,9 +59,9 @@ export class RefreshTokenService {
     }
 
     checkCanUpdate(viewer: Viewer, refreshToken: RefreshToken): boolean {
-        if(viewer.isRootUser()){
-            return true;
-        }
+        // if(viewer.isRootUser()){
+        //     return true;
+        // }
         return true;
     }
 

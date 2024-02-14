@@ -67,9 +67,9 @@ export class MockupRepository implements
     ];
 
     private sessions: Session[] = [
-        new Session("1", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, undefined, "1", "1", "1"),
-        new Session("2", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, undefined, "2", "2", "2"),
-        new Session("3", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, undefined, "3", "3", "3"),
+        new Session("1", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [], undefined, "1", "1", "1"),
+        new Session("2", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [],undefined, "2", "2", "2"),
+        new Session("3", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [],undefined, "3", "3", "3"),
     ]
 
     async printPWS() {
@@ -200,13 +200,15 @@ export class MockupRepository implements
         ));
     }
 
-    createSession(startTime: Date, sessionStatus: SessionStatus, endTime?: Date, associatedDeviceId?: string, associatedLoginId?: string, associatedRefreshTokenId?: string): Promise<Session> {
+    createSession(startTime: Date, sessionStatus: SessionStatus, associatedSessionActivityIds: string[], endTime?: Date, associatedDeviceId?: string, associatedLoginId?: string, associatedRefreshTokenId?: string): Promise<Session> {
         return Promise.resolve(new Session(
             (this.sessions.length + 1).toString(),
             new Date(Date.now()),
             new Date(Date.now()),
             startTime,
             sessionStatus,
+            new Date(),
+            associatedSessionActivityIds,
             endTime,
             associatedDeviceId,
             associatedLoginId,

@@ -8,6 +8,7 @@ export interface SessionRepository {
     createSession(
         startTime: Date,
         sessionStatus: SessionStatus,
+        associatedSessionActivities: string[],
         endTime?: Date,
         associatedDeviceId?: string,
         associatedLoginId?: string,
@@ -19,5 +20,6 @@ export interface SessionRepository {
 
     getAllSessionIds(): Promise<string[] | null>
     getManySessionsByIds(ids: string[]): Promise<(Session | Error | null)[]>
-
+    getSessionIdsByDeviceId(deviceId: string): Promise<string[]>
+    getSessionIdBySessionActivityId(sessionActivityId: string): Promise<string | null>
 }

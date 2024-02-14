@@ -21,4 +21,5 @@ export interface DeviceRepository {
     getManyDevicesByIds(ids: string[]): Promise<(Device | Error | null)[]>
 
     getDeviceIdByDeviceIdentifier(deviceIdentifier: string): Promise<string | null>
+    getDeviceIdBySessionId(sessionId: string): Promise<string | null>
 }

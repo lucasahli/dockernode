@@ -18,7 +18,7 @@ import {
 } from "./core/components/reminderContext/application/services/index.js";
 import {
     AccountService,
-    LoginService,
+    LoginService, SessionActivityService,
     UserService
 } from "./core/components/userSessionContext/application/services/index.js";
 import {PasswordManager} from "./core/components/userSessionContext/domain/services/index.js";
@@ -52,7 +52,7 @@ const app: Express = express();
 app.use(helmet({
     contentSecurityPolicy: false,
 }));
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 
 // **************************************
 //       Express middlewares
@@ -64,7 +64,7 @@ app.use(morgan('dev'));
 //  - For device information, you can store device registration when a user adds a new device and update the last
 //    used time during access.
 const loggingMiddleware = (req: any, res: any, next: any) => {
-    console.log('ip:', req.ip);
+    // console.log('ip:', req.ip);
     next();
 }
 app.use(loggingMiddleware);
@@ -77,7 +77,6 @@ app.use(cors({
 const createViewerMiddleware = async (req: any, res: any, next: any) => {
     const myViewer = new Viewer(req.headers, process.env.SECRET as string);
     await myViewer.prepareViewer().then(() => {
-        console.log("Prepared Viewer");
         res.locals.myViewer = myViewer;
     });
     next();
@@ -125,6 +124,7 @@ const userService = new UserService(redisRepository);
 const loginService = new LoginService(redisRepository, passwordManager);
 const deviceService = new DeviceService(redisRepository);
 const sessionService = new SessionService(redisRepository);
+const sessionActivityService = new SessionActivityService(redisRepository);
 const refreshTokenService = new RefreshTokenService(redisRepository);
 const accountService = new AccountService(loginService, userService, passwordManager, deviceService, sessionService, refreshTokenService);
 const reminderService = new ReminderService(redisRepository);
@@ -196,6 +196,7 @@ export interface GraphQlContext {
     reminderService: ReminderService;
     deviceService: DeviceService;
     sessionService: SessionService;
+    sessionActivityService: SessionActivityService;
     // Add other properties as needed
 }
 
@@ -206,7 +207,8 @@ const graphqlContext = {
     accountService: accountService,
     reminderService: reminderService,
     deviceService: deviceService,
-    sessionService: sessionService
+    sessionService: sessionService,
+    sessionActivityService: sessionActivityService
 };
 
 

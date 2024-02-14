@@ -8,6 +8,8 @@ schema {
 
 union CreateReminderResult = CreateReminderProblem | CreateReminderSuccess
 
+union RefreshAccessResult = RefreshAccessProblem | RefreshAccessSuccess
+
 union SignInResult = SignInProblem | SignInSuccess
 
 union SignUpResult = SignUpProblem | SignUpSuccess
@@ -31,6 +33,19 @@ type CreateReminderSuccess {
     createdReminder: Reminder!
 }
 
+type Device {
+    associatedSessions: [Session]
+    created: DateTime!
+    deviceIdentifier: String
+    deviceName: String
+    deviceOperatingSystem: String
+    deviceType: DeviceType
+    id: ID!
+    lastUsed: DateTime
+    modified: DateTime!
+    userAgentString: String
+}
+
 type Login {
     created: DateTime!
     email: String!
@@ -44,19 +59,37 @@ type Mutation {
     createReminder(dateTimeToRemind: DateTime!, title: String!): CreateReminderResult
     deleteReminder(id: ID!): Boolean!
     deleteUser(id: ID!): Boolean!
+    refreshAccess(refreshToken: String!): RefreshAccessResult
     signIn(email: String!, password: String!): SignInResult
     signUp(email: String!, fullName: String!, password: String!): SignUpResult
+    updatePushNotificationToken(pushNotificationToken: String!): Boolean!
 }
 
 type Query {
     _empty: String
+    device(id: ID!): Device
+    devices: [Device]
     me: User
     myReminders: [Reminder]
     reminder(id: ID!): Reminder
     reminders: [Reminder]
     remindersByOwner(ownerId: ID!): [Reminder!]
+    session(id: ID!): Session
+    sessionActivities: [SessionActivity]
+    sessionActivity(id: ID!): SessionActivity
+    sessions: [Session]
     user(id: ID!): User
     users: [User]
+}
+
+type RefreshAccessProblem {
+    message: String
+}
+
+type RefreshAccessSuccess {
+    accessToken: AccessToken!
+    refreshToken: RefreshToken!
+    sessionId: String!
 }
 
 type RefreshToken {
@@ -79,6 +112,28 @@ type Reminder {
     owner: User
     title: String
     usersToRemind: [User]
+}
+
+type Session {
+    associatedDevice: Device
+    associatedLogin: Login
+    associatedRefreshToken: RefreshToken
+    associatedSessionActivities: [SessionActivity]
+    created: DateTime!
+    endTime: DateTime
+    id: ID!
+    lastActivity: DateTime
+    modified: DateTime!
+    sessionStatus: SessionStatus
+    startTime: DateTime!
+}
+
+type SessionActivity {
+    associatedSession: Session
+    created: DateTime!
+    description: String
+    id: ID!
+    modified: DateTime!
 }
 
 type SignInInvalidInput {
@@ -134,6 +189,20 @@ type User {
 enum CreateReminderInvalidInputField {
     DATETIME
     TITLE
+}
+
+enum DeviceType {
+    DESKTOP
+    LABTOP
+    SMARTPHONE
+    TABLET
+    UNKNOWN
+}
+
+enum SessionStatus {
+    ACTIVE
+    EXPIRED
+    REVOKED
 }
 
 enum SignInInvalidInputField {
