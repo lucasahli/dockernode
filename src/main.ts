@@ -25,7 +25,7 @@ import {PasswordManager} from "./core/components/userSessionContext/domain/servi
 import {BcryptHasher} from "./infrastructure/security/BcryptHasher.js";
 import {Hasher} from "./core/portsAndInterfaces/interfaces/Hasher.js";
 import {MyJobScheduler} from "./infrastructure/scheduledJobs/MyJobScheduler.js";
-import {MyPushNotificationService} from "./infrastructure/notifications/MyPushNotificationService.js";
+import {FirebaseCloudMessagingNotificationService} from "./infrastructure/notifications/FirebaseCloudMessagingNotificationService.js";
 import {InitializePeriodicReminderChecksUseCase} from "./core/portsAndInterfaces/ports/index.js";
 import {
     InitializePeriodicReminderChecksUseCaseHandler
@@ -116,7 +116,7 @@ if(resetRedisOnStartup){
 
 const hasher: Hasher = new BcryptHasher();
 const jobScheduler = new MyJobScheduler();
-const pushNotificationService = new MyPushNotificationService();
+const pushNotificationService = new FirebaseCloudMessagingNotificationService();
 
 // Core:
 const passwordManager = new PasswordManager(hasher);

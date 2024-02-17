@@ -1,11 +1,11 @@
-import {LoginRepository} from "../../../core/portsAndInterfaces/interfaces/LoginRepository.js";
-import {UserRepository} from "../../../core/portsAndInterfaces/interfaces/UserRepository.js";
-import {ReminderRepository} from "../../../core/portsAndInterfaces/interfaces/ReminderRepository.js";
+import {LoginRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
+import {UserRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
+import {ReminderRepository} from "../../../core/portsAndInterfaces/interfaces/index.js";
 import {Login} from "../../../core/components/userSessionContext/domain/entities/Login.js";
 import {Reminder} from "../../../core/components/reminderContext/domain/entities/Reminder.js";
 import {User} from "../../../core/components/userSessionContext/domain/entities/User.js";
 import {UserRole} from "../../../core/sharedKernel/UserRole.js";
-import {PasswordManager} from "../../../core/components/userSessionContext/domain/services/PasswordManager.js";
+import {PasswordManager} from "../../../core/components/userSessionContext/domain/services/index.js";
 import {BcryptHasher} from "../../security/BcryptHasher.js";
 import {Error} from "sequelize";
 import {LocationWithRadius} from "../../../core/components/reminderContext/domain/entities/index.js";
@@ -17,18 +17,8 @@ import {
 import {Device, RefreshToken, Session} from "../../../core/components/userSessionContext/domain/entities/index.js";
 import {DeviceType, SessionStatus} from "../../../core/components/userSessionContext/domain/valueObjects/index.js";
 
-export class MockupRepository implements
-    LoginRepository,
-    UserRepository,
-    ReminderRepository,
-    DeviceRepository,
-    SessionRepository,
-    RefreshTokenRepository {
+export class MockupRepository implements LoginRepository, UserRepository, ReminderRepository, DeviceRepository, SessionRepository, RefreshTokenRepository {
 
-    getRefreshTokenIdByTokenString(tokenString: string): Promise<string | null> {
-        // @ts-ignore
-        throw new Error("Method not implemented.");
-    }
     private passwordManager = new PasswordManager(new BcryptHasher());
 
     private logins: Login[] = [
@@ -68,9 +58,34 @@ export class MockupRepository implements
 
     private sessions: Session[] = [
         new Session("1", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [], undefined, "1", "1", "1"),
-        new Session("2", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [],undefined, "2", "2", "2"),
-        new Session("3", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [],undefined, "3", "3", "3"),
+        new Session("2", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [], undefined, "2", "2", "2"),
+        new Session("3", new Date(Date.now()), new Date(Date.now()), new Date(Date.now()), SessionStatus.active, new Date(), [], undefined, "3", "3", "3"),
     ]
+
+    getSessionIdsByDeviceId(deviceId: string): Promise<string[]> {
+        return Promise.resolve([]);
+    }
+
+    getSessionIdBySessionActivityId(sessionActivityId: string): Promise<string | null> {
+        return Promise.resolve("");
+    }
+
+    getDeviceIdBySessionId(sessionId: string): Promise<string | null> {
+        return Promise.resolve("");
+    }
+
+    getLoginIdBySessionId(sessionId: string): Promise<string | null> {
+        return Promise.resolve("");
+    }
+
+    updateLogin(updatedLogin: Login): Promise<boolean> {
+        return Promise.resolve(true);
+    }
+
+    getRefreshTokenIdByTokenString(tokenString: string): Promise<string | null> {
+        // @ts-ignore
+        throw new Error("Method not implemented.");
+    }
 
     async printPWS() {
         for (let login of this.logins) {
@@ -103,7 +118,7 @@ export class MockupRepository implements
     }
 
     deleteLogin(id: string): Promise<boolean> {
-        return new Promise<boolean> ((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             const index = this.logins.findIndex(item => item.id === id);
             if (index > -1) {
                 this.logins.splice(index, 1);
@@ -114,7 +129,7 @@ export class MockupRepository implements
     }
 
     deleteReminder(id: string): Promise<boolean> {
-        return new Promise<boolean> ((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             const index = this.reminders.findIndex(item => item.id === id);
             if (index > -1) {
                 this.reminders.splice(index, 1);
@@ -125,7 +140,7 @@ export class MockupRepository implements
     }
 
     deleteUser(id: string): Promise<boolean> {
-        return new Promise<boolean> ((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             const index = this.users.findIndex(item => item.id === id);
             if (index > -1) {
                 this.users.splice(index, 1);
@@ -134,7 +149,6 @@ export class MockupRepository implements
             reject(false);
         });
     }
-
 
     getLoginByEmail(email: string): Promise<Login | null> {
         return Promise.resolve(this.logins.find(item => item.email === email) || null);
@@ -150,7 +164,7 @@ export class MockupRepository implements
 
     getReminderIdsByOwnerId(ownerId: string): Promise<string[]> {
         const reminders = this.reminders.filter(item => item.ownerId === ownerId);
-        if (reminders.length > 0){
+        if (reminders.length > 0) {
             return Promise.resolve(reminders.map(reminder => reminder.id));
         }
         return Promise.resolve([]);
@@ -184,7 +198,7 @@ export class MockupRepository implements
             deviceOperatingSystem,
             lastUsed,
             associatedSessionIds
-            ));
+        ));
     }
 
     createRefreshToken(token: string, expiration: Date, revoked: boolean, associatedLoginId: string, associatedDeviceId: string): Promise<RefreshToken> {
@@ -217,7 +231,7 @@ export class MockupRepository implements
     }
 
     deleteDevice(id: string): Promise<boolean> {
-        return new Promise<boolean> ((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             const index = this.devices.findIndex(item => item.id === id);
             if (index > -1) {
                 this.devices.splice(index, 1);
@@ -228,7 +242,7 @@ export class MockupRepository implements
     }
 
     deleteRefreshToken(id: string): Promise<boolean> {
-        return new Promise<boolean> ((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             const index = this.refreshTokens.findIndex(item => item.id === id);
             if (index > -1) {
                 this.refreshTokens.splice(index, 1);
@@ -239,7 +253,7 @@ export class MockupRepository implements
     }
 
     deleteSession(id: string): Promise<boolean> {
-        return new Promise<boolean> ((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             const index = this.sessions.findIndex(item => item.id === id);
             if (index > -1) {
                 this.sessions.splice(index, 1);
@@ -263,7 +277,7 @@ export class MockupRepository implements
 
     getDeviceIdByDeviceIdentifier(deviceIdentifier: string): Promise<string | null> {
         const foundDevice = this.devices.find(item => item.deviceIdentifier === deviceIdentifier);
-        if(foundDevice){
+        if (foundDevice) {
             return Promise.resolve(foundDevice.id)
         }
         return Promise.resolve(null);
