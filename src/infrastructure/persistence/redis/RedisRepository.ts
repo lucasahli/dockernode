@@ -39,6 +39,7 @@ export class RedisRepository
       SessionActivityRepository
 {
   redis: RedisClientType;
+  loginLoader: DataLoader<string, Login | null>
   userLoader: DataLoader<string, User | null>
   reminderLoader: DataLoader<string, Reminder | null>
   deviceLoader: DataLoader<string, Device | null>
@@ -52,6 +53,26 @@ export class RedisRepository
     this.redis = createClient({ url: redisUrl });
     this.redis.on("error", (err) => console.log("Redis Client Error", err));
     this.redis.connect().then(() => console.log("Redis connected"));
+
+
+    this.loginLoader = new DataLoader<string, Login | null>(async (ids) => {
+      // Fetch data from Redis for the provided IDs
+      const promises = ids.map(async (id) => {
+        let data = await this.redis.hGetAll("login:" + id);
+        data = {
+          ...data, // Copy existing key-value pairs
+          id: id, // Append the new key-value pair
+        }
+        if (Login.isValidLoginData(data)) {
+          console.log("Valid LoginData: ", data);
+          return Login.fromJSON(data);
+        } else {
+          console.log("No login data found in redis for id: ", id);
+          return null;
+        }
+      });
+      return Promise.all(promises);
+    });
 
     // Create a DataLoader instance for user IDs
     //  accept string keys (user IDs) and return a User | null type,
@@ -184,82 +205,80 @@ export class RedisRepository
     associatedSessionIds: string[],
   ): Promise<Login> {
     // Check if Login already exists
-    if (await this.redis.hGet("logins", email)) {
-      return Promise.reject("Login with that email already exists!");
-    }
-    // Generate Login-ID
-    const loginId = await this.redis.incr("next_login_id");
+    // if (await this.redis.hGet("login_emails", email)) {
+    //   return Promise.reject("Login with that email already exists!");
+    // }
+    const loginId = await this.redis.incr("next_login_id"); // Generate Login-ID
     const created = new Date(Date.now());
-    // Generate Authentication Secret
-    const authsecret = generateRandomStringWithLength(16);
-    // Store the Authentication Secret
-    await this.redis.hSet("auths", authsecret, loginId);
-    // Store the login data
-    await this.redis.hSet("logins", email, loginId);
+    const authsecret = generateRandomStringWithLength(16); // Generate Authentication Secret
+    await this.redis.hSet("auths", authsecret, loginId); // Store the Authentication Secret
+
+    await this.redis.sAdd("logins", loginId.toString());
+    await this.redis.hSet("login_emails", email, loginId);
     await this.redis.hSet("login:" + loginId.toString(), [
       ...Object.entries({
+        created: created.toISOString(),
+        modified: created.toISOString(),
         email: email,
         password: password,
         auth: authsecret,
-        created: created.toISOString(),
-        modified: created.toISOString()
+        associatedUserIds: JSON.stringify(associatedUserIds),
+        associatedDeviceIds: JSON.stringify(associatedDeviceIds),
+        associatedSessionIds: JSON.stringify(associatedSessionIds)
       }).flat(),
     ]);
 
     // If available, store the associated User-ID's
-    if (associatedUserIds.length > 0) {
-      await this.redis.sAdd(
-        "login:" + loginId.toString() + "associated_user_ids",
-          associatedUserIds
-      );
-    }
-    if (associatedDeviceIds.length > 0) {
-      await this.redis.sAdd(
-          "login:" + loginId.toString() + "associated_device_ids",
-          associatedDeviceIds
-      );
-    }
-    if (associatedSessionIds.length > 0) {
-      await this.redis.sAdd(
-          "login:" + loginId.toString() + "associated_session_ids",
-          associatedSessionIds
-      );
-    }
+    // if (associatedUserIds.length > 0) {
+    //   await this.redis.hSet("login:" + loginId.toString() + "associated_user_ids", associatedUserIds);
+    // }
+    // if (associatedDeviceIds.length > 0) {
+    //   await this.redis.hSet("login:" + loginId.toString() + "associated_device_ids", associatedDeviceIds);
+    // }
+    // if (associatedSessionIds.length > 0) {
+    //   await this.redis.hSet("login:" + loginId.toString() + "associated_session_ids", associatedSessionIds);
+    // }
     // Return the Login Object
     return Promise.resolve(
       new Login(loginId.toString(), created, created, email, password, associatedUserIds, associatedDeviceIds, associatedSessionIds)
     );
   }
 
-  getAllLoginIds(): Promise<string[]> {
-    return Promise.resolve([]);
+  async getAllLoginIds(): Promise<string[] | null> {
+    const setExists = await this.redis.exists('logins');
+    if (setExists === 0) {
+      // The Set does not exist
+      return null;
+    }
+    return await this.redis.sMembers('logins');
   }
 
   async getLoginByEmail(email: string): Promise<Login | null> {
-    const loginId = await this.redis.hGet("logins", email);
+    const loginId = await this.redis.hGet("login_emails", email);
     if (!loginId) {
       // console.log(`No login with that email (${email}) in redis!!!`);
       return null;
     }
+    return this.loginLoader.load(loginId);
 
-    const loginData = await this.redis.hGetAll("login:" + loginId);
-    const associatedUserIds = await this.redis.sMembers("login:" + loginId + "associated_user_ids");
-    const associatedDeviceIds = await this.redis.sMembers("login:" + loginId + "associated_device_ids");
-    const associatedSessionIds = await this.redis.sMembers("login:" + loginId + "associated_session_ids");
-
-    if(loginData && associatedUserIds){
-      return new Login(
-          loginId,
-          new Date(loginData.created),
-          new Date(loginData.modified),
-          loginData.email,
-          loginData.password,
-          associatedUserIds,
-          associatedDeviceIds,
-          associatedSessionIds
-      );
-    }
-    return null;
+    // const loginData = await this.redis.hGetAll("login:" + loginId);
+    // const associatedUserIds = await this.redis.sMembers("login:" + loginId + "associated_user_ids");
+    // const associatedDeviceIds = await this.redis.sMembers("login:" + loginId + "associated_device_ids");
+    // const associatedSessionIds = await this.redis.sMembers("login:" + loginId + "associated_session_ids");
+    //
+    // if(loginData && associatedUserIds){
+    //   return new Login(
+    //       loginId,
+    //       new Date(loginData.created),
+    //       new Date(loginData.modified),
+    //       loginData.email,
+    //       loginData.password,
+    //       associatedUserIds,
+    //       associatedDeviceIds,
+    //       associatedSessionIds
+    //   );
+    // }
+    // return null;
   }
 
   async getLoginIdBySessionId(sessionId: string): Promise<string | null> {
@@ -272,40 +291,74 @@ export class RedisRepository
   }
 
   getLoginById(id: string): Promise<Login | null> {
-    return new Promise<Login | null>(async (resolve, reject) => {
-      //   const loginData = await this.redis.hGetAll("login:" + id);
-      //   const associatedUserIds = await this.redis.sMembers(
-      //     "login:" + id + "associated_user_ids"
-      //   );
-      //   if (loginData && associatedUserIds) {
-      //     console.log("Login Data: ", loginData);
-      //     return resolve(
-      //       new Login(id, loginData.email, loginData.password, associatedUserIds)
-      //     );
-      //   } else {
-      //     console.log("No login data found in redis for id: ", id);
-      //     return resolve(null);
-      //   }
+    return this.loginLoader.load(id);
+    // return new Promise<Login | null>(async (resolve, reject) => {
+    //   //   const loginData = await this.redis.hGetAll("login:" + id);
+    //   //   const associatedUserIds = await this.redis.sMembers(
+    //   //     "login:" + id + "associated_user_ids"
+    //   //   );
+    //   //   if (loginData && associatedUserIds) {
+    //   //     console.log("Login Data: ", loginData);
+    //   //     return resolve(
+    //   //       new Login(id, loginData.email, loginData.password, associatedUserIds)
+    //   //     );
+    //   //   } else {
+    //   //     console.log("No login data found in redis for id: ", id);
+    //   //     return resolve(null);
+    //   //   }
+    //
+    //   return await Promise.all([
+    //     this.redis.hGetAll("login:" + id),
+    //     this.redis.sMembers("login:" + id + "associated_user_ids"),
+    //     this.redis.sMembers("login:" + id + "associated_device_ids"),
+    //     this.redis.sMembers("login:" + id + "associated_session_ids"),
+    //   ])
+    //       .then((results) => {
+    //         if(id === undefined || results[0].email === undefined || results[0].password === undefined){
+    //           return resolve(null);
+    //         }
+    //         else {
+    //           return resolve(new Login(id, new Date(results[0].created), new Date(results[0].modified), results[0].email, results[0].password, results[1], results[2], results[3]));
+    //         }
+    //       })
+    //       .catch((reason) => {
+    //         console.log("Reason: ", reason);
+    //         return resolve(null);
+    //       });
+    // });
+  }
 
-      return await Promise.all([
-        this.redis.hGetAll("login:" + id),
-        this.redis.sMembers("login:" + id + "associated_user_ids"),
-        this.redis.sMembers("login:" + id + "associated_device_ids"),
-        this.redis.sMembers("login:" + id + "associated_session_ids"),
-      ])
-          .then((results) => {
-            if(id === undefined || results[0].email === undefined || results[0].password === undefined){
-              return resolve(null);
-            }
-            else {
-              return resolve(new Login(id, new Date(results[0].created), new Date(results[0].modified), results[0].email, results[0].password, results[1], results[2], results[3]));
-            }
+  async updateLogin(updatedLogin: Login): Promise<boolean> {
+    // Invalidate the DataLoader cache for this login ID if necessary
+    this.loginLoader.clear(updatedLogin.id);
+    const currentLoginInRedis = await this.getLoginById(updatedLogin.id);
+
+    if (!currentLoginInRedis) {
+      console.log("Login to update is not in redis!!!");
+      return false;
+    }
+    console.log("Current Login: ", currentLoginInRedis);
+    console.log("Updated Login: ", updatedLogin);
+    if(!updatedLogin.equals(currentLoginInRedis)){
+      const updatedLoginJson = updatedLogin.toJSON();
+      const entries = Object.entries(updatedLoginJson)
+          .filter(([key, value]) => key !== 'id' && value !== undefined) // Exclude 'id' and undefined values
+          .flatMap(([key, value]) => [key, value]); // Keep only defined values
+
+      const args = ['HSET', `login:${currentLoginInRedis.id}`, ...entries];
+      return await this.redis.sendCommand(args)
+          .then(() => {
+            console.log("Login updated...---------------");
+            this.loginLoader.clear(updatedLogin.id);
+            return true;
           })
-          .catch((reason) => {
-            console.log("Reason: ", reason);
-            return resolve(null);
+          .catch((error) => {
+            return false;
           });
-    });
+    }
+    else {
+      return false;
+    }
   }
 
   async deleteLogin(id: string): Promise<boolean> {
@@ -314,7 +367,7 @@ export class RedisRepository
       return Promise.reject("No login found with id: " + id);
     }
     // await this.redis.hSet("logins", email, loginId);
-    await this.redis.hDel("logins", loginData.email);
+    await this.redis.hDel("login_emails", loginData.email);
     // await this.redis.hSet("auths", authsecret, loginId);
     await this.redis.hDel("auths", loginData.auth);
     // await this.redis.sAdd("login:" + loginId.toString() + "associated_user_ids", associatedUserIds);

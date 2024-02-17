@@ -15,5 +15,3 @@ export class GetSessionBySessionActivityIdUseCaseHandler extends SessionUpdater 
         return this.sessionService.getSessionBySessionActivityId(viewer, sessionActivityId);
     }
 }
-
-// 076 366 87 12

@@ -106,6 +106,10 @@ export class AccountService {
             if(!newSession){
                 throw new DatabaseError("Could not create new Session");
             }
+            newLogin.associateSessionId(newSession.id);
+            newLogin.associateDeviceId(device.id);
+            newLogin.associateUserId(newUser.id)
+            this.loginService.updateLogin(Viewer.Root(), newLogin);
             return {
                 sessionId: newSession.id,
                 accessToken: this.createAccessToken(payload),
@@ -197,6 +201,10 @@ export class AccountService {
         if(!newSession){
             throw new DatabaseError("Could not create new Session");
         }
+
+        login.associateSessionId(newSession.id);
+        login.associateDeviceId(device.id);
+        this.loginService.updateLogin(Viewer.Root(), login);
 
         return {
             sessionId: newSession.id,

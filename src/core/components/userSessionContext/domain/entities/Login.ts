@@ -57,4 +57,44 @@ export class Login {
         }
         return false;
     }
+
+    associateSessionId(sessionId: string) {
+        this.associatedSessionIds.push(sessionId);
+    }
+
+    associateDeviceId(deviceId: string) {
+        if (!this.associatedDeviceIds.includes(deviceId)) {
+            this.associatedDeviceIds.push(deviceId);
+        }
+    }
+
+    associateUserId(userId: string) {
+        if (!this.associatedUserIds.includes(userId)) {
+            this.associatedUserIds.push(userId);
+        }
+    }
+
+    equals(other: Login): boolean {
+        return this.id === other.id &&
+            this.created.getTime() === other.created.getTime() &&
+            this.modified.getTime() === other.modified.getTime() &&
+            this.email === other.email &&
+            this.password === other.password &&
+            this.arrayEquals(this.associatedUserIds, other.associatedUserIds) &&
+            this.arrayEquals(this.associatedDeviceIds, other.associatedDeviceIds) &&
+            this.arrayEquals(this.associatedSessionIds, other.associatedSessionIds);
+    }
+
+    // Helper method to check if two arrays are equal
+    private arrayEquals(a: string[], b: string[]): boolean {
+        if (a.length !== b.length) {
+            return false;
+        }
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

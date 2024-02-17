@@ -128,7 +128,7 @@ const sessionActivityService = new SessionActivityService(redisRepository);
 const refreshTokenService = new RefreshTokenService(redisRepository);
 const accountService = new AccountService(loginService, userService, passwordManager, deviceService, sessionService, refreshTokenService);
 const reminderService = new ReminderService(redisRepository);
-const reminderNotificationService = new ReminderNotificationService(reminderService, userService, pushNotificationService);
+const reminderNotificationService = new ReminderNotificationService(reminderService, userService, loginService, deviceService, pushNotificationService);
 
 // Presentation
 const initializePeriodicReminderChecksUseCase: InitializePeriodicReminderChecksUseCase = new InitializePeriodicReminderChecksUseCaseHandler(jobScheduler, reminderNotificationService)

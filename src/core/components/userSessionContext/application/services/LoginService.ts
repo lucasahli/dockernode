@@ -65,6 +65,10 @@ export class LoginService {
         return true;
     }
 
+    private checkCanUpdate(viewer: Viewer, login: Login): boolean {
+        return true;
+    }
+
     private checkCanDelete(viewer: Viewer, login: Login): boolean {
         return true;
     }
@@ -75,5 +79,10 @@ export class LoginService {
             return this.generate(viewer, loginId);
         }
         return null;
+    }
+
+    async updateLogin(viewer: Viewer, updatedLogin: Login): Promise<boolean> {
+        const canUpdate = this.checkCanUpdate(viewer, updatedLogin);
+        return canUpdate ? this.loginRepository.updateLogin(updatedLogin) : false;
     }
 }

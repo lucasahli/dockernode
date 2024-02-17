@@ -103,7 +103,7 @@ export class SessionService {
                 console.log("Session is expired!!!");
             }
             else {
-                console.log(`Could not generate Session with id: ${sessionId}`);
+                console.log(`Could not generate Session (id: ${sessionId})`);
             }
         }
         return false;
