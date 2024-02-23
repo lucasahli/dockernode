@@ -1,50 +1,220 @@
-"""
-Date custom scalar type
-"""
-scalar Date
+# This file was generated. Do not edit manually.
 
-type Query {
-  _empty: String
-  reminders: [Reminder]
-  reminder(id: ID!): Reminder
-  users: [User]
-  user(id: ID!): User
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
 }
 
-type Mutation {
-  _empty: String
-  signUp(email: String!, password: String!, fullName: String!): Token
-  signIn(email: String!, password: String!): Token
-  createReminder(title: String!, date: Date!): Reminder
-  deleteReminder(id: ID!): Boolean!
-  deleteUser(id: ID!): Boolean!
+union CreateReminderResult = CreateReminderProblem | CreateReminderSuccess
+
+union RefreshAccessResult = RefreshAccessProblem | RefreshAccessSuccess
+
+union SignInResult = SignInProblem | SignInSuccess
+
+union SignUpResult = SignUpProblem | SignUpSuccess
+
+type AccessToken {
+    token: String!
 }
 
-type Subscription {
-  _empty: Boolean
+type CreateReminderInvalidInput {
+    field: CreateReminderInvalidInputField!
+    "translated message."
+    message: String!
 }
 
-type Token {
-  token: String!
+type CreateReminderProblem {
+    invalidInputs: [CreateReminderInvalidInput]
+    title: String!
+}
+
+type CreateReminderSuccess {
+    createdReminder: Reminder!
+}
+
+type Device {
+    associatedSessions: [Session]
+    created: DateTime!
+    deviceIdentifier: String
+    deviceName: String
+    deviceOperatingSystem: String
+    deviceType: DeviceType
+    id: ID!
+    lastUsed: DateTime
+    modified: DateTime!
+    userAgentString: String
 }
 
 type Login {
-  id: ID!
-  email: String!
-  users: [User]
+    created: DateTime!
+    email: String!
+    id: ID!
+    modified: DateTime!
+    users: [User]
+}
+
+type Mutation {
+    _empty: String
+    createReminder(dateTimeToRemind: DateTime!, title: String!): CreateReminderResult
+    deleteReminder(id: ID!): Boolean!
+    deleteUser(id: ID!): Boolean!
+    refreshAccess(refreshToken: String!): RefreshAccessResult
+    signIn(email: String!, password: String!): SignInResult
+    signUp(email: String!, fullName: String!, password: String!): SignUpResult
+    updatePushNotificationToken(pushNotificationToken: String!): Boolean!
+}
+
+type Query {
+    _empty: String
+    device(id: ID!): Device
+    devices: [Device]
+    me: User
+    myReminders: [Reminder]
+    reminder(id: ID!): Reminder
+    reminders: [Reminder]
+    remindersByOwner(ownerId: ID!): [Reminder!]
+    session(id: ID!): Session
+    sessionActivities: [SessionActivity]
+    sessionActivity(id: ID!): SessionActivity
+    sessions: [Session]
+    user(id: ID!): User
+    users: [User]
+}
+
+type RefreshAccessProblem {
+    message: String
+}
+
+type RefreshAccessSuccess {
+    accessToken: AccessToken!
+    refreshToken: RefreshToken!
+    sessionId: String!
+}
+
+type RefreshToken {
+    associatedDeviceId: String
+    associatedLoginId: String
+    created: DateTime
+    expiration: DateTime
+    id: String!
+    modified: DateTime
+    revoked: Boolean
+    token: String!
 }
 
 type Reminder {
-  id: ID!
-  title: String
-  date: Date
-  owner: User
+    created: DateTime!
+    dateTimeToRemind: DateTime
+    id: ID!
+    isCompleted: Boolean
+    modified: DateTime!
+    owner: User
+    title: String
+    usersToRemind: [User]
+}
+
+type Session {
+    associatedDevice: Device
+    associatedLogin: Login
+    associatedRefreshToken: RefreshToken
+    associatedSessionActivities: [SessionActivity]
+    created: DateTime!
+    endTime: DateTime
+    id: ID!
+    lastActivity: DateTime
+    modified: DateTime!
+    sessionStatus: SessionStatus
+    startTime: DateTime!
+}
+
+type SessionActivity {
+    associatedSession: Session
+    created: DateTime!
+    description: String
+    id: ID!
+    modified: DateTime!
+}
+
+type SignInInvalidInput {
+    field: SignInInvalidInputField!
+    "translated message."
+    message: String!
+}
+
+type SignInProblem {
+    invalidInputs: [SignInInvalidInput]
+    "translated message encompassing all invalid inputs."
+    title: String!
+}
+
+type SignInSuccess {
+    accessToken: AccessToken!
+    refreshToken: RefreshToken!
+    sessionId: String!
+}
+
+type SignUpInvalidInput {
+    field: SignUpInvalidInputField!
+    "translated message."
+    message: String!
+}
+
+type SignUpProblem {
+    invalidInputs: [SignUpInvalidInput]
+    "translated message encompassing all invalid inputs."
+    title: String!
+}
+
+type SignUpSuccess {
+    accessToken: AccessToken!
+    refreshToken: RefreshToken!
+    sessionId: String!
+}
+
+type Subscription {
+    _empty: Boolean
 }
 
 type User {
-  id: ID!
-  fullName: String
-  role: String!
-  reminders: [Reminder]
-  login: Login!
+    created: DateTime!
+    fullName: String
+    id: ID!
+    login: Login!
+    modified: DateTime!
+    reminders: [Reminder]
+    role: String!
 }
+
+enum CreateReminderInvalidInputField {
+    DATETIME
+    TITLE
+}
+
+enum DeviceType {
+    DESKTOP
+    LABTOP
+    SMARTPHONE
+    TABLET
+    UNKNOWN
+}
+
+enum SessionStatus {
+    ACTIVE
+    EXPIRED
+    REVOKED
+}
+
+enum SignInInvalidInputField {
+    EMAIL
+    PASSWORD
+}
+
+enum SignUpInvalidInputField {
+    EMAIL
+    FULL_NAME
+    PASSWORD
+}
+
+"Date custom scalar type including time"
+scalar DateTime

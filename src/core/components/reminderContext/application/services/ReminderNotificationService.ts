@@ -1,6 +1,8 @@
-import {ReminderService, UserService} from "./index.js";
+import {ReminderService} from "./index.js";
+// TODO: Change Dependencies --> no context interference!
+import {DeviceService, LoginService, UserService} from "../../../userSessionContext/application/services/index.js"
 import {LocationWithRadius, Reminder} from "../../domain/entities/index.js";
-import {PushNotificationService} from "../../../../portsAndInterfaces/interfaces/index.js";
+import {PushNotificationPayload, PushNotificationService} from "../../../../portsAndInterfaces/interfaces/index.js";
 import {Viewer} from "../../../../sharedKernel/index.js";
 
 
@@ -9,6 +11,8 @@ export class ReminderNotificationService {
     constructor(
         private reminderService: ReminderService,
         private userService: UserService,
+        private loginService: LoginService,
+        private deviceService: DeviceService,
         private pushNotificationService: PushNotificationService
     ) {}
 
@@ -33,10 +37,26 @@ export class ReminderNotificationService {
         for (const userId of reminder.idsOfUsersToRemind) {
             const user = await this.userService.generate(Viewer.Root(), userId);
             if (user){
-                console.log(`Push notification sent for reminder: ${reminder.title}`);
-                console.log(`Push notification sent to user: ${user.id}`);
+                console.log("Has User");
+                const deviceTokens: string[] = [];
+                const login = await this.loginService.generate(Viewer.Root(), user.associatedLoginId);
+                if(login){
+                    console.log("Has Login: ", login);
+                    for (const deviceId of login.associatedDeviceIds) {
+                        console.log("Has Device ", deviceId);
+                        const device = await this.deviceService.generate(Viewer.Root(), deviceId);
+                        if (device) {
+                            console.log(device.deviceIdentifier);
+                            deviceTokens.push(device.deviceIdentifier);
+                        }
+                    }
+                }
                 // TODO: Implement Device Tokens for Notifications
-                // this.pushNotificationService.sendNotification()
+                const payload: PushNotificationPayload = {title: `${reminder.title}`, body: `Do it now!`};
+                const pushNotificationResult = await this.pushNotificationService.sendNotification(deviceTokens, payload);
+                // console.log(`Push notification sent for reminder: ${reminder.title}`);
+                // console.log(`Push notification sent to user: ${user.id}`);
+
                 reminder.complete();
                 const success = await this.reminderService.updateReminder(Viewer.Root(), reminder);
             }

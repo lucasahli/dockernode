@@ -67,8 +67,9 @@ export class MockHeaders implements IncomingHttpHeaders {
     via: string | undefined;
     warning: string | undefined;
 
-    constructor(authorization: string | undefined) {
+    constructor(authorization: string | undefined, userAgent: string | undefined) {
         this.authorization = authorization;
+        this["user-agent"] = userAgent;
     }
 
 }

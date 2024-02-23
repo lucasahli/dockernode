@@ -1,10 +1,13 @@
 import {Viewer} from "../../sharedKernel/index.js";
-import {Token} from "../../components/reminderContext/domain/valueObjects/Token.js";
+import {RefreshToken} from "../../components/userSessionContext/domain/entities/index.js";
+import {AccessToken} from "../../components/userSessionContext/domain/valueObjects/index.js";
 
 export type SignUpResult = SignUpSuccess | SignUpProblem;
 
 export type SignUpSuccess = {
-    token: Token;
+    sessionId: string,
+    accessToken: AccessToken,
+    refreshToken: RefreshToken;
 };
 
 export class SignUpProblem {

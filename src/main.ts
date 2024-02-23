@@ -13,21 +13,29 @@ import url from 'url';
 import cors from 'cors';
 import {RedisRepository} from "./infrastructure/persistence/redis/RedisRepository.js";
 import {
-    AccountService,
-    LoginService,
     ReminderNotificationService,
-    ReminderService,
-    UserService
+    ReminderService
 } from "./core/components/reminderContext/application/services/index.js";
-import {PasswordManager} from "./core/components/reminderContext/domain/services/index.js";
+import {
+    AccountService,
+    LoginService, SessionActivityService,
+    UserService
+} from "./core/components/userSessionContext/application/services/index.js";
+import {PasswordManager} from "./core/components/userSessionContext/domain/services/index.js";
 import {BcryptHasher} from "./infrastructure/security/BcryptHasher.js";
 import {Hasher} from "./core/portsAndInterfaces/interfaces/Hasher.js";
 import {MyJobScheduler} from "./infrastructure/scheduledJobs/MyJobScheduler.js";
-import {MyPushNotificationService} from "./infrastructure/notifications/MyPushNotificationService.js";
+import {FirebaseCloudMessagingNotificationService} from "./infrastructure/notifications/FirebaseCloudMessagingNotificationService.js";
 import {InitializePeriodicReminderChecksUseCase} from "./core/portsAndInterfaces/ports/index.js";
 import {
     InitializePeriodicReminderChecksUseCaseHandler
 } from "./core/components/reminderContext/application/useCases/index.js";
+import {
+    DeviceService,
+    RefreshTokenService,
+    SessionService
+} from "./core/components/userSessionContext/application/services/index.js";
+import {VaultSecretStore} from "./infrastructure/security/VaultSecretStore.js";
 
 
 // **************************************
@@ -45,13 +53,19 @@ const app: Express = express();
 app.use(helmet({
     contentSecurityPolicy: false,
 }));
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 
 // **************************************
 //       Express middlewares
 // **************************************
+// When to Store:
+//
+// Session data and device information can be stored at key points in your application's logic. For example:
+//  - For session data, you can store login and logout events or track activity during a session.
+//  - For device information, you can store device registration when a user adds a new device and update the last
+//    used time during access.
 const loggingMiddleware = (req: any, res: any, next: any) => {
-    console.log('ip:', req.ip);
+    // console.log('ip:', req.ip);
     next();
 }
 app.use(loggingMiddleware);
@@ -64,7 +78,6 @@ app.use(cors({
 const createViewerMiddleware = async (req: any, res: any, next: any) => {
     const myViewer = new Viewer(req.headers, process.env.SECRET as string);
     await myViewer.prepareViewer().then(() => {
-        console.log("Prepared Viewer");
         res.locals.myViewer = myViewer;
     });
     next();
@@ -102,28 +115,53 @@ if(resetRedisOnStartup){
     redisRepository.redis.flushDb();
 }
 
+const secretStore = new VaultSecretStore();
+const encriptionSecret = await secretStore.readSecret("encriptionSecret");
 const hasher: Hasher = new BcryptHasher();
 const jobScheduler = new MyJobScheduler();
-const pushNotificationService = new MyPushNotificationService();
+const pushNotificationService = new FirebaseCloudMessagingNotificationService();
+
 
 // Core:
 const passwordManager = new PasswordManager(hasher);
 const userService = new UserService(redisRepository);
 const loginService = new LoginService(redisRepository, passwordManager);
-const accountService = new AccountService(loginService, userService, passwordManager);
+const deviceService = new DeviceService(redisRepository);
+const sessionService = new SessionService(redisRepository);
+const sessionActivityService = new SessionActivityService(redisRepository);
+const refreshTokenService = new RefreshTokenService(redisRepository);
+const accountService = new AccountService(loginService, userService, passwordManager, deviceService, sessionService, refreshTokenService);
 const reminderService = new ReminderService(redisRepository);
-const reminderNotificationService = new ReminderNotificationService(reminderService, userService, pushNotificationService)
+const reminderNotificationService = new ReminderNotificationService(reminderService, userService, loginService, deviceService, pushNotificationService);
 
 // Presentation
 const initializePeriodicReminderChecksUseCase: InitializePeriodicReminderChecksUseCase = new InitializePeriodicReminderChecksUseCaseHandler(jobScheduler, reminderNotificationService)
 
 // Startup Jobs
 if(resetRedisOnStartup){
-    redisRepository.redis.flushDb();
+    await redisRepository.redis.flushDb();
     const rootViewer = Viewer.Root();
-    await accountService.signUp(rootViewer, "luca@gmail.com", "Hallo1234", "Luca Sahli");
-    await accountService.signUp(rootViewer, "demo@gmail.com", "Hallo1234", "Demo Account");
-    await accountService.signUp(rootViewer, "dummy@gmail.com", "Hallo1234", "Dummy Account");
+    try {
+        await accountService.signUp(rootViewer, "luca@gmail.com", "Hallo1234", "Luca Sahli");
+    }
+    catch (e) {
+        console.log("CATCHED ERROR: ", e);
+    }
+    try {
+        await accountService.signUp(rootViewer, "demo@gmail.com", "Hallo1234", "Demo Account");
+    }
+    catch (e) {
+        console.log("CATCHED ERROR: ", e);
+    }
+    try {
+        await accountService.signUp(rootViewer, "dummy@gmail.com", "Hallo1234", "Dummy Account");
+    }
+    catch (e) {
+        console.log("CATCHED ERROR: ", e);
+    }
+
+
+
 
     await redisRepository.createReminder("Pay Bills!", "1", ["1"], false, new Date("2030-01-01T09:15:00.000Z"), undefined);
     await redisRepository.createReminder("Call Mom!", "1", ["1"], false, new Date("2030-01-02T10:15:00.000Z"), undefined);
@@ -160,6 +198,9 @@ export interface GraphQlContext {
     loginService: LoginService;
     accountService: AccountService;
     reminderService: ReminderService;
+    deviceService: DeviceService;
+    sessionService: SessionService;
+    sessionActivityService: SessionActivityService;
     // Add other properties as needed
 }
 
@@ -169,6 +210,9 @@ const graphqlContext = {
     loginService: loginService,
     accountService: accountService,
     reminderService: reminderService,
+    deviceService: deviceService,
+    sessionService: sessionService,
+    sessionActivityService: sessionActivityService
 };
 
 

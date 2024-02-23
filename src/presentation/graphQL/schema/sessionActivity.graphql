@@ -1,0 +1,13 @@
+type SessionActivity {
+    id: ID!
+    created: DateTime!
+    modified: DateTime!
+    description: String
+    associatedSession: Session,
+}
+
+extend type Query {
+    sessionActivities: [SessionActivity]
+    sessionActivity(id: ID!): SessionActivity
+}
+

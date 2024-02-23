@@ -1,0 +1,46 @@
+schema: src/presentation/graphQL/schema/combinedSchemas/introspectedSchema.graphql
+projects:
+  shared:
+    include: shared/**
+  alpha:
+    include:
+      - alpha/**
+      - shared/**
+  beta:
+    include:
+      - beta/**
+      - shared/**
+  reminderProject:
+    schema:
+      - src/presentation/graphQL/schema/index.graphql
+    exclude:
+      - src/presentation/graphQL/schema/combinedSchemas/*.graphql
+      - src/presentation/graphQL/schema/combinedSchemas/*.gql
+    include:
+      - src/presentation/graphQL/schema/*.graphql
+      - src/presentation/graphQL/schema/*.gql
+    extensions:
+      endpoints:
+        default:
+          url: http://localhost:4000/graphql
+          headers:
+            user-agent: JS GraphQL
+          introspect: false
+  reminderProjectIntrospection:
+    exclude:
+      - src/presentation/graphQL/schema/*.graphql
+      - src/presentation/graphQL/schema/*.gql
+    extensions:
+      endpoints:
+        default:
+          url: http://localhost:4000/graphql
+          headers:
+            user-agent: JS GraphQL
+          introspect: true
+extensions:
+  endpoints:
+    Default GraphQL Endpoint:
+      url: http://localhost:4000/graphql
+      headers:
+        user-agent: JS GraphQL
+      introspect: false

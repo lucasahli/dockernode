@@ -4,4 +4,5 @@ node_modules
 logfile
 .env
 redis_data
+/src/firebaseServiceAccountKey.json
 .idea/*

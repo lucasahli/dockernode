@@ -7,7 +7,9 @@ import {Console} from "inspector";
 
 export class MyPushNotificationService implements PushNotificationService {
     sendNotification(deviceTokens: string[], notification: PushNotificationPayload): Promise<PushNotificationResult> {
-        console.log('Sending Push Notification...')
+        for (const deviceToken of deviceTokens) {
+            console.log(`Sending Push Notification to ${deviceToken} with title: ${notification.title}`);
+        }
         return Promise.resolve({success: true});
     }
 
