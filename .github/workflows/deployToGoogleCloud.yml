@@ -1,27 +1,52 @@
-name: Deploy Infrastructure
+name: Terraform Build and Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+      - uses: actions/checkout@v2
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Setup Google Cloud
+        uses: google/actions/setup-gcloud@v0
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+          project_id: YOUR_PROJECT_ID
+      - name: Initialize Terraform
+        run: terraform init -backend-config=main.tf || exit 1
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          TF_LOG: DEBUG  # Set log level for Terraform commands
+      - name: Plan Terraform changes
+        run: terraform plan || exit 1
+        env:
+          TF_LOG: DEBUG
+      - name: Apply Terraform changes
+        run: terraform apply -auto-approve || exit 1
+        env:
+          TF_LOG: DEBUG
+
+      - name: Log workflow summary
+        run: echo "Workflow completed successfully!" || echo "Workflow failed!"
+        shell: bash
+
+      - name: Upload logs to artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: terraform-logs
+          path: terraform.log terraform.plan
+
+      - uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          github.issues.createComment({
+            owner: 'lucasahli',
+            repo: 'reminder_backend',
+            issue_number: context.issue.number,
+            body: ${{ github.status }} ${{ github.action }} logs can be found in the [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/terraform-logs)
+          })
+        if: always()
