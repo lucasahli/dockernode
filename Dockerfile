@@ -2,6 +2,12 @@ FROM node:18 as buildstage
 
 RUN npm i -g pnpm
 
+# Install Vault
+ENV VAULT_VERSION=1.9.0
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
+    && apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+    && apt-get update && apt-get install vault=${VAULT_VERSION}
+
 WORKDIR /usr/src/app
 
 COPY package.json pnpm-lock.yaml ./
@@ -30,4 +36,4 @@ COPY --from=buildstage /usr/src/app/dist ./dist
 RUN mkdir -p ./src/presentation/graphQL/schema
 COPY ./src/presentation/graphQL/schema ./src/presentation/graphQL/schema
 
-CMD ["node", "./dist/main.js"]
+CMD ["node", "--experimental-json-modules", "./dist/main.js"]

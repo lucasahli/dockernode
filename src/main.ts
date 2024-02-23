@@ -35,6 +35,7 @@ import {
     RefreshTokenService,
     SessionService
 } from "./core/components/userSessionContext/application/services/index.js";
+import {VaultSecretStore} from "./infrastructure/security/VaultSecretStore.js";
 
 
 // **************************************
@@ -114,9 +115,12 @@ if(resetRedisOnStartup){
     redisRepository.redis.flushDb();
 }
 
+const secretStore = new VaultSecretStore();
+const encriptionSecret = await secretStore.readSecret("encriptionSecret");
 const hasher: Hasher = new BcryptHasher();
 const jobScheduler = new MyJobScheduler();
 const pushNotificationService = new FirebaseCloudMessagingNotificationService();
+
 
 // Core:
 const passwordManager = new PasswordManager(hasher);
