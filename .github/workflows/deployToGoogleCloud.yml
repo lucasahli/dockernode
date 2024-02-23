@@ -9,21 +9,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v1
+
       - name: Setup Google Cloud
         uses: google/actions/setup-gcloud@v0
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: YOUR_PROJECT_ID
+
       - name: Initialize Terraform
         run: terraform init -backend-config=main.tf || exit 1
         env:
           TF_LOG: DEBUG  # Set log level for Terraform commands
+
       - name: Plan Terraform changes
         run: terraform plan || exit 1
         env:
           TF_LOG: DEBUG
+
       - name: Apply Terraform changes
         run: terraform apply -auto-approve || exit 1
         env:
@@ -37,16 +42,20 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: terraform-logs
-          path: terraform.log terraform.plan
+          path: |
+            terraform.log
+            terraform.plan
 
-      - uses: actions/github-script@v6
+      - name: Comment on Issue with Artifact Link
+        uses: actions/github-script@v6
+        if: always() # This ensures the step runs regardless of the outcome of previous steps
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          github.issues.createComment({
-            owner: 'lucasahli',
-            repo: 'reminder_backend',
-            issue_number: context.issue.number,
-            body: ${{ github.status }} ${{ github.action }} logs can be found in the [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/terraform-logs)
-          })
-        if: always()
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `The action ${{ github.action }} has completed. Logs can be found in the [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts) for this workflow run.`
+            })
