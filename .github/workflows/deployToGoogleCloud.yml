@@ -17,35 +17,40 @@ jobs:
         uses: google/actions/setup-gcloud@v0
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: YOUR_PROJECT_ID
+          project_id: reminder-app-803e2
 
       - name: Initialize Terraform
-        run: terraform init -backend-config=main.tf || exit 1
+        run: terraform init
         env:
-          TF_LOG: DEBUG  # Set log level for Terraform commands
+          TF_LOG: DEBUG
+          TF_LOG_PATH: terraform.log
 
       - name: Plan Terraform changes
-        run: terraform plan || exit 1
+        run: terraform plan -out=terraform.plan
         env:
           TF_LOG: DEBUG
+          TF_LOG_PATH: terraform.log
 
       - name: Apply Terraform changes
-        run: terraform apply -auto-approve || exit 1
+        run: terraform apply -auto-approve terraform.plan
         env:
           TF_LOG: DEBUG
+          TF_LOG_PATH: terraform.log
 
       - name: Log workflow summary
-        run: echo "Workflow completed successfully!" || echo "Workflow failed!"
-        shell: bash
+        run: echo "Workflow completed successfully!"
 
       - name: Upload logs to artifact
         uses: actions/upload-artifact@v2
+        if: always() # This ensures the step runs regardless of the outcome of previous steps
         with:
           name: terraform-logs
           path: |
             terraform.log
             terraform.plan
 
+      # The following step should be adjusted or removed depending on your actual use case.
+      # It's currently set up to comment on an issue, which may not be applicable.
       - name: Comment on Issue with Artifact Link
         uses: actions/github-script@v6
         if: always() # This ensures the step runs regardless of the outcome of previous steps
@@ -53,9 +58,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `The action ${{ github.action }} has completed. Logs can be found in the [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts) for this workflow run.`
-            })
+            // Ensure this step is only run if there's an issue number available
+            if (context.issue.number) {
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `The action ${{ github.action }} has completed. Logs can be found in the [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts) for this workflow run.`
+              });
+            }
