@@ -17,7 +17,7 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
           project_id: reminder-app-803e2
-          export_default_credentials: true
+          export_environment_variables: true
 
       - name: Initialize Terraform
         run: terraform init

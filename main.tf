@@ -34,6 +34,7 @@ resource "google_compute_instance" "reminder_backend" {
   # Install Node.js and your Node.js project
   metadata_startup_script = <<-EOF
     #!/bin/bash
+    set -e
 
     # Update the package lists and install required packages
     sudo apt-get update
@@ -48,12 +49,12 @@ resource "google_compute_instance" "reminder_backend" {
     # Install Docker
     curl -fsSL https://get.docker.com -o get-docker.sh
     sudo sh get-docker.sh
-    sudo usermod -aG docker $USER
+    sudo usermod -aG docker ubuntu
 
     echo "START DOCKER"
 
     # Start the Docker service (add this line)
-    sudo service docker start
+    #sudo service docker start
 
     echo "INSTALL DOCKER-COMPOSE"
 
@@ -69,10 +70,10 @@ resource "google_compute_instance" "reminder_backend" {
 
     # Pull the Docker Compose project from a repository (e.g., Git)
     if [ -d /home/reminder_backend ]; then
-        sudo rm -r /home/reminder_backend
-        git clone https://github.com/lucasahli/reminder_backend.git /home/reminder_backend
+      cd /home/reminder_backend
+      git pull
     else
-        git clone https://github.com/lucasahli/reminder_backend.git /home/reminder_backend
+      git clone https://github.com/lucasahli/reminder_backend.git /home/reminder_backend
     fi
 
     cd /home/reminder_backend
@@ -80,7 +81,7 @@ resource "google_compute_instance" "reminder_backend" {
 
     echo "START DOCKER-Compose"
     # Start your Docker Compose project
-    docker-compose up --build
+    docker-compose up --build -d
     echo "STARTED DOCKER-COMPOSE"
   EOF
 
