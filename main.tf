@@ -79,6 +79,13 @@ resource "google_compute_instance" "reminder_backend" {
     cd /home/reminder_backend
     sudo mkdir /home/reminder_backend/redis_data
 
+    # Use the Docker image tag passed from Terraform
+    export DOCKER_IMAGE_TAG=${docker_image_tag}
+
+    # Modify the docker-compose.yml file to use the image tag
+    # This assumes you have a placeholder in your docker-compose.yml like <IMAGE_TAG>
+    sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
+
     echo "START DOCKER-Compose"
     # Start your Docker Compose project
     docker-compose up --build -d

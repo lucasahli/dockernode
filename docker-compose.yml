@@ -21,11 +21,8 @@ services:
       VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
       VAULT_ADDR: http://0.0.0.0:8200
     command: server -dev
-
-  express-server:
-    build:
-      context: . # path to Dockerfile to build
-      target: productionstage # targetStage in the Dockerfile
+  reminder-backend:
+    image: "reminder-backend:${IMAGE_TAG}"
     ports: # port_on_host_machine:port_on_container
       - "4000:4000" 
     env_file:
