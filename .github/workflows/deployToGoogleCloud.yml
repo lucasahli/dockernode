@@ -51,7 +51,7 @@ jobs:
           TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Force Unlock Terraform
-        run: terraform force-unlock 1709133003614333
+        run: terraform force-unlock -force 1709133003614333
 
       - name: Plan Terraform changes
         run: terraform plan -out=terraform.plan
