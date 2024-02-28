@@ -112,7 +112,7 @@ resource "google_compute_instance" "reminder_backend" {
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
     echo "DOCKER LOGIN"
-    echo "${var.docker_password}" | docker login -u "${var.docker_username}" --password-stdin
+    echo "${var.docker_password}" | docker login -u "${var.docker_username}" --password-stdin docker.io
 
     echo "START DOCKER-Compose"
     # Export the secret variable
