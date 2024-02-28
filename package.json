@@ -45,7 +45,6 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.1",
     "morgan": "^1.10.0",
-    "node-vault": "^0.10.2",
     "pnpm": "^8.7.0",
     "redis": "^4.6.7",
     "sequelize": "^6.32.1",
