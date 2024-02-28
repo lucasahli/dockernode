@@ -18,7 +18,7 @@ services:
     env_file:
       - .env.production
     environment:
-      VAULT_ADDR: http://vault:8200
+      - FIREBASE_SERVICE_ACCOUNT_KEY=${FIREBASE_SERVICE_ACCOUNT_KEY}
     networks:
       - backend
     depends_on:

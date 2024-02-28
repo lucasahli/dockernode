@@ -47,6 +47,8 @@ jobs:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
           TF_VAR_docker_image_tag: ${{ github.sha }}
+          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Plan Terraform changes
         run: terraform plan -out=terraform.plan
@@ -54,6 +56,8 @@ jobs:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
           TF_VAR_docker_image_tag: ${{ github.sha }}
+          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Apply Terraform changes
         run: terraform apply -auto-approve terraform.plan
@@ -61,6 +65,8 @@ jobs:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
           TF_VAR_docker_image_tag: ${{ github.sha }}
+          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log workflow summary
         run: echo "Workflow completed successfully!"

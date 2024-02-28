@@ -9,6 +9,22 @@ variable "docker_image_tag" {
   description = "The tag of the Docker image to use"
   type        = string
 }
+variable "docker_username" {
+  description = "Docker registry username"
+  type        = string
+  sensitive   = true
+}
+variable "docker_password" {
+  description = "Docker registry password"
+  type        = string
+  sensitive   = true
+}
+
+variable "firebase_service_account_key" {
+  description = "firebase_service_account_key"
+  type        = string
+  sensitive   = true
+}
 
 resource "google_compute_network" "vpc_network" {
   name                    = "my-custom-mode-network"
@@ -95,7 +111,12 @@ resource "google_compute_instance" "reminder_backend" {
     # This assumes you have a placeholder in your docker-compose.yml like <IMAGE_TAG>
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
+    echo "DOCKER LOGIN"
+    echo "${var.docker_password}" | docker login -u "${var.docker_username}" --password-stdin
+
     echo "START DOCKER-Compose"
+    # Export the secret variable
+    export FIREBASE_SERVICE_ACCOUNT_KEY=${var.firebase_service_account_key}
     # Start your Docker Compose project
     docker-compose up --build -d
     echo "STARTED DOCKER-COMPOSE"
