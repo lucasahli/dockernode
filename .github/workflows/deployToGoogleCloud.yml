@@ -35,6 +35,9 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Force Unlock Terraform
+        run: terraform force-unlock 1709133003614333
+
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
