@@ -5,6 +5,11 @@ terraform {
   }
 }
 
+variable "docker_image_tag" {
+  description = "The tag of the Docker image to use"
+  type        = string
+}
+
 resource "google_compute_network" "vpc_network" {
   name                    = "my-custom-mode-network"
   auto_create_subnetworks = false
@@ -24,6 +29,10 @@ resource "google_compute_instance" "reminder_backend" {
   machine_type = "e2-micro"
   zone         = "us-west1-a"
   tags         = ["http-server"]
+  metadata = {
+    # Use the variable like this
+    docker_image_tag = var.docker_image_tag
+  }
 
   boot_disk {
     initialize_params {
