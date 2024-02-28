@@ -89,7 +89,7 @@ resource "google_compute_instance" "reminder_backend" {
     sudo mkdir /home/reminder_backend/redis_data
 
     # Use the Docker image tag passed from Terraform
-    export DOCKER_IMAGE_TAG=${docker_image_tag}
+    export DOCKER_IMAGE_TAG=${var.docker_image_tag}
 
     # Modify the docker-compose.yml file to use the image tag
     # This assumes you have a placeholder in your docker-compose.yml like <IMAGE_TAG>
