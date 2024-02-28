@@ -11,13 +11,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build --target productionstage -t reminder-backend:${{ github.sha }} .
+        run: docker build --target productionstage -t lucasahli/reminder-backend:${{ github.sha }} .
+        env:
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
 
       - name: Login to Docker Hub
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       - name: Push Docker image
-        run: docker push reminder-backend:${{ github.sha }}
+        run: docker push lucasahli/reminder-backend:${{ github.sha }}
 
   deploy:
     needs: build

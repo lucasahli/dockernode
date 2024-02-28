@@ -7,7 +7,7 @@ import {
 // import * as admin from 'firebase-admin';
 import admin, {credential} from 'firebase-admin';
 import {initializeApp} from "firebase-admin/app";
-import serviceAccount from './../../firebaseServiceAccountKey.json' assert { type: 'json' };
+// import serviceAccount from './../../firebaseServiceAccountKey.json' assert { type: 'json' };
 
 
 
@@ -52,6 +52,21 @@ export class FirebaseCloudMessagingNotificationService implements PushNotificati
         // this.firebaseAdmin = admin.initializeApp({
         //     credential: admin.credential.cert(params)
         // });
+
+        // Check if the environment variable is set
+        if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+            throw new Error('The FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set.');
+        }
+
+        // Parse the service account JSON string into an object
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+
+        // Initialize the Firebase Admin SDK
+        // admin.initializeApp({
+        //     credential: admin.credential.cert(serviceAccount),
+        //     // ... other options if needed
+        // });
+
         const result = admin.credential.cert(serviceAccount as admin.ServiceAccount);
         console.log("RESULT: ", result);
         this.firebaseAdmin = admin.initializeApp({
