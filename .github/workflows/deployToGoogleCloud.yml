@@ -58,6 +58,7 @@ jobs:
           TF_VAR_docker_image_tag: ${{ github.sha }}
           TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
           TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_firebase_service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
 
       - name: Apply Terraform changes
         run: terraform apply -auto-approve terraform.plan
@@ -67,6 +68,7 @@ jobs:
           TF_VAR_docker_image_tag: ${{ github.sha }}
           TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
           TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_firebase_service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
 
       - name: Log workflow summary
         run: echo "Workflow completed successfully!"
