@@ -5,8 +5,7 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "build": "rimraf dist && tsc && pnpm run copy-schema && pnpm run copy-firebase-json",
-    "copy-firebase-json": "cp ./src/firebaseServiceAccountKey.json dist/ && cp ./src/firebaseServiceAccountKey.d.ts dist/",
+    "build": "rimraf dist && tsc && pnpm run copy-schema",
     "copy-schema": "mkdir -p dist/presentation/graphQL/schema/ && cp -r src/presentation/graphQL/schema/ dist/presentation/graphQL/schema/",
     "start": "node --experimental-json-modules dist/main.js",
     "dev": "concurrently \"pnpm run watch-compile\" \"pnpm run watch-dev\"",
