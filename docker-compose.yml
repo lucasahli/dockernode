@@ -10,17 +10,7 @@ services:
       - ./redis_data/:/data
     expose:
       - 6379
-  vault:
-    image: vault:1.13.3
-    ports:
-      - "8200:8200"
-    cap_add:
-      - IPC_LOCK
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: myroot
-      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
-      VAULT_ADDR: http://0.0.0.0:8200
-    command: server -dev
+
   reminder-backend:
     image: "reminder-backend:${IMAGE_TAG}"
     ports: # port_on_host_machine:port_on_container
@@ -29,12 +19,9 @@ services:
       - .env.production
     environment:
       VAULT_ADDR: http://vault:8200
-      # You can also set the VAULT_TOKEN here, but it's not recommended for security reasons.
-      # Instead, consider using Docker secrets or another secure approach.
     networks:
       - backend
     depends_on:
-      - vault
       - redis
 networks:
   backend:
