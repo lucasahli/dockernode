@@ -12,7 +12,7 @@ services:
       - 6379
 
   reminder-backend:
-    image: "reminder-backend:${IMAGE_TAG}"
+    image: "lucasahli/reminder-backend:${IMAGE_TAG}"
     ports: # port_on_host_machine:port_on_container
       - "4000:4000" 
     env_file:
