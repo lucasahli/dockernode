@@ -39,6 +39,53 @@ resource "google_compute_subnetwork" "default" {
   network       = google_compute_network.vpc_network.id
 }
 
+provider "google" {
+  project = "reminder-app-803e2"
+  region  = "us-west1"
+}
+resource "google_project_service" "secret_manager" {
+  service = "secretmanager.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_secret_manager_secret" "firebase_service_account_key" {
+  secret_id = "firebase_service_account_key"
+
+  replication {
+    automatic = true
+  }
+}
+resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
+  secret      = google_secret_manager_secret.firebase_service_account_key.id
+  secret_data = var.firebase_service_account_key
+}
+
+resource "google_secret_manager_secret" "docker_password" {
+  secret_id = "docker_password"
+
+  replication {
+    automatic = true
+  }
+}
+resource "google_secret_manager_secret_version" "docker_password_version" {
+  secret      = google_secret_manager_secret.docker_password.id
+  secret_data = var.docker_password
+}
+
+resource "google_secret_manager_secret" "docker_username" {
+  secret_id = "docker_username"
+
+  replication {
+    automatic = true
+  }
+}
+resource "google_secret_manager_secret_version" "docker_username_version" {
+  secret      = google_secret_manager_secret.docker_username.id
+  secret_data = var.docker_username
+}
+
+
 # Create a single Compute Engine instance for Node.js
 resource "google_compute_instance" "reminder_backend" {
   name         = "reminder-backend-vm"
@@ -46,7 +93,6 @@ resource "google_compute_instance" "reminder_backend" {
   zone         = "us-west1-a"
   tags         = ["http-server"]
   metadata = {
-    # Use the variable like this
     docker_image_tag = var.docker_image_tag
   }
 
@@ -84,15 +130,37 @@ resource "google_compute_instance" "reminder_backend" {
     echo "INSTALL DOCKER-COMPOSE"
 
     # Install Docker-Compose
-    # Install Docker Compose
     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
 
     # Check the version of Docker Compose to ensure it's installed correctly
     docker-compose version
 
-    echo "CLONE REPO"
+    # Fetch secrets from Secret Manager
+    export PROJECT_ID="reminder-app-803e2"
 
+    # Use the Docker image tag passed from Terraform
+    export DOCKER_IMAGE_TAG=${var.docker_image_tag}
+
+    # Fetch the secret value and decode it
+    DOCKER_USERNAME=$(gcloud secrets versions access latest \
+      --secret="docker_username" \
+      --project="${PROJECT_ID}" \
+      --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+    export DOCKER_USERNAME=$DOCKER_USERNAME
+
+    DOCKER_PASSWORD=$(gcloud secrets versions access latest \
+      --secret="docker_password" \
+      --project="${PROJECT_ID}" \
+      --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+    export DOCKER_PASSWORD=$DOCKER_PASSWORD
+
+    export FIREBASE_SERVICE_ACCOUNT_KEY=$(gcloud secrets versions access latest \
+      --secret="firebase_service_account_key" \
+      --project="${PROJECT_ID}" \
+      --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+
+    echo "CLONE REPO"
     # Pull the Docker Compose project from a repository (e.g., Git)
     if [ -d /home/reminder_backend ]; then
       cd /home/reminder_backend
@@ -104,22 +172,26 @@ resource "google_compute_instance" "reminder_backend" {
     cd /home/reminder_backend
     sudo mkdir /home/reminder_backend/redis_data
 
-    # Use the Docker image tag passed from Terraform
-    export DOCKER_IMAGE_TAG=${var.docker_image_tag}
-
     # Modify the docker-compose.yml file to use the image tag
     # This assumes you have a placeholder in your docker-compose.yml like <IMAGE_TAG>
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
     echo "DOCKER LOGIN"
-    echo "${var.docker_password}" | docker login -u "${var.docker_username}" --password-stdin docker.io
+    if echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin docker.io; then
+        echo "Docker login successful."
+    else
+        echo "Docker login failed."
+        exit 1
+    fi
 
-    echo "START DOCKER-Compose"
-    # Export the secret variable
-    export FIREBASE_SERVICE_ACCOUNT_KEY=${var.firebase_service_account_key}
+    echo "START DOCKER-COMPOSE"
     # Start your Docker Compose project
-    docker-compose up --build -d
-    echo "STARTED DOCKER-COMPOSE"
+    if docker-compose up --build -d; then
+        echo "STARTED DOCKER-COMPOSE"
+    else
+        echo "DOCKER-COMPOSE failed to start."
+        exit 1
+    fi
   EOF
 
   network_interface {
