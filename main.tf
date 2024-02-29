@@ -53,7 +53,7 @@ resource "google_secret_manager_secret" "firebase_service_account_key" {
   secret_id = "firebase_service_account_key"
 
   replication {
-    automatic = true
+    automatic {}
   }
 }
 resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
@@ -65,7 +65,7 @@ resource "google_secret_manager_secret" "docker_password" {
   secret_id = "docker_password"
 
   replication {
-    automatic = true
+    automatic {}
   }
 }
 resource "google_secret_manager_secret_version" "docker_password_version" {
@@ -77,7 +77,7 @@ resource "google_secret_manager_secret" "docker_username" {
   secret_id = "docker_username"
 
   replication {
-    automatic = true
+    automatic {}
   }
 }
 resource "google_secret_manager_secret_version" "docker_username_version" {
@@ -137,7 +137,7 @@ resource "google_compute_instance" "reminder_backend" {
     docker-compose version
 
     # Fetch secrets from Secret Manager
-    export PROJECT_ID="reminder-app-803e2"
+    PROJECT_ID="reminder-app-803e2"
 
     # Use the Docker image tag passed from Terraform
     export DOCKER_IMAGE_TAG=${var.docker_image_tag}
@@ -177,7 +177,7 @@ resource "google_compute_instance" "reminder_backend" {
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
     echo "DOCKER LOGIN"
-    if echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin docker.io; then
+    if echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin docker.io; then
         echo "Docker login successful."
     else
         echo "Docker login failed."
