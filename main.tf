@@ -24,6 +24,11 @@ variable "docker_password" {
   type        = string
   sensitive   = true
 }
+variable "docker_access_token" {
+  description = "Docker registry access token"
+  type        = string
+  sensitive   = true
+}
 
 variable "firebase_service_account_key" {
   description = "firebase_service_account_key"
@@ -113,6 +118,7 @@ resource "google_compute_instance" "reminder_backend" {
   metadata = {
     "DOCKER_USERNAME" = var.docker_username
     "DOCKER_PASSWORD" = var.docker_password
+    "DOCKER_ACCESS_TOKEN" = var.docker_access_token
     "FIREBASE_SERVICE_ACCOUNT_KEY" = var.firebase_service_account_key
   }
 
@@ -187,7 +193,7 @@ resource "google_compute_instance" "reminder_backend" {
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
     echo "DOCKER LOGIN"
-    if echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin docker.io; then
+    if echo $DOCKER_ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin docker.io; then
         echo "Docker login successful."
     else
         echo "Docker login failed."
