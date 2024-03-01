@@ -205,15 +205,15 @@ resource "google_compute_instance" "reminder_backend" {
 
     echo "DOCKER LOGIN"
     # Retrieve the Docker username from Secret Manager
-    export DOCKER_USERNAME=$(gcloud secrets versions access latest --secret="docker_username" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
-    export DOCKER_ACCESS_TOKEN=$(gcloud secrets versions access latest --secret="docker_access_token" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+    export DOCKERUSERNAME=$(gcloud secrets versions access latest --secret="docker_username" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+    export DOCKER_ACCESSTOKEN=$(gcloud secrets versions access latest --secret="docker_access_token" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
 
     # Use the retrieved username in your script
-    echo "Docker username: $${DOCKER_USERNAME}"
+    echo "Docker username: $${DOCKERUSERNAME}"
 
 
     # Check if variables are retrieved successfully
-    if [ -z "$$DOCKER_USERNAME" ] || [ -z "$$DOCKER_ACCESS_TOKEN" ]; then
+    if [ -z "$$DOCKERUSERNAME" ] || [ -z "$$DOCKER_ACCESSTOKEN" ]; then
         echo "Docker credentials not found in instance metadata."
         exit 1
     fi
@@ -221,7 +221,7 @@ resource "google_compute_instance" "reminder_backend" {
     # Docker login
     echo "DOCKER LOGIN"
     echo "Using username: $$DOCKER_USERNAME"
-    if echo "$$DOCKER_ACCESS_TOKEN" | docker login -u "$$DOCKER_USERNAME" --password-stdin docker.io; then
+    if echo "$$DOCKER_ACCESSTOKEN" | docker login -u "$$DOCKERUSERNAME" --password-stdin docker.io; then
         echo "Docker login successful."
     else
         echo "Docker login failed."
