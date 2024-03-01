@@ -51,10 +51,6 @@ resource "google_project_service" "secret_manager" {
 
 resource "google_secret_manager_secret" "firebase_service_account_key" {
   secret_id = "firebase_service_account_key"
-
-  replication {
-    automatic {}
-  }
 }
 resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
   secret      = google_secret_manager_secret.firebase_service_account_key.id
@@ -63,10 +59,6 @@ resource "google_secret_manager_secret_version" "firebase_service_account_key_ve
 
 resource "google_secret_manager_secret" "docker_password" {
   secret_id = "docker_password"
-
-  replication {
-    automatic {}
-  }
 }
 resource "google_secret_manager_secret_version" "docker_password_version" {
   secret      = google_secret_manager_secret.docker_password.id
@@ -75,10 +67,6 @@ resource "google_secret_manager_secret_version" "docker_password_version" {
 
 resource "google_secret_manager_secret" "docker_username" {
   secret_id = "docker_username"
-
-  replication {
-    automatic {}
-  }
 }
 resource "google_secret_manager_secret_version" "docker_username_version" {
   secret      = google_secret_manager_secret.docker_username.id
@@ -92,9 +80,13 @@ resource "google_compute_instance" "reminder_backend" {
   machine_type = "e2-micro"
   zone         = "us-west1-a"
   tags         = ["http-server"]
-  metadata = {
-    docker_image_tag = var.docker_image_tag
-  }
+  metadata = <<EOF
+# ... (existing metadata)
+DOCKER_USERNAME=${google_secret_manager_secret_version.docker_username_version.secret_data}
+DOCKER_PASSWORD=${google_secret_manager_secret_version.docker_password_version.secret_data}
+FIREBASE_SERVICE_ACCOUNT_KEY=${google_secret_manager_secret_version.firebase_service_account_key_version.secret_data}
+EOF
+
 
   boot_disk {
     initialize_params {
@@ -141,24 +133,6 @@ resource "google_compute_instance" "reminder_backend" {
 
     # Use the Docker image tag passed from Terraform
     export DOCKER_IMAGE_TAG=${var.docker_image_tag}
-
-    # Fetch the secret value and decode it
-    DOCKER_USERNAME=$(gcloud secrets versions access latest \
-      --secret="docker_username" \
-      --project="${PROJECT_ID}" \
-      --format='get(payload.data)' | tr -d '\n' | base64 --decode)
-    export DOCKER_USERNAME=$DOCKER_USERNAME
-
-    DOCKER_PASSWORD=$(gcloud secrets versions access latest \
-      --secret="docker_password" \
-      --project="${PROJECT_ID}" \
-      --format='get(payload.data)' | tr -d '\n' | base64 --decode)
-    export DOCKER_PASSWORD=$DOCKER_PASSWORD
-
-    export FIREBASE_SERVICE_ACCOUNT_KEY=$(gcloud secrets versions access latest \
-      --secret="firebase_service_account_key" \
-      --project="${PROJECT_ID}" \
-      --format='get(payload.data)' | tr -d '\n' | base64 --decode)
 
     echo "CLONE REPO"
     # Pull the Docker Compose project from a repository (e.g., Git)
