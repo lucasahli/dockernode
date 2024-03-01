@@ -109,6 +109,17 @@ resource "google_secret_manager_secret_version" "docker_username_version" {
 }
 
 
+resource "google_secret_manager_secret" "docker_access_token" {
+  secret_id = "docker_access_token"
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "docker_access_token_version" {
+  secret      = google_secret_manager_secret.docker_access_token.id
+  secret_data = var.docker_access_token
+}
+
 # Create a single Compute Engine instance for Node.js
 resource "google_compute_instance" "reminder_backend" {
   name         = "reminder-backend-vm"
@@ -194,7 +205,8 @@ resource "google_compute_instance" "reminder_backend" {
 
     echo "DOCKER LOGIN"
     # Retrieve the Docker username from Secret Manager
-    export DOCKER_USERNAME=$(gcloud secrets versions access latest --secret="docker_username" --project="${PROJECT_ID}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+    export DOCKER_USERNAME=$(gcloud secrets versions access latest --secret="docker_username" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+    export DOCKER_ACCESS_TOKEN=$(gcloud secrets versions access latest --secret="docker_access_token" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
 
     # Use the retrieved username in your script
     echo "Docker username: $DOCKER_USERNAME"
