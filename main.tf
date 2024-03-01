@@ -221,7 +221,7 @@ resource "google_compute_instance" "reminder_backend" {
     # Docker login
     echo "DOCKER LOGIN"
     echo "Using username: $DOCKER_USERNAME"
-    if echo "${DOCKER_ACCESS_TOKEN}" | docker login -u "${DOCKER_USERNAME}" --password-stdin docker.io; then
+    if echo "$DOCKER_ACCESS_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.io; then
         echo "Docker login successful."
     else
         echo "Docker login failed."
