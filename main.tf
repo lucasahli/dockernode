@@ -5,6 +5,11 @@ terraform {
   }
 }
 
+variable "project_id" {
+  description = "Google project ID"
+  type        = string
+  default = "reminder-app-803e2"
+}
 variable "docker_image_tag" {
   description = "The tag of the Docker image to use"
   type        = string
@@ -24,6 +29,17 @@ variable "firebase_service_account_key" {
   description = "firebase_service_account_key"
   type        = string
   sensitive   = true
+}
+
+resource "google_service_account" "terraform_service_account" {
+  account_id   = "terraform-service-account"
+  display_name = "Terraform Service Account"
+}
+
+resource "google_project_iam_member" "secret_accessor" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.terraform_service_account.email}"
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -94,12 +110,17 @@ resource "google_compute_instance" "reminder_backend" {
     "DOCKER_PASSWORD" = var.docker_password
     "FIREBASE_SERVICE_ACCOUNT_KEY" = var.firebase_service_account_key
   }
+
 #  metadata = <<EOF
 #DOCKER_USERNAME=${google_secret_manager_secret_version.docker_username_version.secret_data}
 #DOCKER_PASSWORD=${google_secret_manager_secret_version.docker_password_version.secret_data}
 #FIREBASE_SERVICE_ACCOUNT_KEY=${google_secret_manager_secret_version.firebase_service_account_key_version.secret_data}
 #EOF
 
+  service_account {
+    email  = google_service_account.terraform_service_account.email
+    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+  }
 
   boot_disk {
     initialize_params {
@@ -140,9 +161,6 @@ resource "google_compute_instance" "reminder_backend" {
 
     # Check the version of Docker Compose to ensure it's installed correctly
     docker-compose version
-
-    # Fetch secrets from Secret Manager
-    PROJECT_ID="reminder-app-803e2"
 
     # Use the Docker image tag passed from Terraform
     export DOCKER_IMAGE_TAG=${var.docker_image_tag}
