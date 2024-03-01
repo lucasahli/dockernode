@@ -51,6 +51,9 @@ resource "google_project_service" "secret_manager" {
 
 resource "google_secret_manager_secret" "firebase_service_account_key" {
   secret_id = "firebase_service_account_key"
+  replication {
+    auto {}
+  }
 }
 resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
   secret      = google_secret_manager_secret.firebase_service_account_key.id
@@ -59,6 +62,9 @@ resource "google_secret_manager_secret_version" "firebase_service_account_key_ve
 
 resource "google_secret_manager_secret" "docker_password" {
   secret_id = "docker_password"
+  replication {
+    auto {}
+  }
 }
 resource "google_secret_manager_secret_version" "docker_password_version" {
   secret      = google_secret_manager_secret.docker_password.id
@@ -67,6 +73,9 @@ resource "google_secret_manager_secret_version" "docker_password_version" {
 
 resource "google_secret_manager_secret" "docker_username" {
   secret_id = "docker_username"
+  replication {
+    auto {}
+  }
 }
 resource "google_secret_manager_secret_version" "docker_username_version" {
   secret      = google_secret_manager_secret.docker_username.id
