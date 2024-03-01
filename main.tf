@@ -39,48 +39,48 @@ resource "google_compute_subnetwork" "default" {
   network       = google_compute_network.vpc_network.id
 }
 
-provider "google" {
-  project = "reminder-app-803e2"
-  region  = "us-west1"
-}
-resource "google_project_service" "secret_manager" {
-  service = "secretmanager.googleapis.com"
-
-  disable_dependent_services = true
-}
-
-resource "google_secret_manager_secret" "firebase_service_account_key" {
-  secret_id = "firebase_service_account_key"
-  replication {
-    auto {}
-  }
-}
-resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
-  secret      = google_secret_manager_secret.firebase_service_account_key.id
-  secret_data = var.firebase_service_account_key
-}
-
-resource "google_secret_manager_secret" "docker_password" {
-  secret_id = "docker_password"
-  replication {
-    auto {}
-  }
-}
-resource "google_secret_manager_secret_version" "docker_password_version" {
-  secret      = google_secret_manager_secret.docker_password.id
-  secret_data = var.docker_password
-}
-
-resource "google_secret_manager_secret" "docker_username" {
-  secret_id = "docker_username"
-  replication {
-    auto {}
-  }
-}
-resource "google_secret_manager_secret_version" "docker_username_version" {
-  secret      = google_secret_manager_secret.docker_username.id
-  secret_data = var.docker_username
-}
+#provider "google" {
+#  project = "reminder-app-803e2"
+#  region  = "us-west1"
+#}
+#resource "google_project_service" "secret_manager" {
+#  service = "secretmanager.googleapis.com"
+#
+#  disable_dependent_services = true
+#}
+#
+#resource "google_secret_manager_secret" "firebase_service_account_key" {
+#  secret_id = "firebase_service_account_key"
+#  replication {
+#    auto {}
+#  }
+#}
+#resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
+#  secret      = google_secret_manager_secret.firebase_service_account_key.id
+#  secret_data = var.firebase_service_account_key
+#}
+#
+#resource "google_secret_manager_secret" "docker_password" {
+#  secret_id = "docker_password"
+#  replication {
+#    auto {}
+#  }
+#}
+#resource "google_secret_manager_secret_version" "docker_password_version" {
+#  secret      = google_secret_manager_secret.docker_password.id
+#  secret_data = var.docker_password
+#}
+#
+#resource "google_secret_manager_secret" "docker_username" {
+#  secret_id = "docker_username"
+#  replication {
+#    auto {}
+#  }
+#}
+#resource "google_secret_manager_secret_version" "docker_username_version" {
+#  secret      = google_secret_manager_secret.docker_username.id
+#  secret_data = var.docker_username
+#}
 
 
 # Create a single Compute Engine instance for Node.js
