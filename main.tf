@@ -193,6 +193,7 @@ resource "google_compute_instance" "reminder_backend" {
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
     echo "DOCKER LOGIN"
+    echo "Using username: $DOCKER_USERNAME"
     if echo $DOCKER_ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin docker.io; then
         echo "Docker login successful."
     else
