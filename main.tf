@@ -194,12 +194,12 @@ resource "google_compute_instance" "reminder_backend" {
 
     echo "DOCKER LOGIN"
     # Retrieve metadata
-    METADATA_URL="http://metadata.google.internal/computeMetadata/v1/instance"
-    HEADER="Metadata-Flavor: Google"
+    export METADATA_URL="http://metadata.google.internal/computeMetadata/v1/instance"
+    export HEADER="Metadata-Flavor: Google"
 
     # Use curl to get the DOCKER_USERNAME and DOCKER_ACCESS_TOKEN from instance metadata
-    DOCKER_USERNAME=$(curl -s "${METADATA_URL}/attributes/DOCKER_USERNAME" -H "${HEADER}")
-    DOCKER_ACCESS_TOKEN=$(curl -s "${METADATA_URL}/attributes/DOCKER_ACCESS_TOKEN" -H "${HEADER}")
+    export DOCKER_USERNAME=$(curl -s "${METADATA_URL}/attributes/DOCKER_USERNAME" -H "${HEADER}")
+    export DOCKER_ACCESS_TOKEN=$(curl -s "${METADATA_URL}/attributes/DOCKER_ACCESS_TOKEN" -H "${HEADER}")
 
     # Check if variables are retrieved successfully
     if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_ACCESS_TOKEN" ]; then
