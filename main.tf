@@ -31,6 +31,11 @@ variable "firebase_service_account_key" {
   sensitive   = true
 }
 
+resource "google_project_service" "iam_api" {
+  service            = "iam.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_service_account" "terraform_service_account" {
   account_id   = "terraform-service-account"
   display_name = "Terraform Service Account"
