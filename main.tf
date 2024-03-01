@@ -65,48 +65,48 @@ resource "google_compute_subnetwork" "default" {
   network       = google_compute_network.vpc_network.id
 }
 
-#provider "google" {
-#  project = "reminder-app-803e2"
-#  region  = "us-west1"
-#}
-#resource "google_project_service" "secret_manager" {
-#  service = "secretmanager.googleapis.com"
-#
-#  disable_dependent_services = true
-#}
-#
-#resource "google_secret_manager_secret" "firebase_service_account_key" {
-#  secret_id = "firebase_service_account_key"
-#  replication {
-#    auto {}
-#  }
-#}
-#resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
-#  secret      = google_secret_manager_secret.firebase_service_account_key.id
-#  secret_data = var.firebase_service_account_key
-#}
-#
-#resource "google_secret_manager_secret" "docker_password" {
-#  secret_id = "docker_password"
-#  replication {
-#    auto {}
-#  }
-#}
-#resource "google_secret_manager_secret_version" "docker_password_version" {
-#  secret      = google_secret_manager_secret.docker_password.id
-#  secret_data = var.docker_password
-#}
-#
-#resource "google_secret_manager_secret" "docker_username" {
-#  secret_id = "docker_username"
-#  replication {
-#    auto {}
-#  }
-#}
-#resource "google_secret_manager_secret_version" "docker_username_version" {
-#  secret      = google_secret_manager_secret.docker_username.id
-#  secret_data = var.docker_username
-#}
+provider "google" {
+  project = "reminder-app-803e2"
+  region  = "us-west1"
+}
+resource "google_project_service" "secret_manager" {
+  service = "secretmanager.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_secret_manager_secret" "firebase_service_account_key" {
+  secret_id = "firebase_service_account_key"
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
+  secret      = google_secret_manager_secret.firebase_service_account_key.id
+  secret_data = var.firebase_service_account_key
+}
+
+resource "google_secret_manager_secret" "docker_password" {
+  secret_id = "docker_password"
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "docker_password_version" {
+  secret      = google_secret_manager_secret.docker_password.id
+  secret_data = var.docker_password
+}
+
+resource "google_secret_manager_secret" "docker_username" {
+  secret_id = "docker_username"
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "docker_username_version" {
+  secret      = google_secret_manager_secret.docker_username.id
+  secret_data = var.docker_username
+}
 
 
 # Create a single Compute Engine instance for Node.js
@@ -115,12 +115,12 @@ resource "google_compute_instance" "reminder_backend" {
   machine_type = "e2-micro"
   zone         = "us-west1-a"
   tags         = ["http-server"]
-  metadata = {
-    DOCKER_USERNAME = var.docker_username
-    DOCKER_PASSWORD = var.docker_password
-    DOCKER_ACCESS_TOKEN = var.docker_access_token
-    FIREBASE_SERVICE_ACCOUNT_KEY = var.firebase_service_account_key
-  }
+#  metadata = {
+#    DOCKER_USERNAME = var.docker_username
+#    DOCKER_PASSWORD = var.docker_password
+#    DOCKER_ACCESS_TOKEN = var.docker_access_token
+#    FIREBASE_SERVICE_ACCOUNT_KEY = var.firebase_service_account_key
+#  }
 
 #  metadata = <<EOF
 #DOCKER_USERNAME=${google_secret_manager_secret_version.docker_username_version.secret_data}
@@ -193,13 +193,12 @@ resource "google_compute_instance" "reminder_backend" {
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
     echo "DOCKER LOGIN"
-    # Retrieve metadata
-    export METADATA_URL="http://metadata.google.internal/computeMetadata/v1/instance"
-    export HEADER="Metadata-Flavor: Google"
+    # Retrieve the Docker username from Secret Manager
+    export DOCKER_USERNAME=$(gcloud secrets versions access latest --secret="docker_username" --project="${PROJECT_ID}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
 
-    # Use curl to get the DOCKER_USERNAME and DOCKER_ACCESS_TOKEN from instance metadata
-    export DOCKER_USERNAME=$(curl -s "${METADATA_URL}/attributes/DOCKER_USERNAME" -H "${HEADER}")
-    export DOCKER_ACCESS_TOKEN=$(curl -s "${METADATA_URL}/attributes/DOCKER_ACCESS_TOKEN" -H "${HEADER}")
+    # Use the retrieved username in your script
+    echo "Docker username: $DOCKER_USERNAME"
+
 
     # Check if variables are retrieved successfully
     if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_ACCESS_TOKEN" ]; then
