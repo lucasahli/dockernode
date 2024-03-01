@@ -89,12 +89,16 @@ resource "google_compute_instance" "reminder_backend" {
   machine_type = "e2-micro"
   zone         = "us-west1-a"
   tags         = ["http-server"]
-  metadata = <<EOF
-# ... (existing metadata)
-DOCKER_USERNAME=${google_secret_manager_secret_version.docker_username_version.secret_data}
-DOCKER_PASSWORD=${google_secret_manager_secret_version.docker_password_version.secret_data}
-FIREBASE_SERVICE_ACCOUNT_KEY=${google_secret_manager_secret_version.firebase_service_account_key_version.secret_data}
-EOF
+  metadata = {
+    "DOCKER_USERNAME" = var.docker_username
+    "DOCKER_PASSWORD" = var.docker_password
+    "FIREBASE_SERVICE_ACCOUNT_KEY" = var.firebase_service_account_key
+  }
+#  metadata = <<EOF
+#DOCKER_USERNAME=${google_secret_manager_secret_version.docker_username_version.secret_data}
+#DOCKER_PASSWORD=${google_secret_manager_secret_version.docker_password_version.secret_data}
+#FIREBASE_SERVICE_ACCOUNT_KEY=${google_secret_manager_secret_version.firebase_service_account_key_version.secret_data}
+#EOF
 
 
   boot_disk {
