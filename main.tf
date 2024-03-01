@@ -116,10 +116,10 @@ resource "google_compute_instance" "reminder_backend" {
   zone         = "us-west1-a"
   tags         = ["http-server"]
   metadata = {
-    "DOCKER_USERNAME" = var.docker_username
-    "DOCKER_PASSWORD" = var.docker_password
-    "DOCKER_ACCESS_TOKEN" = var.docker_access_token
-    "FIREBASE_SERVICE_ACCOUNT_KEY" = var.firebase_service_account_key
+    DOCKER_USERNAME = var.docker_username
+    DOCKER_PASSWORD = var.docker_password
+    DOCKER_ACCESS_TOKEN = var.docker_access_token
+    FIREBASE_SERVICE_ACCOUNT_KEY = var.firebase_service_account_key
   }
 
 #  metadata = <<EOF
