@@ -193,8 +193,24 @@ resource "google_compute_instance" "reminder_backend" {
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
 
     echo "DOCKER LOGIN"
+    # Retrieve metadata
+    METADATA_URL="http://metadata.google.internal/computeMetadata/v1/instance"
+    HEADER="Metadata-Flavor: Google"
+
+    # Use curl to get the DOCKER_USERNAME and DOCKER_ACCESS_TOKEN from instance metadata
+    DOCKER_USERNAME=$(curl -s "${METADATA_URL}/attributes/DOCKER_USERNAME" -H "${HEADER}")
+    DOCKER_ACCESS_TOKEN=$(curl -s "${METADATA_URL}/attributes/DOCKER_ACCESS_TOKEN" -H "${HEADER}")
+
+    # Check if variables are retrieved successfully
+    if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_ACCESS_TOKEN" ]; then
+        echo "Docker credentials not found in instance metadata."
+        exit 1
+    fi
+
+    # Docker login
+    echo "DOCKER LOGIN"
     echo "Using username: $DOCKER_USERNAME"
-    if echo $DOCKER_ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin docker.io; then
+    if echo "${DOCKER_ACCESS_TOKEN}" | docker login -u "${DOCKER_USERNAME}" --password-stdin docker.io; then
         echo "Docker login successful."
     else
         echo "Docker login failed."
