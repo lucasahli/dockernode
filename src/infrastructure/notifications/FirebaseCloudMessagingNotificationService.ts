@@ -59,7 +59,9 @@ export class FirebaseCloudMessagingNotificationService implements PushNotificati
         }
 
         // Parse the service account JSON string into an object
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+        const base64String = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+        const jsonString = Buffer.from(base64String, 'base64').toString('utf-8');
+        const serviceAccount = JSON.parse(jsonString);
 
         // Initialize the Firebase Admin SDK
         // admin.initializeApp({
@@ -68,7 +70,7 @@ export class FirebaseCloudMessagingNotificationService implements PushNotificati
         // });
 
         const result = admin.credential.cert(serviceAccount as admin.ServiceAccount);
-        console.log("RESULT: ", result);
+        // console.log("RESULT: ", result);
         this.firebaseAdmin = admin.initializeApp({
             credential: result
         });

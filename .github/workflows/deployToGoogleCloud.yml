@@ -64,6 +64,7 @@ jobs:
           TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
           TF_VAR_firebase_service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
           TF_VAR_docker_access_token: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          TF_VAR_hash_secret: ${{ secrets.HASH_SECRET }}
 
       - name: Apply Terraform changes
         run: terraform apply -auto-approve terraform.plan
@@ -75,6 +76,7 @@ jobs:
           TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
           TF_VAR_firebase_service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
           TF_VAR_docker_access_token: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          TF_VAR_hash_secret: ${{ secrets.HASH_SECRET }}
 
       - name: Log workflow summary
         run: echo "Workflow completed successfully!"

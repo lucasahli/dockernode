@@ -35,7 +35,6 @@ import {
     RefreshTokenService,
     SessionService
 } from "./core/components/userSessionContext/application/services/index.js";
-import {VaultSecretStore} from "./infrastructure/security/VaultSecretStore.js";
 
 
 // **************************************
@@ -76,7 +75,7 @@ app.use(cors({
 
 
 const createViewerMiddleware = async (req: any, res: any, next: any) => {
-    const myViewer = new Viewer(req.headers, process.env.SECRET as string);
+    const myViewer = new Viewer(req.headers, process.env.HASH_SECRET as string);
     await myViewer.prepareViewer().then(() => {
         res.locals.myViewer = myViewer;
     });
@@ -115,8 +114,6 @@ if(resetRedisOnStartup){
     redisRepository.redis.flushDb();
 }
 
-const secretStore = new VaultSecretStore();
-const encriptionSecret = await secretStore.readSecret("encriptionSecret");
 const hasher: Hasher = new BcryptHasher();
 const jobScheduler = new MyJobScheduler();
 const pushNotificationService = new FirebaseCloudMessagingNotificationService();

@@ -31,3 +31,8 @@ RUN mkdir -p ./src/presentation/graphQL/schema
 COPY ./src/presentation/graphQL/schema ./src/presentation/graphQL/schema
 
 CMD ["node", "--experimental-json-modules", "./dist/main.js"]
+
+# Optional Development Stage
+FROM buildstage AS developmentstage
+
+RUN pnpm run dev

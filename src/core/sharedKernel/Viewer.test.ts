@@ -33,7 +33,7 @@ describe("Viewer", () => {
     test("Can be instanced with authorization header", async () => {
         const signInResult: SignInProblem | SignInSuccess = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
         if (!(signInResult instanceof SignInProblem)) {
-            const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+            const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
             expect(authenticatedViewer).toBeInstanceOf(Viewer);
         }
 
@@ -43,7 +43,7 @@ describe("Viewer", () => {
         test("Returns the payload if the token can be decoded", async () => {
             const signInResult: SignInResult = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 expect(authenticatedViewer.getPayloadFromToken()).toHaveProperty("loginId", "1");
             }
 
@@ -58,7 +58,7 @@ describe("Viewer", () => {
         test("Returns true if the token is valid", async () => {
             const signInResult: SignInResult = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 expect(authenticatedViewer.hasValidToken()).toBeTruthy();
             }
 
@@ -74,7 +74,7 @@ describe("Viewer", () => {
             expect.assertions(2);
             const signInResult: SignInResult = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await authenticatedViewer.prepareViewer();
                 expect(authenticatedViewer.loginId).toBeDefined();
                 expect(authenticatedViewer.loginId).toBe("1");
@@ -86,7 +86,7 @@ describe("Viewer", () => {
             expect.assertions(2);
             const signInResult: SignInResult = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await authenticatedViewer.prepareViewer();
                 expect(authenticatedViewer.loginEmail).toBeDefined();
                 expect(authenticatedViewer.loginEmail).toBe("mockup01@test.com");
@@ -98,7 +98,7 @@ describe("Viewer", () => {
             expect.assertions(2);
             const signInResult: SignInResult = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await authenticatedViewer.prepareViewer();
                 expect(authenticatedViewer.userId).toBeDefined();
                 expect(authenticatedViewer.userId).toBe("1");
@@ -110,7 +110,7 @@ describe("Viewer", () => {
             expect.assertions(2);
             const signInResult: SignInResult = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await authenticatedViewer.prepareViewer();
                 expect(authenticatedViewer.userRole).toBeDefined();
                 expect(authenticatedViewer.userRole).toBe(UserRole.freemium);
@@ -124,7 +124,7 @@ describe("Viewer", () => {
         test("Returns true if the token is valid", async () => {
             const signInResult: SignInResult = await accountService.signIn(unknownViewer, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const authenticatedViewer = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 expect(authenticatedViewer.isLoggedIn()).toBeTruthy();
             }
 
