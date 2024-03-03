@@ -36,6 +36,12 @@ variable "firebase_service_account_key" {
   sensitive   = true
 }
 
+variable "hash_secret" {
+  description = "hash_secret"
+  type        = string
+  sensitive   = true
+}
+
 resource "google_project_service" "iam_api" {
   service            = "iam.googleapis.com"
   disable_on_destroy = false
