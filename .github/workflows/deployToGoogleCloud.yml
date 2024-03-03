@@ -50,7 +50,6 @@ jobs:
           TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
           TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
           TF_VAR_docker_access_token: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-          TF_VAR_hash_secret: ${{ secrets.HASH_SECRET }}
 
 #      - name: Force Unlock Terraform
 #        run: terraform force-unlock -force 1709133003614333
