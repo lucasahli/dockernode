@@ -139,7 +139,7 @@ export class AccountService {
     }
 
     private createAccessToken(payload: string | object | Buffer): AccessToken {
-        return new AccessToken(jwt.sign(payload, process.env.SECRET!, {expiresIn: '1m'}));
+        return new AccessToken(jwt.sign(payload, process.env.HASH_SECRET!, {expiresIn: '1m'}));
     }
 
     private checkCanSignUp(viewer: Viewer, email: string, password: string, fullName: string): boolean {
@@ -234,7 +234,7 @@ export class AccountService {
     }
 
     private createRefreshTokenString(payload: string | object | Buffer) {
-        return jwt.sign(payload, process.env.SECRET!, {expiresIn: '90d'});
+        return jwt.sign(payload, process.env.HASH_SECRET!, {expiresIn: '90d'});
     }
 
     private checkCanRefreshAccess(viewer: Viewer, refreshToken: RefreshToken): boolean {

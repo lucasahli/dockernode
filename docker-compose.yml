@@ -14,11 +14,14 @@ services:
   reminder-backend:
     image: "lucasahli/reminder-backend:<IMAGE_TAG>"
     ports: # port_on_host_machine:port_on_container
-      - "4000:4000" 
-    env_file:
-      - .env.production
+      - "4000:4000"
     environment:
       - FIREBASE_SERVICE_ACCOUNT_KEY=${FIREBASE_SERVICE_ACCOUNT_KEY}
+      - HASH_SECRET=${HASH_SECRET}
+      - API_SERVER_PORT=4000
+      - REDIS_HOST=rediscontainer
+      - REDIS_PORT=6379
+      - NODE_OPTIONS='--experimental-vm-modules'
     networks:
       - backend
     depends_on:

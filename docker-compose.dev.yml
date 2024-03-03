@@ -20,8 +20,13 @@ services:
       - .:/usr/src/app
       - /usr/src/app/.pnpm-store # is only here to prevent syncing with the host machine
       - /usr/src/app/node_modules # is only here to prevent syncing with the host machine (this hack works because this path is more specific than /usr/src/app)
-    env_file:
-      - .env.development
+    environment:
+      - API_SERVER_PORT=4000
+      - REDIS_TEST_HOST='127.0.0.1'
+      - REDIS_TEST_PORT=6380
+      - REDIS_HOST=rediscontainer
+      - REDIS_PORT=6379
+      - NODE_OPTIONS='--experimental-vm-modules'
     ports: # port_on_host_machine:port_on_container
       - "4000:4000"
       - "9229:9229" # for debugging

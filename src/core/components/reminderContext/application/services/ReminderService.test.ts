@@ -34,7 +34,7 @@ describe("ReminderService", () => {
         test("Generates if it exists in DB and canSee returns true", async () => {
             const signInResult: SignInSuccess | SignInProblem = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await expect(reminderService.generate(viewerAuthenticated, "1")).resolves.toBeInstanceOf(Reminder);
             }
 
@@ -42,7 +42,7 @@ describe("ReminderService", () => {
         test("Returns Null if it does not exists in DB", async () => {
             const signInResult: SignInSuccess | SignInProblem = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await expect(reminderService.generate(viewerAuthenticated, "9")).resolves.toBeNull();
             }
 
@@ -57,7 +57,7 @@ describe("ReminderService", () => {
         test("Returns true if viewer has a valid token", async () => {
             const signInResult: SignInSuccess | SignInProblem = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 expect(reminderService.checkCanSee(viewerAuthenticated, reminder)).toBeTruthy();
             }
 
@@ -75,7 +75,7 @@ describe("ReminderService", () => {
         test("Returns true if viewer is logged in and reminder is timed in the future ", async () => {
             const signInResult: SignInSuccess | SignInProblem = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 expect(reminderService.checkCanCreate(viewerAuthenticated, reminder.title, reminder.dateTimeToRemind!)).toBeTruthy();
             }
 
@@ -92,7 +92,7 @@ describe("ReminderService", () => {
         test("Returns the created reminder if it could be created", async () => {
             const signInResult: SignInResult = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await viewerAuthenticated.prepareViewer();
                 expect(reminderService.createReminder(viewerAuthenticated, "ReminderTitle", new Date("2030-10-01T14:48:00.000Z"))).resolves.toMatchObject({createdReminder: {}});
             }
@@ -109,7 +109,7 @@ describe("ReminderService", () => {
         test("Returns true if viewer owns the reminder", async () => {
             const signInResult = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult?.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult?.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await viewerAuthenticated.prepareViewer();
                 const canDelete = reminderService.checkCanDelete(viewerAuthenticated, reminder);
                 expect(canDelete).toBeTruthy();
@@ -128,7 +128,7 @@ describe("ReminderService", () => {
         test("Returns true if it could be deleted", async () => {
             const signInResult: SignInResult = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await viewerAuthenticated.prepareViewer();
                 expect(reminderService.deleteReminder(viewerAuthenticated, "1")).resolves.toBeTruthy();
             }
@@ -146,7 +146,7 @@ describe("ReminderService", () => {
         test("Returns the reminders of the user in an array if there are some", async () => {
             const signInResult: SignInResult = await accountService.signIn(viewerUnknown, "mockup01@test.com", "superSecretPassword01");
             if (!(signInResult instanceof SignInProblem)) {
-                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.SECRET);
+                const viewerAuthenticated = new Viewer(new MockHeaders("Bearer " + signInResult.accessToken.token, "SomeUserAgentString"), process.env.HASH_SECRET);
                 await viewerAuthenticated.prepareViewer();
                 expect(reminderService.getRemindersByOwnerId(viewerAuthenticated, "3")).resolves.toHaveLength(4);
             }
