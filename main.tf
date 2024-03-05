@@ -209,6 +209,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
     export DOCKER_USERNAME=$(gcloud secrets versions access latest --secret="docker_username" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
     export DOCKER_ACCESS_TOKEN=$(gcloud secrets versions access latest --secret="docker_access_token" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
     export HASH_SECRET=$(gcloud secrets versions access latest --secret="hash_secret" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
+    export FIREBASE_SERVICE_ACCOUNT_KEY=$(gcloud secrets versions access latest --secret="firebase_service_account_key" --project="${var.project_id}" --format='get(payload.data)' | tr -d '\n' | base64 --decode)
 
     # Use the retrieved username in your script
     echo "Docker username: $${DOCKER_USERNAME}"
