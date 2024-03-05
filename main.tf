@@ -237,7 +237,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
 
   network_interface {
     network = google_compute_network.virtual_private_cloud_network.self_link
-#    subnetwork = google_compute_subnetwork.my_compute_subnetwork.self_link
+    subnetwork = google_compute_subnetwork.my_compute_subnetwork.self_link
     access_config {
       # Include this section to give the VM an external IP address
     }
@@ -250,12 +250,12 @@ resource "google_compute_network" "virtual_private_cloud_network" {
   mtu                     = 1460
 }
 
-#resource "google_compute_subnetwork" "my_compute_subnetwork" {
-#  name          = "my-custom-subnet"
-#  ip_cidr_range = "10.0.1.0/24"
-#  region        = "us-west1"
-#  network       = google_compute_network.virtual_private_cloud_network.id
-#}
+resource "google_compute_subnetwork" "my_compute_subnetwork" {
+  name          = "my-compute-subnet"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-west1"
+  network       = google_compute_network.virtual_private_cloud_network.id
+}
 
 resource "google_compute_firewall" "allow_internal" {
   name    = "allow-internal"
