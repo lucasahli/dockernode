@@ -64,6 +64,11 @@ resource "google_project_iam_member" "secret_accessor" {
   member  = "serviceAccount:${google_service_account.terraform_service_account.email}"
 }
 
+resource "google_project_iam_member" "workload_identity_user" {
+  project = var.project_id
+  role    = "roles/iam.workloadIdentityUser"
+  member  = "serviceAccount:${google_service_account.terraform_service_account.email}"
+}
 
 
 resource "google_project_service" "secret_manager" {

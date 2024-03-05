@@ -10,6 +10,7 @@ services:
       - ./redis_data/:/data
     expose:
       - 6379
+    restart: always
 
   reminder-backend:
     image: "lucasahli/reminder-backend:<IMAGE_TAG>"
@@ -26,5 +27,6 @@ services:
       - backend
     depends_on:
       - redis
+    restart: always
 networks:
   backend:
