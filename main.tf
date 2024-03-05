@@ -245,7 +245,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
 }
 
 resource "google_compute_network" "virtual_private_cloud_network" {
-  name                    = "virtualprivateclould_network"
+  name                    = "virtualprivateclould-network"
   auto_create_subnetworks = false
   mtu                     = 1460
 }
