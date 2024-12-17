@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    environment: ${{ github.ref == 'refs/heads/main' && production || dev }}
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
     runs-on: ubuntu-22.04 #ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
 
   deploy:
     needs: build
-    environment: ${{ github.ref == 'refs/heads/main' && production || dev }}
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
