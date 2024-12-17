@@ -6,3 +6,5 @@ logfile
 redis_data
 /src/firebaseServiceAccountKey.json
 .idea/*
+/.github/workflows/GCP_SA_KEY.json
+/.github/workflows/GCP_SA_KEY_DEV.json

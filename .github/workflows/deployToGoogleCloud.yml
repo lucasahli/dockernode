@@ -2,10 +2,13 @@ name: Terraform Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - dev
 
 jobs:
   build:
+    environment: ${{ github.ref == 'refs/heads/main' && production || dev }}
     runs-on: ubuntu-22.04 #ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,8 +22,8 @@ jobs:
         run: |
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY_URL
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           DOCKER_REGISTRY_URL: docker.io
 
       - name: Push Docker image
@@ -28,6 +31,7 @@ jobs:
 
   deploy:
     needs: build
+    environment: ${{ github.ref == 'refs/heads/main' && production || dev }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,8 +51,8 @@ jobs:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
           TF_VAR_docker_image_tag: ${{ github.sha }}
-          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
-          TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_docker_username: ${{ vars.DOCKER_USERNAME }}
+          TF_VAR_docker_password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           TF_VAR_docker_access_token: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
 #      - name: Force Unlock Terraform
@@ -60,8 +64,8 @@ jobs:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
           TF_VAR_docker_image_tag: ${{ github.sha }}
-          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
-          TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_docker_username: ${{ vars.DOCKER_USERNAME }}
+          TF_VAR_docker_password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           TF_VAR_firebase_service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
           TF_VAR_docker_access_token: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           TF_VAR_hash_secret: ${{ secrets.HASH_SECRET }}
@@ -72,8 +76,8 @@ jobs:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
           TF_VAR_docker_image_tag: ${{ github.sha }}
-          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
-          TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_docker_username: ${{ vars.DOCKER_USERNAME }}
+          TF_VAR_docker_password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           TF_VAR_firebase_service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
           TF_VAR_docker_access_token: ${{ secrets.DOCKER_ACCESS_TOKEN }}
           TF_VAR_hash_secret: ${{ secrets.HASH_SECRET }}
@@ -89,22 +93,3 @@ jobs:
           path: |
             terraform.log
             terraform.plan
-
-      # The following step should be adjusted or removed depending on your actual use case.
-      # It's currently set up to comment on an issue, which may not be applicable.
-      - name: Comment on Issue with Artifact Link
-        uses: actions/github-script@v7
-        if: always() # This ensures the step runs regardless of the outcome of previous steps
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            // Ensure this step is only run if there's an issue number available
-            if (context.issue.number) {
-              github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: `The action ${{ github.action }} has completed. Logs can be found in the [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts) for this workflow run.`
-              });
-            }
