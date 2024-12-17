@@ -7,6 +7,10 @@ on:
       - dev
   workflow_dispatch:
 
+env:
+  BUCKET_NAME: reminders_bucket
+  BUCKET_LOCATION: us-east1
+
 jobs:
   build:
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
@@ -37,14 +41,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - uses: google-github-actions/auth@v2
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ vars.GCP_PROJECT_ID }}
           export_environment_variables: true
+
+      - name: Install gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+
+      # Step 3: Create GCS Bucket if it doesn't exist
+      - name: Check and Create GCS Bucket
+        run: |
+          if ! gsutil ls -b gs://${BUCKET_NAME} 2>/dev/null; then
+            echo "Bucket ${BUCKET_NAME} does not exist. Creating it..."
+            gcloud storage buckets create ${BUCKET_NAME} \
+              --project=${PROJECT_ID} \
+              --location=${BUCKET_LOCATION} \
+              --uniform-bucket-level-access
+            echo "Bucket ${BUCKET_NAME} created successfully."
+          else
+            echo "Bucket ${BUCKET_NAME} already exists."
+          fi
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
 
       - name: Initialize Terraform
         run: terraform init -reconfigure
