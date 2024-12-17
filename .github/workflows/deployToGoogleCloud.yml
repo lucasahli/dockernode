@@ -60,7 +60,7 @@ jobs:
           if ! gsutil ls -b gs://${BUCKET_NAME} 2>/dev/null; then
             echo "Bucket ${BUCKET_NAME} does not exist. Creating it..."
             gcloud storage buckets create ${BUCKET_NAME} \
-              --project=${PROJECT_ID} \
+              --project=${{ vars.GCP_PROJECT_ID }} \
               --location=${BUCKET_LOCATION} \
               --uniform-bucket-level-access
             echo "Bucket ${BUCKET_NAME} created successfully."
