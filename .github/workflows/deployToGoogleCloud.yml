@@ -47,7 +47,7 @@ jobs:
           export_environment_variables: true
 
       - name: Initialize Terraform
-        run: terraform init
+        run: terraform init -reconfigure
         env:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
