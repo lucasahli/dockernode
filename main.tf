@@ -44,7 +44,7 @@ variable "hash_secret" {
 
 
 provider "google" {
-  project = "reminder-app-803e2"
+  project = var.project_id
   region  = "us-west1"
 }
 
