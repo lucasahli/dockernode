@@ -1,9 +1,3 @@
-terraform {
-  backend "gcs" {
-    bucket = "reminders_bucket"
-    prefix = "terraform/state"
-  }
-}
 
 variable "project_id" {
   description = "Google project ID"
@@ -43,9 +37,23 @@ variable "hash_secret" {
 }
 
 
+# Provider Configuration
 provider "google" {
   project = var.project_id
   region  = "us-west1"
+}
+
+resource "google_storage_bucket" "reminders_bucket" {
+  name     = "reminders_bucket"      # The bucket name
+  location = "us-east1"              # Choose the location (multi-region or specific region)
+  storage_class = "STANDARD"         # Storage class (STANDARD, NEARLINE, etc.)
+}
+
+terraform {
+  backend "gcs" {
+    bucket = "reminders_bucket"
+    prefix = "terraform/state"
+  }
 }
 
 resource "google_project_service" "iam_api" {
