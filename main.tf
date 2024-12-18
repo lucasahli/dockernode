@@ -46,12 +46,6 @@ provider "google" {
   region  = "us-west1"
 }
 
-resource "google_storage_bucket_iam_member" "gcs_bucket_access" {
-  bucket = var.storage_bucket_name
-  role   = "roles/storage.objectAdmin" # Or "roles/storage.objectViewer" for read-only
-  member = "serviceAccount:githubactions@${var.project_id}.iam.gserviceaccount.com"
-}
-
 terraform {
   backend "gcs" {
     prefix = "terraform/state"
@@ -65,12 +59,8 @@ resource "google_project_service" "enable_iam_api" {
 }
 
 
-resource "google_project_service" "iam_api" {
-  service            = "iam.googleapis.com"
-  disable_on_destroy = false
-}
-
 resource "google_service_account" "terraform_service_account" {
+  depends_on = [google_project_service.enable_iam_api] # Explicit dependency
   account_id   = "terraform-service-account"
   display_name = "Terraform Service Account"
 }
@@ -90,7 +80,6 @@ resource "google_project_iam_member" "workload_identity_user" {
 
 resource "google_project_service" "secret_manager" {
   service = "secretmanager.googleapis.com"
-
   disable_dependent_services = true
 }
 
