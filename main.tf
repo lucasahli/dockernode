@@ -93,6 +93,7 @@ resource "google_secret_manager_secret" "firebase_service_account_key" {
     auto {}
   }
 }
+
 resource "google_secret_manager_secret_version" "firebase_service_account_key_version" {
   secret      = google_secret_manager_secret.firebase_service_account_key.id
   secret_data = var.firebase_service_account_key
