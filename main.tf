@@ -67,7 +67,7 @@ resource "google_project_service" "enable_iam_api" {
 
 resource "google_service_account" "runtime_service_account" {
   depends_on = [google_project_service.enable_iam_api] # Explicit dependency
-  account_id   = "runtime_service_account"
+  account_id   = "runtime-service-account"
   display_name = "Runtime Service Account"
 }
 
