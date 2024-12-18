@@ -1,4 +1,7 @@
-
+variable "storage_bucket_name" {
+  description = "The name of the storage bucket to use"
+  type        = string
+}
 variable "project_id" {
   description = "Google project ID"
   type        = string
@@ -44,20 +47,14 @@ provider "google" {
 }
 
 resource "google_storage_bucket_iam_member" "gcs_bucket_access" {
-  bucket = "reminders_bucket"
+  bucket = var.storage_bucket_name
   role   = "roles/storage.objectAdmin" # Or "roles/storage.objectViewer" for read-only
   member = "serviceAccount:githubactions@${var.project_id}.iam.gserviceaccount.com"
 }
 
-resource "google_storage_bucket" "reminders_bucket" {
-  name     = "reminders_bucket"      # The bucket name
-  location = "us-east1"              # Choose the location (multi-region or specific region)
-  storage_class = "STANDARD"         # Storage class (STANDARD, NEARLINE, etc.)
-}
-
 terraform {
   backend "gcs" {
-    bucket = "reminders_bucket"
+    bucket = var.storage_bucket_name
     prefix = "terraform/state"
   }
 }
