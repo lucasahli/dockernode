@@ -67,7 +67,7 @@ resource "google_service_account" "terraform_service_account" {
 
 resource "google_project_iam_member" "secret_accessor" {
   project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
+  role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${google_service_account.terraform_service_account.email}"
 }
 
