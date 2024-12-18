@@ -54,9 +54,9 @@ export class FirebaseCloudMessagingNotificationService implements PushNotificati
         // });
 
         // Check if the environment variable is set
-        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-            throw new Error('The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.');
-        }
+        // if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        //     throw new Error('The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.');
+        // }
 
         // Parse the service account JSON string into an object
         // const base64String = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
