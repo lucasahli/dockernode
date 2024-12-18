@@ -47,14 +47,13 @@ provider "google" {
 }
 
 resource "google_storage_bucket_iam_member" "gcs_bucket_access" {
-  bucket = var.storage_bucket_name
+  bucket = "${var.storage_bucket_name}"
   role   = "roles/storage.objectAdmin" # Or "roles/storage.objectViewer" for read-only
   member = "serviceAccount:githubactions@${var.project_id}.iam.gserviceaccount.com"
 }
 
 terraform {
   backend "gcs" {
-    bucket = var.storage_bucket_name
     prefix = "terraform/state"
   }
 }
