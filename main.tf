@@ -65,23 +65,24 @@ resource "google_project_service" "enable_iam_api" {
 }
 
 
-resource "google_service_account" "terraform_service_account" {
+resource "google_service_account" "runtime_service_account" {
   depends_on = [google_project_service.enable_iam_api] # Explicit dependency
-  account_id   = "terraform-service-account"
-  display_name = "Terraform Service Account"
+  account_id   = "runtime_service_account"
+  display_name = "Runtime Service Account"
 }
 
 resource "google_project_iam_member" "secret_accessor" {
-  depends_on = [google_service_account.terraform_service_account]
+  depends_on = [google_service_account.runtime_service_account]
   project = var.project_id
   role    = "roles/secretmanager.admin"
-  member  = "serviceAccount:${google_service_account.terraform_service_account.email}"
+  member  = "serviceAccount:${google_service_account.runtime_service_account.email}"
 }
 
 resource "google_project_iam_member" "workload_identity_user" {
+  depends_on = [google_service_account.runtime_service_account]
   project = var.project_id
   role    = "roles/iam.workloadIdentityUser"
-  member  = "serviceAccount:${google_service_account.terraform_service_account.email}"
+  member  = "serviceAccount:${google_service_account.runtime_service_account.email}"
 }
 
 
@@ -89,6 +90,13 @@ resource "google_project_service" "secret_manager" {
   project = var.project_id
   service = "secretmanager.googleapis.com"
   disable_dependent_services = true
+}
+
+resource "google_project_iam_member" "firebase_admin_access" {
+  depends_on = [google_service_account.runtime_service_account]
+  project = var.project_id
+  role    = "roles/firebase.admin"
+  member  = "serviceAccount:${google_service_account.runtime_service_account.email}"
 }
 
 #
@@ -175,7 +183,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
   tags         = ["http-server"]
 
   service_account {
-    email  = google_service_account.terraform_service_account.email
+    email  = google_service_account.runtime_service_account.email
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 

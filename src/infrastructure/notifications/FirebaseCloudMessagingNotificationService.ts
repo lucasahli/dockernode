@@ -54,25 +54,25 @@ export class FirebaseCloudMessagingNotificationService implements PushNotificati
         // });
 
         // Check if the environment variable is set
-        if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-            throw new Error('The FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set.');
+        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+            throw new Error('The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.');
         }
 
         // Parse the service account JSON string into an object
-        const base64String = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-        const jsonString = Buffer.from(base64String, 'base64').toString('utf-8');
-        const serviceAccount = JSON.parse(jsonString);
+        // const base64String = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+        // const jsonString = Buffer.from(base64String, 'base64').toString('utf-8');
+        // const serviceAccount = JSON.parse(jsonString);
 
-        // Initialize the Firebase Admin SDK
-        // admin.initializeApp({
-        //     credential: admin.credential.cert(serviceAccount),
-        //     // ... other options if needed
-        // });
 
-        const result = admin.credential.cert(serviceAccount as admin.ServiceAccount);
-        // console.log("RESULT: ", result);
+        // const result = admin.credential.cert(serviceAccount as admin.ServiceAccount);
+
+        // Initialize Firebase Admin SDK using environment variables
+        // Locally (for development): You can set the GOOGLE_APPLICATION_CREDENTIALS environment
+        // variable to the path of your service account JSON file:
+        // GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/serviceAccountKey.json"
+
         this.firebaseAdmin = admin.initializeApp({
-            credential: result
+            credential: admin.credential.applicationDefault(),
         });
 
         // serviceAccount as admin.ServiceAccount
