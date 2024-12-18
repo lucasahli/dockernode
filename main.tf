@@ -290,6 +290,19 @@ resource "google_compute_network" "virtual_private_cloud_network" {
   mtu                     = 1460
 }
 
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "allow-ssh"
+  network = google_compute_network.virtual_private_cloud_network.self_link
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["0.0.0.0/0"] # Allow SSH from any IP (for testing purposes)
+  # source_ranges = ["<your_ip_address>/32"] # Recommended: Restrict to your IP address
+}
+
 resource "google_compute_subnetwork" "my_compute_subnetwork" {
   name          = "my-compute-subnet"
   ip_cidr_range = "10.0.1.0/24"
