@@ -1,7 +1,3 @@
-variable "storage_bucket_name" {
-  description = "The name of the storage bucket to use"
-  type        = string
-}
 variable "project_id" {
   description = "Google project ID"
   type        = string
@@ -148,8 +144,15 @@ resource "google_secret_manager_secret_version" "hash_secret_version" {
   secret_data = var.hash_secret
 }
 
+resource "google_project_service" "compute_api" {
+  project = var.project_id
+  service = "compute.googleapis.com"
+}
+
+
 # Create a single Compute Engine instance for Node.js
 resource "google_compute_instance" "reminder_backend_instance" {
+  depends_on = [google_project_service.compute_api]
   name         = "reminder-backend-vm"
   machine_type = "e2-micro"
   zone         = "us-west1-a"
