@@ -66,6 +66,7 @@ resource "google_service_account" "terraform_service_account" {
 }
 
 resource "google_project_iam_member" "secret_accessor" {
+  depends_on = [google_service_account.terraform_service_account]
   project = var.project_id
   role    = "roles/secretmanager.admin"
   member  = "serviceAccount:${google_service_account.terraform_service_account.email}"
@@ -84,6 +85,7 @@ resource "google_project_service" "secret_manager" {
 }
 
 resource "google_secret_manager_secret" "firebase_service_account_key" {
+  depends_on = [google_project_iam_member.secret_accessor]
   secret_id = "firebase_service_account_key"
   replication {
     auto {}
@@ -95,6 +97,7 @@ resource "google_secret_manager_secret_version" "firebase_service_account_key_ve
 }
 
 resource "google_secret_manager_secret" "docker_password" {
+  depends_on = [google_project_iam_member.secret_accessor]
   secret_id = "docker_password"
   replication {
     auto {}
@@ -106,6 +109,7 @@ resource "google_secret_manager_secret_version" "docker_password_version" {
 }
 
 resource "google_secret_manager_secret" "docker_username" {
+  depends_on = [google_project_iam_member.secret_accessor]
   secret_id = "docker_username"
   replication {
     auto {}
@@ -118,6 +122,7 @@ resource "google_secret_manager_secret_version" "docker_username_version" {
 
 
 resource "google_secret_manager_secret" "docker_access_token" {
+  depends_on = [google_project_iam_member.secret_accessor]
   secret_id = "docker_access_token"
   replication {
     auto {}
@@ -129,6 +134,7 @@ resource "google_secret_manager_secret_version" "docker_access_token_version" {
 }
 
 resource "google_secret_manager_secret" "hash_secret" {
+  depends_on = [google_project_iam_member.secret_accessor]
   secret_id = "hash_secret"
   replication {
     auto {}
