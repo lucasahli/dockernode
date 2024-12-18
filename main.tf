@@ -85,7 +85,7 @@ resource "google_project_service" "secret_manager" {
 }
 
 resource "google_secret_manager_secret" "firebase_service_account_key" {
-  depends_on = [google_project_iam_member.secret_accessor]
+  depends_on = [google_project_iam_member.secret_accessor, google_project_service.secret_manager]
   secret_id = "firebase_service_account_key"
   replication {
     auto {}
