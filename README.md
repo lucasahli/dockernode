@@ -13,5 +13,5 @@ To run Reminder Backend, your development environment must meet these minimum re
 - Clone the Reminder Backend repository
 - At the root of the repository run:
 ```bash
-$ docker-compose up
+$ docker-compose -f docker-compose.dev.yml up
 ```

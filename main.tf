@@ -1,3 +1,6 @@
+#
+# VARIABLES
+#
 variable "project_id" {
   description = "Google project ID"
   type        = string
@@ -35,6 +38,9 @@ variable "hash_secret" {
   sensitive   = true
 }
 
+#
+# TERRAFORM AND PROJECT SETUP
+#
 
 # Provider Configuration
 provider "google" {
@@ -47,6 +53,10 @@ terraform {
     prefix = "terraform/state"
   }
 }
+
+#
+# MAIN RESOURCES
+#
 
 resource "google_project_service" "enable_iam_api" {
   project = var.project_id
@@ -81,6 +91,9 @@ resource "google_project_service" "secret_manager" {
   disable_dependent_services = true
 }
 
+#
+# ADD SECRETS
+#
 resource "google_secret_manager_secret" "firebase_service_account_key" {
   depends_on = [google_project_iam_member.secret_accessor, google_project_service.secret_manager]
   project = var.project_id
@@ -144,11 +157,14 @@ resource "google_secret_manager_secret_version" "hash_secret_version" {
   secret_data = var.hash_secret
 }
 
+#
+# COMPUTE RESOURCES
+#
+
 resource "google_project_service" "compute_api" {
   project = var.project_id
   service = "compute.googleapis.com"
 }
-
 
 # Create a single Compute Engine instance for Node.js
 resource "google_compute_instance" "reminder_backend_instance" {
