@@ -73,11 +73,13 @@ jobs:
           terraform_version: 1.6.0
 
       - name: Initialize Terraform
-        run: terraform init -reconfigure
+        run: |
+          terraform init -reconfigure \
+            -backend-config="bucket=$TF_VAR_storage_bucket_name" \
+            -backend-config="prefix=terraform/state"
         env:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
-          TF_VAR_bucket: ${{ vars.TF_STORAGE_BUCKET_NAME }}
           TF_VAR_storage_bucket_name: ${{ vars.TF_STORAGE_BUCKET_NAME }}
           TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_docker_image_tag: ${{ github.sha }}
@@ -93,7 +95,6 @@ jobs:
         env:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
-          TF_VAR_bucket: ${{ vars.TF_STORAGE_BUCKET_NAME }}
           TF_VAR_storage_bucket_name: ${{ vars.TF_STORAGE_BUCKET_NAME }}
           TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_docker_image_tag: ${{ github.sha }}
@@ -108,7 +109,6 @@ jobs:
         env:
           TF_LOG: DEBUG
           TF_LOG_PATH: terraform.log
-          TF_VAR_bucket: ${{ vars.TF_STORAGE_BUCKET_NAME }}
           TF_VAR_storage_bucket_name: ${{ vars.TF_STORAGE_BUCKET_NAME }}
           TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_docker_image_tag: ${{ github.sha }}
