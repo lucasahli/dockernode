@@ -169,6 +169,12 @@ resource "google_secret_manager_secret_version" "hash_secret_version" {
 # COMPUTE RESOURCES
 #
 
+# Reserve a static external IP address
+resource "google_compute_address" "static_ip" {
+  name = "my-static-ip"
+  region = "us-west1"
+}
+
 resource "google_project_service" "compute_api" {
   project = var.project_id
   service = "compute.googleapis.com"
@@ -285,6 +291,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
 
   network_interface {
     network = google_compute_network.virtual_private_cloud_network.self_link
+    network_ip = google_compute_address.static_ip.address # Assign the static IP
     subnetwork = google_compute_subnetwork.my_compute_subnetwork.self_link
     access_config {
       # Include this section to give the VM an external IP address
@@ -343,21 +350,17 @@ resource "google_compute_firewall" "allow_external" {
 }
 
 
-# Create a firewall rule to allow incoming HTTP (port 80) traffic
-#resource "google_compute_firewall" "allow-http" {
-#  name    = "allow-http"
-#  network = google_compute_network.vpc_network.self_link
-#
-#  allow {
-#    protocol = "tcp"
-#    ports    = ["4000"]
-#  }
-#
-#  source_ranges = ["0.0.0.0/0"]
-#  target_tags   = ["http-server"]
-#}
+output "web_server_ip" {
+  value = google_compute_address.static_ip.address
+  description = "The static external IP address of the web server."
+}
 
-// A variable for extracting the external IP address of the VM
-output "Web-server-URL" {
- value = "http://${google_compute_instance.reminder_backend_instance.network_interface.0.access_config.0.nat_ip}:4000/graphql"
+output "web_server_url" {
+  value = "http://${google_compute_address.static_ip.address}:4000/graphql"
+  description = "The URL of the web service (HTTP)."
+}
+
+output "web_server_url_https" {
+  value = "https://${google_compute_address.static_ip.address}:4000/graphql"
+  description = "The URL of the web service (HTTPS - after SSL setup)."
 }
