@@ -290,11 +290,11 @@ resource "google_compute_instance" "reminder_backend_instance" {
   EOF
 
   network_interface {
-    network = google_compute_network.virtual_private_cloud_network.self_link
     network_ip = google_compute_address.static_ip.address # Assign the static IP
     subnetwork = google_compute_subnetwork.my_compute_subnetwork.self_link
     access_config {
       # Include this section to give the VM an external IP address
+      nat_ip = google_compute_address.static_ip.address
     }
   }
 }
