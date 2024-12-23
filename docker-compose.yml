@@ -43,6 +43,10 @@ services:
       - ./certificates:/etc/letsencrypt            # SSL certificates
       - ./webroot:/var/www/html                    # Webroot for Certbot
       - ./certbot:/var/www/certbot # Ensure Certbot can access challenge files here
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 30s
+      retries: 5
     networks:
       - backend
     depends_on:
