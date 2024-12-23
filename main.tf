@@ -279,6 +279,8 @@ resource "google_compute_instance" "reminder_backend_instance" {
         exit 1
     fi
 
+    docker-compose run --rm certbot certonly --webroot -w /var/www/html -d rexni.com
+
     echo "START DOCKER-COMPOSE"
     # Start your Docker Compose project
     if docker-compose up --build -d; then
@@ -342,7 +344,7 @@ resource "google_compute_firewall" "allow_external" {
 
   allow {
     protocol = "tcp"
-    ports    = ["4000"]
+    ports    = ["443"]
   }
 
   source_ranges = ["0.0.0.0/0"]
@@ -354,12 +356,7 @@ output "web_server_ip" {
   description = "The static external IP address of the web server."
 }
 
-output "web_server_url" {
-  value = "http://${google_compute_address.static_ip.address}:4000/graphql"
-  description = "The URL of the web service (HTTP)."
-}
-
 output "web_server_url_https" {
-  value = "https://${google_compute_address.static_ip.address}:4000/graphql"
-  description = "The URL of the web service (HTTPS - after SSL setup)."
+  value = "https://${google_compute_address.static_ip.address}/graphql"
+  description = "The URL of the web service (HTTPS - served by Nginx)."
 }
