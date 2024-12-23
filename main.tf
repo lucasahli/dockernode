@@ -10,6 +10,10 @@ variable "docker_image_tag" {
   description = "The tag of the Docker image to use"
   type        = string
 }
+variable "git_commit_sha" {
+  description = "The git commit to use for deployment"
+  type        = string
+}
 variable "docker_username" {
   description = "Docker registry username"
   type        = string
@@ -246,6 +250,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
     fi
 
     cd /home/reminder_backend
+    git checkout ${var.git_commit_sha}
     sudo mkdir /home/reminder_backend/redis_data
 
     # Modify the docker-compose.yml file to use the image tag
