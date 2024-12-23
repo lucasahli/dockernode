@@ -34,6 +34,7 @@ services:
   nginx:
     image: nginx:latest
     container_name: nginx
+    restart: always
     ports:
       - "80:80"     # HTTP (for Certbot's initial challenge)
       - "443:443"   # HTTPS

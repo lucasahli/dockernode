@@ -279,15 +279,33 @@ resource "google_compute_instance" "reminder_backend_instance" {
         exit 1
     fi
 
-    docker-compose up nginx certbot
-    docker-compose run --rm certbot certonly --webroot -w /var/www/html -d rexni.com
+    # Ensure the required directories exist
+    mkdir -p ./certbot/www ./nginx/certs
 
-    echo "START DOCKER-COMPOSE"
-    # Start your Docker Compose project
-    if docker-compose up --build -d; then
-        echo "STARTED DOCKER-COMPOSE"
+    # Start Nginx and Certbot to initialize certificate generation
+    echo "Starting Nginx and Certbot services..."
+    docker-compose up -d nginx certbot
+
+    # Obtain SSL certificate using Certbot
+    echo "Obtaining SSL certificate..."
+    if docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d rexni.com; then
+        echo "Certificate obtained successfully."
     else
-        echo "DOCKER-COMPOSE failed to start."
+        echo "Certificate generation failed."
+        exit 1
+    fi
+
+    # Restart Nginx to load SSL certificates
+    echo "Restarting Nginx with SSL configuration..."
+    docker-compose down
+    docker-compose up -d nginx
+
+    # Start the remaining services
+    echo "Starting all services with Docker Compose..."
+    if docker-compose up --build -d; then
+        echo "All services started successfully."
+    else
+        echo "Docker Compose failed to start services."
         exit 1
     fi
   EOF
