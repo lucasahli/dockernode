@@ -279,6 +279,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
         exit 1
     fi
 
+    docker-compose up nginx certbot
     docker-compose run --rm certbot certonly --webroot -w /var/www/html -d rexni.com
 
     echo "START DOCKER-COMPOSE"
