@@ -284,6 +284,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
     sudo mkdir /home/reminder_backend/certificates
     sudo mkdir /home/reminder_backend/webroot
     sudo mkdir /home/reminder_backend/certbot
+    sudo mkdir -p /var/www/certbot
     # sudo chmod -R 755 /var/www/certbot
     # sudo chown -R $(whoami):$(whoami) /var/www/certbot
 
