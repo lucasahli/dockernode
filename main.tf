@@ -280,7 +280,9 @@ resource "google_compute_instance" "reminder_backend_instance" {
     fi
 
     # Ensure the required directories exist
-    mkdir -p ./certbot/www ./nginx/certs
+    sudo mkdir -p ./certbot/www ./nginx/certs /var/www/certbot
+    sudo chmod -R 755 /var/www/certbot
+    sudo chown -R $(whoami):$(whoami) /var/www/certbot
 
     # Start Nginx and Certbot to initialize certificate generation
     echo "Starting Nginx and Certbot services..."
