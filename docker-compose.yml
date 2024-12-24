@@ -17,7 +17,7 @@ services:
     ports: # port_on_host_machine:port_on_container
       - "4000:4000"
     expose:
-      - "3000" # Expose the internal port for Nginx to connect
+      - "4000" # Expose the internal port for Nginx to connect
     environment:
       - FIREBASE_SERVICE_ACCOUNT_KEY=${FIREBASE_SERVICE_ACCOUNT_KEY}
       - HASH_SECRET=${HASH_SECRET}
@@ -60,10 +60,12 @@ services:
       - ./certificates:/etc/letsencrypt            # SSL certificates
       - ./webroot:/var/www/html                    # Webroot for Certbot
       - ./certbot:/var/www/certbot # Ensure Certbot can access challenge files here
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 6h & wait $!; certbot renew --webroot -w /var/www/html && docker-compose restart nginx; done;'"
+    command:
+      - "certbot certonly --webroot -w /var/www/html -d rexni.com --agree-tos --email lucaandrea.sahli@gmail.com --non-interactiv"
+#    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 6h & wait $!; certbot renew --webroot -w /var/www/html && docker-compose restart nginx; done;'"
     depends_on:
-      - nginx
-      - reminder-backend
+      nginx:
+          condition: service_healthy
 
 networks:
   backend:
