@@ -299,7 +299,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
 
     # Obtain SSL certificate using Certbot
     echo "Obtaining SSL certificate..."
-    if docker-compose run --rm certbot certonly --webroot -w /var/www/html -d rexni.com; then
+    if docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d rexni.com; then
         echo "Certificate obtained successfully."
     else
         echo "Certificate generation failed."
