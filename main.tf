@@ -297,6 +297,22 @@ resource "google_compute_instance" "reminder_backend_instance" {
     echo "Starting Nginx and Certbot services..."
     docker-compose up -d nginx certbot
 
+    # Update Nginx to serve the webroot for Certbot
+    echo "Configuring Nginx for Certbot..."
+    docker-compose exec nginx sh -c 'cat <<EOF > /etc/nginx/conf.d/default.conf
+    server {
+        listen 80;
+        server_name rexni.com;
+
+        location /.well-known/acme-challenge/ {
+            root /var/www/certbot;
+        }
+    }
+    EOF
+      nginx -s reload
+    '
+    #docker-compose exec nginx nginx -t && docker-compose exec nginx nginx -s reload
+
     # Obtain SSL certificate using Certbot
     echo "Obtaining SSL certificate..."
     if docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d rexni.com; then
@@ -308,9 +324,18 @@ resource "google_compute_instance" "reminder_backend_instance" {
 
     # Restart Nginx to load SSL certificates
     echo "Restarting Nginx with SSL configuration..."
-    docker-compose down
-    echo "Compose up again"
-    docker-compose up -d nginx
+    docker-compose restart nginx
+
+    # Set up automatic renewal (optional but recommended)
+    echo "Setting up SSL certificate renewal..."
+    (crontab -l ; echo "0 0 * * * docker-compose run --rm certbot renew --quiet && docker-compose restart nginx") | crontab -
+
+
+    # Restart Nginx to load SSL certificates
+    # echo "Restarting Nginx with SSL configuration..."
+    # docker-compose down
+    # echo "Compose up again"
+    # docker-compose up -d nginx
 
     # Start the remaining services
     echo "Starting all services with Docker Compose..."
