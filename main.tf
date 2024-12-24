@@ -299,18 +299,10 @@ resource "google_compute_instance" "reminder_backend_instance" {
 
     # Update Nginx to serve the webroot for Certbot
     echo "Configuring Nginx for Certbot..."
-    docker-compose exec nginx sh -c 'cat <<EOF > /etc/nginx/conf.d/default.conf
-    server {
-        listen 80;
-        server_name rexni.com;
-
-        location /.well-known/acme-challenge/ {
-            root /var/www/certbot;
-        }
-    }
-    EOF
-      nginx -s reload
-    '
+    # Start Nginx with HTTP-only config
+    echo "Applying HTTP-only configuration..."
+    docker cp nginx-http-only.conf nginx:/etc/nginx/conf.d/default.conf
+    docker-compose exec nginx nginx -s reload
     #docker-compose exec nginx nginx -t && docker-compose exec nginx nginx -s reload
 
     # Obtain SSL certificate using Certbot
@@ -321,6 +313,13 @@ resource "google_compute_instance" "reminder_backend_instance" {
         echo "Certificate generation failed."
         exit 1
     fi
+
+    # Step 3: Switch to full Nginx configuration
+    echo "Applying full HTTPS configuration..."
+    docker cp nginx.conf nginx:/etc/nginx/conf.d/default.conf
+    docker-compose exec nginx nginx -s reload
+
+    echo "Nginx is now running with full HTTPS support."
 
     # Restart Nginx to load SSL certificates
     echo "Restarting Nginx with SSL configuration..."
