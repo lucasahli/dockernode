@@ -309,6 +309,7 @@ resource "google_compute_instance" "reminder_backend_instance" {
     # Restart Nginx to load SSL certificates
     echo "Restarting Nginx with SSL configuration..."
     docker-compose down
+    echo "Compose up again"
     docker-compose up -d nginx
 
     # Start the remaining services
