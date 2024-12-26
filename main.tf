@@ -265,6 +265,8 @@ resource "google_compute_instance" "reminder_backend_instance" {
 
     # Modify the docker-compose.yml file to use the domain variable
     # This assumes you have a placeholder in your docker-compose.yml like <DOMAIN>
+    # and the environment variable set
+    export DOMAIN=${var.domain}
     sed -i "s/<DOMAIN>/$DOMAIN/g" docker-compose.yml
 
     # Modify the nginx.conf files to use the domain variable
