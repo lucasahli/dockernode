@@ -61,7 +61,7 @@ services:
       - ./webroot:/var/www/html                    # Webroot for Certbot
       - ./certbot:/var/www/certbot # Ensure Certbot can access challenge files here
     command:
-      - "certbot certonly --webroot -w /var/www/html -d rexni.com --agree-tos --email lucaandrea.sahli@gmail.com --non-interactiv"
+      - "certbot certonly --webroot -w /var/www/html -d <DOMAIN> --agree-tos --email lucaandrea.sahli@gmail.com --non-interactiv"
     depends_on:
       nginx:
           condition: service_healthy

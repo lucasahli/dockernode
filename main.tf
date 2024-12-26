@@ -6,13 +6,19 @@ variable "project_id" {
   type        = string
   default = "reminder-app-803e2"
 }
+variable "domain" {
+  description = "Domain for the public access: example.com"
+  type = string
+}
 variable "docker_image_tag" {
   description = "The tag of the Docker image to use"
   type        = string
+  sensitive = true
 }
 variable "git_commit_sha" {
   description = "The git commit to use for deployment"
   type        = string
+  sensitive = true
 }
 variable "docker_username" {
   description = "Docker registry username"
@@ -256,6 +262,14 @@ resource "google_compute_instance" "reminder_backend_instance" {
     # Modify the docker-compose.yml file to use the image tag
     # This assumes you have a placeholder in your docker-compose.yml like <IMAGE_TAG>
     sed -i "s/<IMAGE_TAG>/$DOCKER_IMAGE_TAG/g" docker-compose.yml
+
+    # Modify the docker-compose.yml file to use the domain variable
+    # This assumes you have a placeholder in your docker-compose.yml like <DOMAIN>
+    sed -i "s/<DOMAIN>/$DOMAIN/g" docker-compose.yml
+
+    # Modify the nginx.conf files to use the domain variable
+    sed -i "s/<DOMAIN>/$DOMAIN/g" nginx.conf
+    sed -i "s/<DOMAIN>/$DOMAIN/g" nginx-http-only.conf
 
     echo "DOCKER LOGIN"
     # Retrieve the Docker username from Secret Manager
