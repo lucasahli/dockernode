@@ -323,8 +323,8 @@ resource "google_compute_instance" "reminder_backend_instance" {
 
     # Obtain SSL certificate using Certbot
     echo "Obtaining SSL certificate..."
-    # certbot certonly --webroot -w /var/www/certbot -d rexni.com --agree-tos --email lucaandrea.sahli@gmail.com --non-interactiv
-    if docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d rexni.com --agree-tos --email lucaandrea.sahli@gmail.com --non-interactiv; then
+    # certbot certonly --webroot -w /var/www/certbot -d ${var.domain} --agree-tos --email lucaandrea.sahli@gmail.com --non-interactiv
+    if docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d ${var.domain} --agree-tos --email lucaandrea.sahli@gmail.com --non-interactiv; then
         echo "Certificate obtained successfully."
     else
         echo "Certificate generation failed."
@@ -431,4 +431,9 @@ output "web_server_ip" {
 output "web_server_url_https" {
   value = "https://${google_compute_address.static_ip.address}/graphql"
   description = "The URL of the web service (HTTPS - served by Nginx)."
+}
+
+output "web_server_domain" {
+  value = "https://${var.domain}/graphql"
+  description = "The real world address of the web service."
 }
